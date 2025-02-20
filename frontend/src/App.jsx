@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Example from './paginas/Example'
 import Dashboard from './paginas/Dashboard';
 import BarraNav from './navigation/BarraNav';
+import PagInicio from './paginas/PagInicio';
 
 function App() {
 
@@ -11,7 +11,7 @@ function App() {
       <BarraNav />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Example />} />
+          <Route path="/" element={<PagInicio />} />
           <Route path="/Dashboard" element={<Dashboard />} />
         </Routes>
       </BrowserRouter>

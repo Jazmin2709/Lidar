@@ -6,7 +6,7 @@ export default function BarraNav() {
     <div>
       <nav class="navbar navbar-expand-lg bg-primary px-5">
         <div class="container-fluid">
-          <a class="navbar-brand" href="/">
+          <a class="navbar-brand fst-italic fw-bold" href="/">
             OCA Global
           </a>
         </div>
@@ -15,9 +15,9 @@ export default function BarraNav() {
             <i className='bi bi-person'>Administrador</i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="/ajustes">Ajustes</a></li>
-            <li><a class="dropdown-item" href="/dashboard">Reportes</a></li>
-            <li><a class="dropdown-item" href="/">Cerrar Sesión</a></li>
+            <li><a class="dropdown-item fst-italic" href="/ajustes">Ajustes</a></li>
+            <li><a class="dropdown-item fst-italic" href="/dashboard">Reportes</a></li>
+            <li><a class="dropdown-item fst-italic" href="/">Cerrar Sesión</a></li>
           </ul>
         </div>
       </nav>

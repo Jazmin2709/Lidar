@@ -48,14 +48,14 @@ export default function Dashboard() {
       <div className="row row-cols-1 row-cols-sm-2 align-items-center">
         <div className="col align-self-center border border-secondary rounded-4 p-3">
           <div className="row row-cols-1 ">
-            <h1>Reportes</h1>
+            <h1 className='fst-italic'>Reportes</h1>
             {col("Camilo", 50000, "50%")}
             {col("Dilan", 100000, "70%")}
             {col("Cielo", 90000, "90%")}
           </div>
         </div>
         <div className="col p-5">
-          <h1 className="text-center">Grafica</h1>
+          <h1 className="text-center fst-italic">Grafica</h1>
           <CustomeChart data={GraficaData} tipo="doughnut" options={options} />
         </div>
       </div>
