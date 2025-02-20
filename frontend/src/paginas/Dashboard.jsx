@@ -48,6 +48,7 @@ export default function Dashboard() {
       <div className="row row-cols-1 row-cols-sm-2 align-items-center">
         <div className="col align-self-center border border-secondary rounded-4 p-3">
           <div className="row row-cols-1 ">
+            <h1>Reportes</h1>
             {col("Camilo", 50000, "50%")}
             {col("Dilan", 100000, "70%")}
             {col("Cielo", 90000, "90%")}

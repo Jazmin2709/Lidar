@@ -30,7 +30,7 @@ export default function Example() {
                 return <h1 key={item.id}>{item.name}</h1>
             })
         }
-      <h1 className='text-warning text-center '>Example</h1>
+      <h1 className='text-warning text-center '>Pagina de inicio</h1>
       <Holi />
     </div>
   );

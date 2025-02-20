@@ -12,7 +12,7 @@ export default function BarraNav() {
         </div>
         <div class="dropdown">
           <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i className='bi bi-person'></i>
+            <i className='bi bi-person'>Administrador</i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="/ajustes">Ajustes</a></li>
