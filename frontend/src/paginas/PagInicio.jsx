@@ -9,7 +9,7 @@ export default function PagInicio() {
   return (
     <div className='container'>
           
-      <h1 className='text-warning text-center col p-5 fw-bold fst-italic' >Pagina de inicio</h1>
+      <h1 className='text-dark text-center col p-5 fw-bold fst-italic' >Pagina de inicio</h1>
       
       <div className="row row-cols-1 row-cols-sm-2 align-items-center">
         
