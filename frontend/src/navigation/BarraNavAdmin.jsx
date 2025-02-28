@@ -1,26 +1,26 @@
-import React from 'react'
+import  React from 'react'
 
 
 export default function BarraNavAdmin() {
-return (
-    <div>
-        <nav class="navbar navbar-expand-lg bg-primary px-5">
-            <div class="container-fluid">
-            <a class="navbar-brand fst-italic fw-bold" href="/">
-                OCA Global
-            </a>
-            </div>
-            <div class="dropdown">
-            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i className='bi bi-person'>Administrador</i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item fst-italic" href="/ajustes">Ajustes</a></li>
-                <li><a class="dropdown-item fst-italic" href="/dashboard">Reportes</a></li>
-                <li><a class="dropdown-item fst-italic" href="/">Cerrar Sesión</a></li>
-            </ul>
-            </div>
-        </nav>
-    </div>
-);
+    return (
+        <div>
+            <nav className="navbar navbar-expand-lg bg-primary px-5">
+                <div className="container-fluid">
+                    <a className="navbar-brand fst-italic fw-bold" href="/">
+                        OCA Global
+                    </a>
+                </div>
+                <div className="dropdown">
+                    <button className="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i className='bi bi-person'>Administrador</i>
+                    </button>
+                    <ul className="dropdown-menu dropdown-menu-end">
+                        <li><a className="dropdown-item fst-italic" href="/ajustes">Ajustes</a></li>
+                        <li><a className="dropdown-item fst-italic" href="/dashboard">Reportes</a></li>
+                        <li><a className="dropdown-item fst-italic" href="/">Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    );
 }
