@@ -2,23 +2,26 @@ import { useState } from 'react';
 
 export default function Registrar() {
 
-    const [Nombres, setNombres] = useState('');
-    const [Apellidos, setApellidos] = useState('');
-    const [Gmail, setGmail] = useState('');
-    const [TipoDoc, setTipoDoc] = useState('');
-    const [Cedula, setCedula] = useState('');
-    const [Celular, setCelular] = useState('');
-    const [Contraseña, setContraseña] = useState('');
-    const [agreeTerms, setAgreeTerms] = useState(false);
-    const [validated, setValidated] = useState(false);
-
+    const [Usuario, setUsuario] = useState({
+        Nombres: '',
+        Apellidos: '',
+        Gmail: '',
+        TipoDoc: '',
+        Cedula: '',
+        Celular: '',
+        Contraseña: '',
+        agreeTerms: false,
+    });
     const handleSubmit = (event) => {
-        const form = event.currentTarget;
-        if (form.checkValidity() === false || !agreeTerms) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        setValidated(true);
+
+    };
+
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
+        setUsuario((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
     };
 
     return (
@@ -29,15 +32,15 @@ export default function Registrar() {
                     FORMULARIO DE REGISTRO
                 </h1>
                 <br />
-                <form className={`row g-3 ${validated ? 'was-validated' : ''}`} noValidate onSubmit={handleSubmit}>
+                <form className={`row g-3`} noValidate onSubmit={handleSubmit}>
                     <div className="col-md-4">
                         <label htmlFor="Nombres" className="form-label">Nombres</label>
                         <input
                             type="text"
                             className="form-control"
                             id="Nombres"
-                            value={Nombres}
-                            onChange={(e) => setNombres(e.target.value)}
+                            value={Usuario.Nombres}
+                            onChange={handleInputChange}
                             required
                         />
                         <div className="valid-feedback">Looks good!</div>
@@ -48,8 +51,8 @@ export default function Registrar() {
                             type="text"
                             className="form-control"
                             id="Apellidos"
-                            value={Apellidos}
-                            onChange={(e) => setApellidos(e.target.value)}
+                            value={Usuario.Apellidos}
+                            onChange={handleInputChange}
                             required
                         />
                         <div className="valid-feedback">Looks good!</div>
@@ -63,8 +66,8 @@ export default function Registrar() {
                                 className="form-control"
                                 id="Gmail"
                                 aria-describedby="inputGroupPrepend"
-                                value={Gmail}
-                                onChange={(e) => setGmail(e.target.value)}
+                                value={Usuario.Gmail}
+                                onChange={handleInputChange}
                                 required
                             />
                             <div className="invalid-feedback">Por favor ingresa tu Gmail.</div>
@@ -75,8 +78,8 @@ export default function Registrar() {
                         <select
                             className="form-select"
                             id="TipoDoc"
-                            value={TipoDoc}
-                            onChange={(e) => setTipoDoc(e.target.value)}
+                            value={Usuario.TipoDoc}
+                            onChange={handleInputChange}
                             required
                         >
                             <option value="">Seleccione...</option>
@@ -93,8 +96,8 @@ export default function Registrar() {
                             type="number"
                             className="form-control"
                             id="Cedula"
-                            value={Cedula}
-                            onChange={(e) => setCedula(e.target.value)}
+                            value={Usuario.Cedula}
+                            onChange={handleInputChange}
                             required
                         />
                         <div className="invalid-feedback">Por favor ingresa tu número de documento.</div>
@@ -106,8 +109,8 @@ export default function Registrar() {
                             type="number"
                             className="form-control"
                             id="Celular"
-                            value={Celular}
-                            onChange={(e) => setCelular(e.target.value)}
+                            value={Usuario.Celular}
+                            onChange={handleInputChange}
                             required
                         />
                         <div className="invalid-feedback">Por favor ingrese su número de celular.</div>
@@ -118,8 +121,8 @@ export default function Registrar() {
                             type="text"
                             className="form-control"
                             id="Contraseña"
-                            value={Contraseña}
-                            onChange={(e) => setContraseña(e.target.value)}
+                            value={Usuario.Contraseña}
+                            onChange={handleInputChange}
                             required
                         />
                         <div className="valid-feedback">Looks good!</div>
@@ -131,8 +134,8 @@ export default function Registrar() {
                                 type="checkbox"
                                 value=""
                                 id="agreeTerms"
-                                checked={agreeTerms}
-                                onChange={(e) => setAgreeTerms(e.target.checked)}
+                                checked={Usuario.agreeTerms}
+                                onChange={handleInputChange}
                                 required
                             />
                             <label className="form-check-label" htmlFor="agreeTerms">

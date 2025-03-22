@@ -12,6 +12,7 @@ import Buddy1Page from './paginas/Buddy1Page';
 import Buddy2Page from './paginas/Buddy2Page';
 import Buddy3Page from './paginas/Buddy3Page';
 
+
 function App() {
   return (
     <div>
