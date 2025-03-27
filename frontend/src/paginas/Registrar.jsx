@@ -1,18 +1,43 @@
 import { useState } from 'react';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+const API_URL = 'http://localhost:3000/api';
 
 export default function Registrar() {
 
     const [Usuario, setUsuario] = useState({
         Nombres: '',
         Apellidos: '',
-        Gmail: '',
-        TipoDoc: '',
+        Correo: '',
+        Tipo_Doc: '',
         Cedula: '',
         Celular: '',
-        Contraseña: '',
+        Contrasena: '',
         agreeTerms: false,
     });
-    const handleSubmit = (event) => {
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const response = await axios.post(`${API_URL}/auth/registrar`, Usuario);
+            if (response.status === 200) {
+                Swal.fire({
+                    icon: 'success',
+                    title: response.data.message,
+                    text: response.data.results,
+                }).then(() => {
+                    window.location.href = '/login';
+                });
+            }
+            
+        } catch (error) {
+            console.error('Error al registrar usuario:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al registrar usuario',
+                text: error.response.data.message,
+            });
+        }
 
     };
 
@@ -40,6 +65,7 @@ export default function Registrar() {
                             className="form-control"
                             id="Nombres"
                             value={Usuario.Nombres}
+                            name='Nombres'
                             onChange={handleInputChange}
                             required
                         />
@@ -52,41 +78,43 @@ export default function Registrar() {
                             className="form-control"
                             id="Apellidos"
                             value={Usuario.Apellidos}
+                            name='Apellidos'
                             onChange={handleInputChange}
                             required
                         />
                         <div className="valid-feedback">Looks good!</div>
                     </div>
                     <div className="col-md-4">
-                        <label htmlFor="Gmail" className="form-label">Gmail</label>
+                        <label htmlFor="Correo" className="form-label">Correo</label>
                         <div className="input-group has-validation">
-                            <span className="input-group-text" id="inputGroupPrepend">  </span>
+                            <span className="input-group-text" id="inputGroupPrepend"> @ </span>
                             <input
-                                type="gmail"
+                                type="email"
                                 className="form-control"
-                                id="Gmail"
+                                id="Correo"
                                 aria-describedby="inputGroupPrepend"
-                                value={Usuario.Gmail}
+                                value={Usuario.Correo}
+                                name='Correo'
                                 onChange={handleInputChange}
                                 required
                             />
-                            <div className="invalid-feedback">Por favor ingresa tu Gmail.</div>
+                            <div className="invalid-feedback">Por favor ingresa tu correo.</div>
                         </div>
                     </div>
                     <div className="col-md-4">
-                        <label htmlFor="TipoDoc" className="form-label">Tipo de Documento</label>
+                        <label htmlFor="Tipo_Doc" className="form-label">Tipo de Documento</label>
                         <select
                             className="form-select"
-                            id="TipoDoc"
-                            value={Usuario.TipoDoc}
+                            id="Tipo_Doc"
+                            value={Usuario.Tipo_Doc}
+                            name='Tipo_Doc'
                             onChange={handleInputChange}
                             required
                         >
                             <option value="">Seleccione...</option>
-                            <option value="CI">Cédula de ciudadania</option>
+                            <option value="CC">Cédula de ciudadania</option>
                             <option value="PA">Pasaporte</option>
                             <option value="PP">Permiso se permanencia</option>
-                            {/* Add more states as needed */}
                         </select>
                         <div className="invalid-feedback">Por favor selecione un tipo de documento.</div>
                     </div>
@@ -97,6 +125,7 @@ export default function Registrar() {
                             className="form-control"
                             id="Cedula"
                             value={Usuario.Cedula}
+                            name='Cedula'
                             onChange={handleInputChange}
                             required
                         />
@@ -110,18 +139,20 @@ export default function Registrar() {
                             className="form-control"
                             id="Celular"
                             value={Usuario.Celular}
+                            name = 'Celular'
                             onChange={handleInputChange}
                             required
                         />
                         <div className="invalid-feedback">Por favor ingrese su número de celular.</div>
                     </div>
                     <div className="col-md-4">
-                        <label htmlFor="Contraseña" className="form-label">Contraseña</label>
+                        <label htmlFor="Contrasena" className="form-label">Contraseña</label>
                         <input
-                            type="text"
+                            type="password"
                             className="form-control"
-                            id="Contraseña"
-                            value={Usuario.Contraseña}
+                            id="Contrasena"
+                            value={Usuario.Contrasena}
+                            name = 'Contrasena'
                             onChange={handleInputChange}
                             required
                         />
@@ -132,7 +163,8 @@ export default function Registrar() {
                             <input
                                 className="form-check-input"
                                 type="checkbox"
-                                value=""
+                                value={Usuario.agreeTerms}
+                                name="agreeTerms"
                                 id="agreeTerms"
                                 checked={Usuario.agreeTerms}
                                 onChange={handleInputChange}
@@ -149,7 +181,6 @@ export default function Registrar() {
                             Enviar registro
                         </button>
                     </div>
-
                 </form>
             </div>
         </div>

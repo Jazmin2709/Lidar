@@ -11,7 +11,8 @@ import Registrar from './paginas/Registrar';
 import Buddy1Page from './paginas/Buddy1Page'; 
 import Buddy2Page from './paginas/Buddy2Page';
 import Buddy3Page from './paginas/Buddy3Page';
-
+import Login from './paginas/Login';
+import RoutePrivate from "./componentes/RoutePrivate";
 
 function App() {
   return (
@@ -23,8 +24,15 @@ function App() {
           <Route path="/buddy1/*" element={<><BarraNavBuddy1 /><Buddy1Page /></>} />
           <Route path="/buddy2/*" element={<><BarraNavBuddy2 /><Buddy2Page /></>} />
           <Route path="/buddy3/*" element={<><BarraNavBuddy3 /><Buddy3Page /></>} />
-          <Route path="/Dashboard" element={<Dashboard />} />
+          
           <Route path="/Registrar" element={<Registrar />} />
+          <Route path="/Login" element={<Login />} />
+
+          {/* RUTAS PRIVADAS */}
+          <Route element={<RoutePrivate />}>
+            <Route path="/Dashboard" element={<Dashboard />} />
+          </Route>
+
         </Routes>
       </BrowserRouter>
     </div>
