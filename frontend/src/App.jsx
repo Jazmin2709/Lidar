@@ -13,11 +13,12 @@ import Buddy2Page from './paginas/Buddy2Page';
 import Buddy3Page from './paginas/Buddy3Page';
 import Login from './paginas/Login';
 import RoutePrivate from "./componentes/RoutePrivate";
+import Fotter from './navigation/Fotter';
 
 function App() {
   return (
     <div>
-      <BarraNavAdmin />
+      
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<><BarraNavInicio /><PagInicio /></>} />
@@ -25,16 +26,17 @@ function App() {
           <Route path="/buddy2/*" element={<><BarraNavBuddy2 /><Buddy2Page /></>} />
           <Route path="/buddy3/*" element={<><BarraNavBuddy3 /><Buddy3Page /></>} />
           
-          <Route path="/Registrar" element={<Registrar />} />
-          <Route path="/Login" element={<Login />} />
+          <Route path="/Registrar" element={<><BarraNavInicio /><Registrar /></>} />
+          <Route path="/Login" element={<><BarraNavInicio /><Login /></>} />
 
           {/* RUTAS PRIVADAS */}
           <Route element={<RoutePrivate />}>
-            <Route path="/Dashboard" element={<Dashboard />} />
+            <Route path="/Dashboard" element={ <><BarraNavAdmin /><Dashboard /></>} />
           </Route>
 
         </Routes>
       </BrowserRouter>
+      <Fotter />
     </div>
   );
 }

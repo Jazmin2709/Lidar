@@ -45,50 +45,51 @@ export default function Login() {
     };
 
     return (
-
-        <div className='justify-content-center align-items-center h-100'>
-            <div className='container mt-5 p-5 shadow rounded-5 w-50'>
-                <h1 className='text-center p-5'>
-                    FORMULARIO DE REGISTRO
-                </h1>
-                <br />
-                <form className='row g-3 p-5' noValidate onSubmit={handleSubmit}>
-                    <div className="col-12">
-                        <label htmlFor="Correo" className="form-label">Correo</label>
-                        <div className="input-group has-validation">
-                            <span className="input-group-text" id="inputGroupPrepend"> @ </span>
+        <div className='container-fluid' style={{ border: '1px solid black' }} >
+            <div className='justify-content-center align-items-center h-100'>
+                <div className='container mt-5 p-5 shadow rounded-5 w-50'>
+                    <h1 className='text-center p-5'>
+                        FORMULARIO DE REGISTRO
+                    </h1>
+                    <br />
+                    <form className='row g-3 p-5' noValidate onSubmit={handleSubmit}>
+                        <div className="col-12">
+                            <label htmlFor="Correo" className="form-label">Correo</label>
+                            <div className="input-group has-validation">
+                                <span className="input-group-text" id="inputGroupPrepend"> @ </span>
+                                <input
+                                    type="email"
+                                    className="form-control"
+                                    id="Correo"
+                                    aria-describedby="inputGroupPrepend"
+                                    value={Usuario.Correo}
+                                    name='Correo'
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                                <div className="invalid-feedback">Por favor ingresa tu correo.</div>
+                            </div>
+                        </div>
+                        <div className="col-12">
+                            <label htmlFor="Contrasena" className="form-label">Contraseña</label>
                             <input
-                                type="email"
+                                type="password"
                                 className="form-control"
-                                id="Correo"
-                                aria-describedby="inputGroupPrepend"
-                                value={Usuario.Correo}
-                                name='Correo'
+                                id="Contrasena"
+                                value={Usuario.Contrasena}
+                                name='Contrasena'
                                 onChange={handleInputChange}
                                 required
                             />
-                            <div className="invalid-feedback">Por favor ingresa tu correo.</div>
+                            <div className="valid-feedback">Looks good!</div>
                         </div>
-                    </div>
-                    <div className="col-12">
-                        <label htmlFor="Contrasena" className="form-label">Contraseña</label>
-                        <input
-                            type="password"
-                            className="form-control"
-                            id="Contrasena"
-                            value={Usuario.Contrasena}
-                            name='Contrasena'
-                            onChange={handleInputChange}
-                            required
-                        />
-                        <div className="valid-feedback">Looks good!</div>
-                    </div>
-                    <div className="col-12 text-center">
-                        <button className="btn btn-primary" type="submit">
-                            Ingresar
-                        </button>
-                    </div>
-                </form>
+                        <div className="col-12 text-center">
+                            <button className="btn btn-primary" type="submit">
+                                Ingresar
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );
