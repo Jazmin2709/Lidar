@@ -14,24 +14,24 @@ import Buddy3Page from './paginas/Buddy3Page';
 import Login from './paginas/Login';
 import RoutePrivate from "./componentes/RoutePrivate";
 import Fotter from './navigation/Fotter';
+import Lidar from './paginas/Lidar';
 
 function App() {
   return (
     <div>
-      
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<><BarraNavInicio /><PagInicio /></>} />
           <Route path="/buddy1/*" element={<><BarraNavBuddy1 /><Buddy1Page /></>} />
           <Route path="/buddy2/*" element={<><BarraNavBuddy2 /><Buddy2Page /></>} />
           <Route path="/buddy3/*" element={<><BarraNavBuddy3 /><Buddy3Page /></>} />
-          
           <Route path="/Registrar" element={<><BarraNavInicio /><Registrar /></>} />
           <Route path="/Login" element={<><BarraNavInicio /><Login /></>} />
+          <Route path="/Lidar" element={<><BarraNavInicio /><Lidar /></>} />
 
           {/* RUTAS PRIVADAS */}
-          <Route element={<RoutePrivate />}>
-            <Route path="/Dashboard" element={ <><BarraNavAdmin /><Dashboard /></>} />
+          <Route path="/dashboard" element={<RoutePrivate />}>
+            <Route index element={<><BarraNavAdmin /><Dashboard /></>} />
           </Route>
 
         </Routes>
