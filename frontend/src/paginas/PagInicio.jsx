@@ -1,4 +1,6 @@
 import React from 'react';
+import datosImagen from '/src/assets/img/Datos.jpg';
+import grupo2Imagen from '/src/assets/img/grupo2.jpg';
 
 export default function PagInicio() {
   return (
@@ -9,7 +11,7 @@ export default function PagInicio() {
 
         {/* Columna para la Misión */}
         <div className="col">
-          <h1 className="text-center fw-lighter fw-bold">Misión</h1> {/* Título fuera del cuadro */}
+          <h2 className="text-center fw-lighter fw-bold">Misión</h2> {/* Título fuera del cuadro */}
           <div className="border border-secondary rounded-4 p-3"> {/* Cuadro para el texto */}
             <p className="text-dark fw-lighter">
               Nuestra misión es proporcionar servicios de levantamiento y modelado 3D de infraestructuras utilizando tecnología LIDAR de vanguardia,
@@ -22,18 +24,18 @@ export default function PagInicio() {
         </div>
 
         {/* Columna para la Imagen de la Misión (lado derecho) */}
-        <div className="col">
-          <img src="/ruta/a/tu/imagen-mision.jpg" alt="Imagen de la Misión" className="img-fluid rounded" />
+        <div className="col" style={{ display: 'flex', justifyContent: 'center' }}>
+          <img src={datosImagen} alt="Imagen de LIDAR" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
         </div>
 
         {/* Columna para la Imagen de la Visión (lado izquierdo) */}
-        <div className="col">
-          <img src="/ruta/a/tu/imagen-vision.jpg" alt="Imagen de la Visión" className="img-fluid rounded" />
+        <div className="col" style={{ display: 'flex', justifyContent: 'center' }}>
+          <img src={grupo2Imagen} alt="Imagen de LIDAR" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
         </div>
 
         {/* Columna para la Visión */}
-        <div className="col">
-          <h1 className="text-center fw-lighter fw-bold">Visión</h1> {/* Título fuera del cuadro */}
+        <div className="col" style={{ marginBottom: '50px' }}> {/* Cambio aquí: agregado marginBottom */}
+          <h2 className="text-center fw-lighter fw-bold">Visión</h2> {/* Título fuera del cuadro */}
           <div className="border border-secondary rounded-4 p-3"> {/* Cuadro para el texto */}
             <p className="text-dark fw-lighter">
               Aspiramos a ser líderes en la prestación de servicios LIDAR en el ámbito de la inspección y modelado de infraestructuras,
@@ -47,3 +49,4 @@ export default function PagInicio() {
     </div>
   );
 }
+

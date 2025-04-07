@@ -1,17 +1,13 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
+import ocaImagen from '/src/assets/img/OCA.png';
 
 function BarraNavInicio() {
   return (
-    <nav className="navbar navbar-expand-lg bg-primary px-5">
+    <nav className="navbar navbar-expand-lg px-5" style={{ backgroundColor: '#3483cd' }}>
       <div className="container-fluid">
-        <Link className="navbar-brand fst-italic fw-bold" to="/">
-          <img
-            src="/logo.png"
-            alt="OCA Global Logo"
-            style={{ height: "30px" }}
-          />
+        <Link to="/" className="navbar-brand fst-italic fw-bold">
+          <img src={ocaImagen} alt="OCA" className="oca-logo" style={{ width: '100px', height: 'auto' }} />
         </Link>
         <div className="d-flex align-items-center ms-auto">
           <Link to="/lidar" className="btn btn-light mx-2">

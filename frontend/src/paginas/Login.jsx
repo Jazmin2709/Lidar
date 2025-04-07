@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import axios from 'axios';
 import { useState } from 'react';
 import Swal from 'sweetalert2';
@@ -7,8 +7,8 @@ const API_URL = 'http://localhost:3000/api';
 
 export default function Login() {
     const [Usuario, setUsuario] = useState({
+        Cedula: '',
         Correo: '',
-        Contrasena: '',
     });
 
     const handleSubmit = async (event) => {
@@ -45,50 +45,54 @@ export default function Login() {
     };
 
     return (
-        <div className='container-fluid' style={{ border: '1px solid black' }} >
+        <div className='container-fluid'>
             <div className='justify-content-center align-items-center h-100'>
-                <div className='container mt-5 p-5 shadow rounded-5 w-50'>
+                <div className='container mt-5 p-5 shadow rounded-5 border-3' style={{ marginBottom: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', maxWidth: '400px', backgroundColor: '#ffffff' }}>
                     <h1 className='text-center p-5'>
-                        FORMULARIO DE REGISTRO
+                        Iniciar Sesión
                     </h1>
                     <br />
-                    <form className='row g-3 p-5' noValidate onSubmit={handleSubmit}>
-                        <div className="col-12">
-                            <label htmlFor="Correo" className="form-label">Correo</label>
-                            <div className="input-group has-validation">
-                                <span className="input-group-text" id="inputGroupPrepend"> @ </span>
-                                <input
-                                    type="email"
-                                    className="form-control"
-                                    id="Correo"
-                                    aria-describedby="inputGroupPrepend"
-                                    value={Usuario.Correo}
-                                    name='Correo'
-                                    onChange={handleInputChange}
-                                    required
-                                />
-                                <div className="invalid-feedback">Por favor ingresa tu correo.</div>
-                            </div>
-                        </div>
-                        <div className="col-12">
-                            <label htmlFor="Contrasena" className="form-label">Contraseña</label>
+                    <form className='d-flex flex-column align-items-center' noValidate onSubmit={handleSubmit}>
+                        <div className="mb-3" style={{ width: '300px' }}>
+                            <label htmlFor="Cedula" className="form-label">Nº de Cédula</label>
                             <input
-                                type="password"
+                                type="text"
                                 className="form-control"
-                                id="Contrasena"
-                                value={Usuario.Contrasena}
-                                name='Contrasena'
+                                id="Cedula"
+                                value={Usuario.Cedula}
+                                name='Cedula'
                                 onChange={handleInputChange}
                                 required
                             />
-                            <div className="valid-feedback">Looks good!</div>
+                            <div className="invalid-feedback">Por favor ingresa tu número de cédula.</div>
                         </div>
-                        <div className="col-12 text-center">
+                        <div className="mb-3" style={{ width: '300px' }}>
+                            <label htmlFor="Correo" className="form-label">Correo Electrónico</label>
+                            <input
+                                type="email"
+                                className="form-control"
+                                id="Correo"
+                                value={Usuario.Correo}
+                                name='Correo'
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <div className="invalid-feedback">Por favor ingresa tu correo electrónico.</div>
+                        </div>
+                        <div className="text-center">
                             <button className="btn btn-primary" type="submit">
                                 Ingresar
                             </button>
                         </div>
+                        <style jsx>{`
+                            button.btn.btn-primary:hover {
+                            background-color: rgb(73, 1, 141);
+                            }
+                        `}</style>
                     </form>
+                    <p className="mt-3 text-center">
+                        ¿No tiene una cuenta? <a href="/Registrar">Regístrese aquí</a>
+                    </p>
                 </div>
             </div>
         </div>

@@ -13,7 +13,7 @@ export default function Lidar() {
 
                 {/* Sección 1: ¿Qué es el proyecto LIDAR? */}
                 <div className='col'>
-                    <h1 className='text-center fw-lighter fw-bold'>¿Qué es el proyecto LIDAR?</h1>
+                    <h2 className='text-center fw-lighter fw-bold'>¿Qué es LIDAR?</h2>
                     <div className='border border-secondary rounded-4 p-3'>
                         <p className='text-dark fw-lighter'>
                             LIDAR (Light Detection and Ranging) es una tecnología de teledetección que utiliza pulsos láser para medir distancias y crear modelos 3D precisos del entorno.
@@ -28,12 +28,12 @@ export default function Lidar() {
                 </div>
 
                 {/* Sección 2: Aplicaciones del Proyecto LIDAR */}
-                <div className="col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}> {/* Cambios aquí */}
+                <div className="col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <img src={topografiaImagen} alt="Imagen de Topografía" className="img-fluid rounded" style={{ width: '300px', height: '200px', marginBottom: '10px' }} />
                     <img src={cartografiaImagen} alt="Imagen de Cartografía" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
                 </div>
                 <div className="col">
-                    <h1 className="text-center fw-lighter fw-bold">Aplicaciones del Proyecto LIDAR de Global Solutions y Dynamics</h1>
+                    <h2 className="text-center fw-lighter fw-bold">Aplicaciones del Proyecto LIDAR en Global Solutions & Dynamics</h2>
                     <div className="border border-secondary rounded-4 p-3">
                         <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
                             Topografía y cartografía:
@@ -70,7 +70,7 @@ export default function Lidar() {
 
                 {/* Sección 3: Beneficios del uso de LIDAR */}
                 <div className="col">
-                    <h1 className="text-center fw-lighter fw-bold">Beneficios del uso de LIDAR</h1>
+                    <h2 className="text-center fw-lighter fw-bold">Beneficios del uso de LIDAR</h2>
                     <div className="border border-secondary rounded-4 p-3">
                         <p className="text-dark fw-lighter">
                             <li>Alta precisión y densidad de datos.</li>
@@ -88,8 +88,8 @@ export default function Lidar() {
                 <div className="col" style={{ display: 'flex', justifyContent: 'center' }}>
                     <img src={herramientasImagen} alt="Imagen de Herramientas" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
                 </div>
-                <div className="col">
-                    <h1 className="text-center fw-lighter fw-bold">Tecnología y software utilizados:</h1>
+                <div className="col" style={{ marginBottom: '50px' }}> {/* Cambio aquí: agregado marginBottom */}
+                    <h2 className="text-center fw-lighter fw-bold">Tecnología y software utilizados:</h2>
                     <div className="border border-secondary rounded-4 p-3">
                         <p className="text-dark fw-lighter">
                             Global Solutions y Dynamics utiliza equipos LIDAR de última generación, tanto aéreos como terrestres, y software especializado para el procesamiento y análisis de los datos.
