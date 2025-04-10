@@ -1,7 +1,18 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const secret = 'mi-secreto';
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: 'lidarnotificador@gmail.com',
+        pass: 'sheq slcr idya okrd'
+    }
+});
 
 exports.registrar = async (req, res) => {
     try {
@@ -72,25 +83,25 @@ exports.registrar = async (req, res) => {
 
 exports.ingresar = async (req, res) => {
     try {
-        const { Correo, Contrasena } = req.body;
-
-        if (!Correo) {
-            return res.status(400).json({ message: 'El correo es obligatorio' });
+        const { Documento, Contrasena } = req.body;
+        console.log(req.body);
+        if (!Documento) {
+            return res.status(400).json({ message: 'La cédula es obligatoria' });
         }
 
         if (!Contrasena) {
             return res.status(400).json({ message: 'La contraseña es obligatoria' });
         }
 
-        const query = 'SELECT * FROM persona WHERE Correo = ?';
-        db.query(query, [Correo], async (error, results) => {
+        const query = 'SELECT * FROM persona WHERE Cedula = ?';
+        db.query(query, [Documento], async (error, results) => {
             if (error) {
                 console.error(error);
                 return res.status(500).json({ message: 'Error al ingresar' });
             }
 
             if (results.length === 0) {
-                return res.status(401).json({ message: 'El correo no está registrado' });
+                return res.status(401).json({ message: 'La cédula no está registrada' });
             }
 
             const user = results[0];
@@ -99,7 +110,7 @@ exports.ingresar = async (req, res) => {
                 const token = jwt.sign({ id: user.id_per }, secret, { expiresIn: '30d' });
                 return res.status(200).json({ message: 'Ingreso exitoso', token: token });
             } else {
-                return res.status(401).json({ message: 'El correo o la contraseña son incorrectos' });
+                return res.status(401).json({ message: 'la contraseña es incorrecta' });
             }
         });
     } catch (error) {
@@ -123,3 +134,55 @@ exports.validarToken = async (req, res) => {
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
+
+exports.enviarCorreo = async (req, res) => {
+    try {
+        const { Correo } = req.body;
+        console.log(req.body);
+        if (!Correo) {
+            return res.status(400).json({ message: 'El correo es obligatorio' });
+        }
+
+        const query = 'SELECT * FROM persona WHERE Correo = ?';
+        db.query(query, [Correo], async (error, results) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Error al ingresar' });
+            }
+
+            if (results.length === 0) {
+                return res.status(401).json({ message: 'El correo no está registrado' });
+            }
+            const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            const mailOptions = {
+                from: 'lidarnotificador@gmail.com',
+                to: Correo,
+                subject: 'Código de verificación para restablecer contraseña || Lidar',
+                html: `
+                <div class="container" style="background-color: #3483CD; color: #fff; padding: 80px;">
+                    <div class="imagen" style="text-align: center;">
+                    </div>
+                    <h1>Recuperación de Contraseña</h1>
+                    <p style="font-size: 25px;">Tu código de verificación es:</p>
+                    <h2 style="font-size: 40px; font-weight: bold; color:rgb(255, 255, 255);">${verificationCode}</h2>
+                    <p>Por favor, ingrésalo en el formulario de recuperación de contraseña.</p>
+                    <p>Si no solicitaste este cambio, ignora este mensaje.</p>
+                    <p>Gracias,</p>
+                    <p>El equipo de soporte</p>
+                </div>
+                `,
+            };
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error(error);
+                    return res.status(500).json({ message: 'Error al enviar el correo' });
+                }
+                return res.status(200).json({ message: 'Correo enviado exitosamente' });
+            });
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+}

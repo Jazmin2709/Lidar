@@ -20,7 +20,7 @@ import QuienesSomos from './paginas/QuienesSomos';
 
 function App() {
   return (
-    <div>
+    <div className='vh-100'>
       <BrowserRouter>
         <div style={{ flex: 1 }}> {/* Contenedor principal que ocupa todo el espacio disponible */}
           <Routes>

@@ -7,10 +7,10 @@ const API_URL = 'http://localhost:3000/api';
 
 export default function Login() {
     const [Usuario, setUsuario] = useState({
-        Cedula: '',
-        Correo: '',
+        Documento: '',
+        Contrasena: '',
     });
-
+    console.log(Usuario);
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
@@ -45,7 +45,7 @@ export default function Login() {
     };
 
     return (
-        <div className='container-fluid'>
+        <div className='container-fluid vh-100'>
             <div className='justify-content-center align-items-center h-100'>
                 <div className='container mt-5 p-5 shadow rounded-5 border-3' style={{ marginBottom: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', maxWidth: '400px', backgroundColor: '#ffffff' }}>
                     <h1 className='text-center p-5'>
@@ -59,25 +59,25 @@ export default function Login() {
                                 type="text"
                                 className="form-control"
                                 id="Cedula"
-                                value={Usuario.Cedula}
-                                name='Cedula'
+                                value={Usuario.Documento}
+                                name='Documento'
                                 onChange={handleInputChange}
                                 required
                             />
                             <div className="invalid-feedback">Por favor ingresa tu número de cédula.</div>
                         </div>
                         <div className="mb-3" style={{ width: '300px' }}>
-                            <label htmlFor="Correo" className="form-label">Correo Electrónico</label>
+                            <label htmlFor="Contrasena" className="form-label">Contraseña</label>
                             <input
-                                type="email"
+                                type="password"
                                 className="form-control"
-                                id="Correo"
-                                value={Usuario.Correo}
-                                name='Correo'
+                                id="Contrasena"
+                                value={Usuario.Contrasena}
+                                name='Contrasena'
                                 onChange={handleInputChange}
                                 required
                             />
-                            <div className="invalid-feedback">Por favor ingresa tu correo electrónico.</div>
+                            <div className="invalid-feedback">Por favor ingresa tu Contraseña</div>
                         </div>
                         <div className="text-center">
                             <button className="btn btn-primary" type="submit">

@@ -4,7 +4,7 @@ import grupo2Imagen from '/src/assets/img/grupo2.jpg';
 
 export default function PagInicio() {
   return (
-    <div className="container">
+    <div className="container vh-100">
       <h1 className="text-dark text-center col p-5 fw-bold fw-lighter">Página de inicio</h1>
       <div className="row row-cols-1 row-cols-md-2 align-items-center">
         {/* Usamos row-cols-md-2 para que en pantallas medianas y grandes se divida en dos columnas */}
