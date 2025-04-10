@@ -93,6 +93,9 @@ export default function Login() {
                     <p className="mt-3 text-center">
                         ¿No tiene una cuenta? <a href="/Registrar">Regístrese aquí</a>
                     </p>
+                    <p className="mt-3 text-center">
+                        ¿Olvido su Conraseña? <a href="/Registrar">Recuperar Conraseña</a>
+                    </p>
                 </div>
             </div>
         </div>
