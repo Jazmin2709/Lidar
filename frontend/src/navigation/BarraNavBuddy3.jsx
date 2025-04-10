@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 function BarraNavBuddy3() {
     return (
         <div>
-            <nav className="navbar navbar-expand-lg bg-primary px-5">
+            <nav className="navbar navbar-expand-lg  px-5" style={{ backgroundColor: '#3483cd' }}>
                 <div className="container-fluid">
                     <Link className="navbar-brand fst-italic fw-bold" to="/">
                         OCA Global

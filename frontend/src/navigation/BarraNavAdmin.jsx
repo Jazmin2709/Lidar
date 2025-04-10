@@ -4,7 +4,7 @@ import  React from 'react'
 export default function BarraNavAdmin() {
     return (
         <div>
-            <nav className="navbar navbar-expand-lg bg-primary px-5">
+            <nav className="navbar navbar-expand-lg px-5" style={{ backgroundColor: '#3483cd' }}>
                 <div className="container-fluid">
                     <a className="navbar-brand fst-italic fw-bold" href="/">
                         OCA Global

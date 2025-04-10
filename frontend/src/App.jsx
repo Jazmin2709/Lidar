@@ -16,6 +16,7 @@ import RoutePrivate from "./componentes/RoutePrivate";
 import Fotter from './navigation/Fotter';
 import './css/styles.css';
 import Lidar from './paginas/Lidar';
+import QuienesSomos from './paginas/QuienesSomos';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/Registrar" element={<><BarraNavInicio /><Registrar /></>} />
             <Route path="/Login" element={<><BarraNavInicio /><Login /></>} />
             <Route path="/Lidar" element={<><BarraNavInicio /><Lidar /></>} />
+            <Route path="/QuienesSomos" element={<><BarraNavInicio /><QuienesSomos /></>} />
 
             {/* RUTAS PRIVADAS */}
             <Route path="/dashboard" element={<RoutePrivate />}>

@@ -13,7 +13,7 @@ function BarraNavInicio() {
           <Link to="/lidar" className="btn btn-light mx-2">
             LIDAR
           </Link>
-          <Link to="/quienes-somos" className="btn btn-light mx-2">
+          <Link to="/quienessomos" className="btn btn-light mx-2">
             QUIENES SOMOS
           </Link>
           <Link to="/Registrar" className="btn btn-light mx-2">
