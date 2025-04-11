@@ -48,7 +48,7 @@ export default function Registrar() {
     };
 
     return (
-        <div className='container-fluid vh-100' >
+        <div className='container-fluid'>
             <div className='justify-content-center align-items-center h-100'>
                 <div className='container mt-5 p-5 shadow rounded-5' style={{ marginBottom: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '700px', height: 'auto', backgroundColor: '#ffffff' }}>
                     <h1 className='text-center p-5'>

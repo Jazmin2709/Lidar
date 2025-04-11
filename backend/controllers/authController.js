@@ -138,7 +138,6 @@ exports.validarToken = async (req, res) => {
 exports.enviarCorreo = async (req, res) => {
     try {
         const { Correo } = req.body;
-        console.log(req.body);
         if (!Correo) {
             return res.status(400).json({ message: 'El correo es obligatorio' });
         }
@@ -178,7 +177,56 @@ exports.enviarCorreo = async (req, res) => {
                     console.error(error);
                     return res.status(500).json({ message: 'Error al enviar el correo' });
                 }
-                return res.status(200).json({ message: 'Correo enviado exitosamente' });
+                db.query('UPDATE persona SET Codigo = ? WHERE Correo = ?', [verificationCode, Correo], (error) => {
+                    if (error) {
+                        console.error(error);
+                        return res.status(500).json({ message: 'Error al actualizar el correo' });
+                    }
+                    return res.status(200).json({ correo: Correo, message: 'Correo enviado exitosamente' });
+                });
+            });
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error interno del servidor' });
+    }
+}
+
+exports.recuperarContrasena = async (req, res) => {
+    try {
+        const { Correo, Codigo, NuevaContrasena } = req.body;
+        console.log(req.body);
+        if (!Correo) {
+            return res.status(400).json({ message: 'El correo es obligatorio' });
+        }
+
+        if (!Codigo) {
+            return res.status(400).json({ message: 'El codigo es obligatorio' });
+        }
+
+        if (!NuevaContrasena) {
+            return res.status(400).json({ message: 'La nueva contraseña es obligatoria' });
+        }
+
+        const query = 'SELECT * FROM persona WHERE Correo = ? AND Codigo = ?';
+        db.query(query, [Correo, Codigo], async (error, results) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).json({ message: 'Error al ingresar' });
+            }
+
+            if (results.length === 0) {
+                return res.status(401).json({ message: 'El correo no está registrado' });
+            }
+
+            const hashedPassword = await bcrypt.hash(NuevaContrasena, 10);
+
+            db.query('UPDATE persona SET Contrasena = ? WHERE Correo = ?', [hashedPassword, Correo], (error) => {
+                if (error) {
+                    console.error(error);
+                    return res.status(500).json({ message: 'Error al actualizar la contraseña' });
+                }
+                return res.status(200).json({ message: 'Contraseña actualizada exitosamente' });
             });
         });
     } catch (error) {

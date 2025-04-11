@@ -17,6 +17,8 @@ import Fotter from './navigation/Fotter';
 import './css/styles.css';
 import Lidar from './paginas/Lidar';
 import QuienesSomos from './paginas/QuienesSomos';
+import EnviarCorreo from './paginas/EnviarCorreo';
+import RecuperarContraseña from './paginas/RecuperarContraseña';
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
             <Route path="/Login" element={<><BarraNavInicio /><Login /></>} />
             <Route path="/Lidar" element={<><BarraNavInicio /><Lidar /></>} />
             <Route path="/QuienesSomos" element={<><BarraNavInicio /><QuienesSomos /></>} />
+            <Route path="/EnviarCorreo" element={<><BarraNavInicio /><EnviarCorreo /></>} />
+            <Route path='/RecuperarContraseña' element={<><BarraNavInicio /><RecuperarContraseña/></>} />
 
             {/* RUTAS PRIVADAS */}
             <Route path="/dashboard" element={<RoutePrivate />}>

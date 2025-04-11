@@ -1,27 +1,29 @@
-import React from 'react';
-import axios from 'axios';
-import { useState } from 'react';
-import Swal from 'sweetalert2';
+import React, { useState } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const API_URL = 'http://localhost:3000/api';
 
-export default function Login() {
+export default function RecuperarContraseña() {
+
+    const correo = localStorage.getItem('correo');
+
     const [Usuario, setUsuario] = useState({
-        Documento: '',
-        Contrasena: '',
+        Correo: correo,
+        Codigo: '',
+        NuevaContrasena: '',
     });
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axios.post(`${API_URL}/auth/ingresar`, Usuario);
+            const response = await axios.post(`${API_URL}/auth/recuperarContrasena`, Usuario);
             if (response.status === 200) {
-                localStorage.setItem('token', response.data.token);
                 Swal.fire({
                     icon: 'success',
                     title: response.data.message,
                 }).then(() => {
-                    window.location.href = '/Dashboard';
+                    window.location.href = '/Login';
                 });
             }
 
@@ -43,44 +45,44 @@ export default function Login() {
         }));
     };
 
-    return (
+    return(
         <div className='container-fluid'>
             <div className='justify-content-center align-items-center h-100'>
-                <div className='container mt-5 p-5 shadow rounded-5 border-3 ' style={{ marginBottom: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', maxWidth: '400px', backgroundColor: '#ffffff' }}>
+                <div className='container mt-5 p-5 shadow rounded-5 border-3' style={{ marginBottom: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', maxWidth: '400px', backgroundColor: '#ffffff' }}>
                     <h1 className='text-center p-5'>
-                        Iniciar Sesión
+                        Recuperar Contraseña
                     </h1>
                     <br />
                     <form className='d-flex flex-column align-items-center' noValidate onSubmit={handleSubmit}>
                         <div className="mb-3" style={{ width: '300px' }}>
-                            <label htmlFor="Cedula" className="form-label">Nº de Cédula</label>
+                            <label htmlFor="Codigo" className="form-label">Codigo</label>
                             <input
                                 type="text"
                                 className="form-control"
-                                id="Cedula"
-                                value={Usuario.Documento}
-                                name='Documento'
+                                id="Codigo"
+                                value={Usuario.Codigo}
+                                name='Codigo'
                                 onChange={handleInputChange}
                                 required
                             />
-                            <div className="invalid-feedback">Por favor ingresa tu número de cédula.</div>
+                            <div className="invalid-feedback">Por favor ingresa tu nueva contraseña</div>
                         </div>
                         <div className="mb-3" style={{ width: '300px' }}>
-                            <label htmlFor="Contrasena" className="form-label">Contraseña</label>
+                            <label htmlFor="NuevaContrasena" className="form-label">Contraseña Nueva</label>
                             <input
                                 type="password"
                                 className="form-control"
-                                id="Contrasena"
-                                value={Usuario.Contrasena}
-                                name='Contrasena'
+                                id="NuevaContrasena"
+                                value={Usuario.NuevaContrasena}
+                                name='NuevaContrasena'
                                 onChange={handleInputChange}
                                 required
                             />
-                            <div className="invalid-feedback">Por favor ingresa tu Contraseña</div>
+                            <div className="invalid-feedback">Por favor ingresa tu nueva contraseña</div>
                         </div>
                         <div className="text-center">
                             <button className="btn btn-primary" type="submit">
-                                Ingresar
+                                Recuperar
                             </button>
                         </div>
                         <style jsx>{`
@@ -89,12 +91,6 @@ export default function Login() {
                             }
                         `}</style>
                     </form>
-                    <p className="mt-3 text-center">
-                        ¿No tiene una cuenta? <a href="/Registrar">Regístrese aquí</a>
-                    </p>
-                    <p className="mt-3 text-center">
-                        ¿Olvido su Conraseña? <a href="/EnviarCorreo">Recuperar Conraseña</a>
-                    </p>
                 </div>
             </div>
         </div>
