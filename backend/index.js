@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
+const buddyRoutes = require('./routes/BuddyPartners');
 
 const port = process.env.PORT || 3000;
 
@@ -20,6 +21,7 @@ app.use(cors({
 
 // Rutas
 app.use('/api/auth', authRoutes);
+app.use('/api/buddy', buddyRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

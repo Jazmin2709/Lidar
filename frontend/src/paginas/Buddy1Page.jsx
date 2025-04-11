@@ -5,25 +5,30 @@ import Swal from 'sweetalert2';
 const API_URL = 'http://localhost:3000/api';
 
 export default function Buddy1Page() {
+
+    const token = localStorage.getItem('token');
+
+    const decoded_token = token ? JSON.parse(atob(token.split('.')[1])) : null;
+
+    const id_empleado = decoded_token ? decoded_token.id : null;
+
     const [Formulario, setFormulario] = useState({
-        id_buddy1: '',
         num_cuadrilla: '',
         Hora_buddy: '',
         Est_empl: '',
         Est_vehi: '',
         Carnet: '',
-        Nombre_id: '',
         TarjetaVida: '',
         Fecha: '',
         Est_etapa: '',
         Est_her: '',
-        id_empleado: ''
+        id_empleado: id_empleado
     });
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axios.post(`${API_URL}/registro-formulario`, Formulario);
+            const response = await axios.post(`${API_URL}/buddy/BuddyPartner1`, Formulario);
             if (response.status === 200) {
                 Swal.fire({
                     icon: 'success',
@@ -55,37 +60,82 @@ export default function Buddy1Page() {
         <div className='container mt-5 p-5 shadow rounded-5' style={{ maxWidth: '800px', backgroundColor: '#ffffff' }}>
             <h2 className='text-center mb-4'>Formulario Buddy</h2>
             <form className='row g-3' onSubmit={handleSubmit}>
-                {[
-                    { id: 'id_buddy1', label: 'ID Buddy 1' },
-                    { id: 'num_cuadrilla', label: 'Número de Cuadrilla' },
-                    { id: 'Hora_buddy', label: 'Hora Buddy', type: 'time' },
-                    { id: 'Est_empl', label: 'Estado Empleado' },
-                    { id: 'Est_vehi', label: 'Estado Vehículo' },
-                    { id: 'Carnet', label: 'Carnet' },
-                    { id: 'Nombre_id', label: 'Nombre ID' },
-                    { id: 'TarjetaVida', label: 'Tarjeta Vida' },
-                    { id: 'Fecha', label: 'Fecha', type: 'date' },
-                    { id: 'Est_etapa', label: 'Estado Etapa' },
-                    { id: 'Est_her', label: 'Estado Herramienta' },
-                    { id: 'id_empleado', label: 'ID Empleado' }
-                ].map(({ id, label, type = 'text' }) => (
-                    <div key={id} className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
-                        <label htmlFor={id} className="form-label">{label}</label>
-                        <input
-                            type={type}
-                            className="form-control"
-                            id={id}
-                            name={id}
-                            value={Formulario[id]}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
-                ))}
+                <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                    <label htmlFor="num_cuadrilla" className="form-label">Número de Cuadrilla</label>
+                    <input type="text" className="form-control" id="num_cuadrilla" name="num_cuadrilla" value={Formulario.num_cuadrilla} onChange={handleInputChange} required />
+                </div>
+
+                <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                    <label htmlFor="Hora_buddy" className="form-label">Hora Buddy</label>
+                    <input type="time" className="form-control" id="Hora_buddy" name="Hora_buddy" value={Formulario.Hora_buddy} onChange={handleInputChange} required />
+                </div>
+
+                <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                    <label htmlFor="Est_empl" className="form-label">Estado Empleado</label>
+                    <select className="form-select" id="Est_empl" name="Est_empl" value={Formulario.Est_empl} onChange={handleInputChange} required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="Excelente">Excelente</option>
+                        <option value="Bueno">Bueno</option>
+                        <option value="Malo">Malo</option>
+                    </select>
+                </div>
+
+                <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                    <label htmlFor="Est_vehi" className="form-label">Estado Vehículo</label>
+                    <select className="form-select" id="Est_vehi" name="Est_vehi" value={Formulario.Est_vehi} onChange={handleInputChange} required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="Excelente">Excelente</option>
+                        <option value="Bueno">Bueno</option>
+                        <option value="Malo">Malo</option>
+                    </select>
+                </div>
+
+                <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                    <label htmlFor="Carnet" className="form-label">Carnet</label>
+                    <input type="text" className="form-control" id="Carnet" name="Carnet" value={Formulario.Carnet} onChange={handleInputChange} required />
+                </div>
+
+                <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                    <label htmlFor="TarjetaVida" className="form-label">Tarjeta Vida</label>
+                    <input type="text" className="form-control" id="TarjetaVida" name="TarjetaVida" value={Formulario.TarjetaVida} onChange={handleInputChange} required />
+                </div>
+
+                <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                    <label htmlFor="Fecha" className="form-label">Fecha</label>
+                    <input type="date" className="form-control" id="Fecha" name="Fecha" value={Formulario.Fecha} onChange={handleInputChange} required />
+                </div>
+
+                <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                    <label htmlFor="Est_etapa" className="form-label">Estado Etapa</label>
+                    <select
+                        className="form-select"
+                        id="Est_etapa"
+                        name="Est_etapa"
+                        value={Formulario.Est_etapa}
+                        onChange={handleInputChange}
+                        required
+                    >
+                        <option value="">Seleccione una opción</option>
+                        <option value="Inicio">Inicio</option>
+                        <option value="En proceso">En proceso</option>
+                        <option value="Finalizó">Finalizó</option>
+                    </select>
+                </div>
+
+                <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                    <label htmlFor="Est_her" className="form-label">Estado Herramienta</label>
+                    <select className="form-select" id="Est_her" name="Est_her" value={Formulario.Est_her} onChange={handleInputChange} required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="Excelente">Excelente</option>
+                        <option value="Bueno">Bueno</option>
+                        <option value="Malo">Malo</option>
+                    </select>
+                </div>
 
                 <div className="col-12 text-center mt-4">
                     <button type="submit" className="btn btn-primary">Confirmar</button>
                 </div>
+
                 <style jsx>{`
                     button.btn.btn-primary:hover {
                         background-color: rgb(73, 1, 141);
