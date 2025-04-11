@@ -17,11 +17,22 @@ export default function Login() {
             const response = await axios.post(`${API_URL}/auth/ingresar`, Usuario);
             if (response.status === 200) {
                 localStorage.setItem('token', response.data.token);
+                const rol = response.data.rol;
                 Swal.fire({
                     icon: 'success',
                     title: response.data.message,
                 }).then(() => {
-                    window.location.href = '/Dashboard';
+                    switch (rol) {
+                        case 1:
+                            window.location.href = '/dashboard';
+                            break;
+                        case 2:
+                            window.location.href = '/IndexEmpleado';
+                            break;
+                        default:
+                            window.location.href = '/Login';
+                            break;
+                    }
                 });
             }
 

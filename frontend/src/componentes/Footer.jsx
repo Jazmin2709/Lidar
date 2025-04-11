@@ -6,7 +6,7 @@ export default function Footer() {
 
     return (
         <footer
-            className="d-flex flex-wrap justify-content-between align-items-center py-4 my-4 border-top"
+            className="d-flex flex-wrap justify-content-between align-items-center py-4 border-top"
             style={{
                 backgroundColor: '#3483cd',
                 width: '100%', // Asegura que el footer ocupe el 100% del ancho

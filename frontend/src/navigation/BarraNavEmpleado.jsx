@@ -3,7 +3,7 @@ import ocaImagen from '/src/assets/img/OCA.png';
 import Swal from 'sweetalert2';
 
 
-export default function BarraNavAdmin() {
+export default function BarraNavEmpleado() {
 
     const cerrarSesion = async () => {
         localStorage.removeItem('token');
@@ -15,7 +15,7 @@ export default function BarraNavAdmin() {
             window.location.href = '/login';
         })
     };
-    
+
     return (
         <div>
             <nav className="navbar navbar-expand-lg px-5" style={{ backgroundColor: '#3483cd' }}>
@@ -26,7 +26,7 @@ export default function BarraNavAdmin() {
                 </div>
                 <div className="dropdown">
                     <button className="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i className='bi bi-person'>Administrador</i>
+                        <i className='bi bi-person'>Empleado</i>
                     </button>
                     <ul className="dropdown-menu dropdown-menu-end">
                         <li><a className="dropdown-item fst-italic" href="/ajustes">Ajustes</a></li>

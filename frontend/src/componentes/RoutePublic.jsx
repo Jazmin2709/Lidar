@@ -2,15 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import Loader from './Loader';
+
 const RUTA_API = "http://localhost:3000/api";
 
-export default function RoutePrivate({ requiredRole }) {
-    const [isAuth, setIsAuth] = useState(null);
+
+export default function RoutePublic() {
     const [userRole, setUserRole] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        const validarToken = async () => {
+        const rolToken = async () => {
             try {
                 const config = {
                     headers: {
@@ -18,42 +22,41 @@ export default function RoutePrivate({ requiredRole }) {
                     },
                 };
                 const res = await axios.get(`${RUTA_API}/auth/validarToken`, config);
-                if (res.status === 200) {
-                    setIsAuth(true);
-                }
                 setUserRole(res.data.rol);
             } catch (err) {
                 console.error(err);
-                setIsAuth(false);
                 localStorage.removeItem('token');
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: 'Su sesión ha expirado. Por favor, inicia sesión de nuevo.',
-                })
+                });
+            } finally {
+                setIsLoading(false);
             }
         };
 
         if (token) {
-            validarToken();
+            rolToken();
         } else {
-            setIsAuth(false);
+            setIsLoading(false);
         }
     }, [token]);
 
-    if (isAuth === null) {
-        return <div></div>;
+    if (isLoading) {
+        return <Loader />;
     }
 
-    console.log(userRole);
-
-    if (requiredRole && userRole !== requiredRole) {
-        return <Navigate to="/login" />;
-    }
-
-    if (!isAuth) {
-        return <Navigate to="/login" />;
+    if (userRole) {
+        switch (userRole) {
+            case 1:
+                return <Navigate to="/dashboard/" />;
+            case 2:
+                return <Navigate to="/IndexEmpleado/" />;
+            default:
+                return <Navigate to="/Login/" />;
+        }
     }
 
     return <Outlet />;
-};
+}
