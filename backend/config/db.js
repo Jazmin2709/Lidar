@@ -9,8 +9,7 @@ const db = mysql.createPool({
     connectTimeout: 10000,
     ssl: process.env.DB_SSL ? true : false
 });
-
-/* Verificar la conección */
+/* Verificar la conección */        
 db.getConnection((err) => {
     if (err) {
         console.log(err);
