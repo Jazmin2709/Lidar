@@ -1,9 +1,10 @@
 import React from 'react'
 import ocaImagen from '/src/assets/img/OCA.png';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2'; 
+import { Link } from 'react-router-dom';
 
 
-export default function BarraNavAdmin() {
+export default function BarraNavSupervisor() {
 
     const cerrarSesion = async () => {
         localStorage.removeItem('token');
@@ -26,11 +27,11 @@ export default function BarraNavAdmin() {
                 </div>
                 <div className="dropdown">
                     <button className="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i className='bi bi-person'>Administrador</i>
+                        <i className='bi bi-person'>Supervisor</i>
                     </button>
                     <ul className="dropdown-menu dropdown-menu-end">
-                        <li><a className="dropdown-item fst-italic" href="/admin/dashboard/">Dashboard</a></li>
-                        <li><a className="dropdown-item fst-italic" href="/admin/reportes/">Reportes</a></li>
+                        <li><Link className="dropdown-item fst-italic" to="/supervisor/dashboard">Dashboard</Link></li>
+                        <li><Link className="dropdown-item fst-italic" to="/supervisor/reportes">Reportes</Link></li>
                         <li><button className="dropdown-item fst-italic" onClick={cerrarSesion}>Cerrar Sesión</button></li>
                     </ul>
                 </div>

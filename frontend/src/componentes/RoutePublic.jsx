@@ -50,9 +50,11 @@ export default function RoutePublic() {
     if (userRole) {
         switch (userRole) {
             case 1:
-                return <Navigate to="/dashboard/" />;
+                return <Navigate to="/supervisor/dashboard/" />;
             case 2:
                 return <Navigate to="/IndexEmpleado/" />;
+            case 3:
+                return <Navigate to="/admin/dashboard/" />;
             default:
                 return <Navigate to="/Login/" />;
         }

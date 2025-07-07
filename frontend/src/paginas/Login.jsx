@@ -24,10 +24,13 @@ export default function Login() {
                 }).then(() => {
                     switch (rol) {
                         case 1:
-                            window.location.href = '/dashboard';
+                            window.location.href = '/supervisor/dashboard';
                             break;
                         case 2:
                             window.location.href = '/IndexEmpleado';
+                            break;
+                        case 3:
+                            window.location.href = '/admin/dashboard';
                             break;
                         default:
                             window.location.href = '/Login';

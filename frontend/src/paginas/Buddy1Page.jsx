@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import moment from 'moment';
 
 const API_URL = 'http://localhost:3000/api';
 
@@ -22,13 +23,18 @@ export default function Buddy1Page() {
         Fecha: '',
         Est_etapa: '',
         Est_her: '',
+        MotivoEmp: '',
+        MotivoVeh: '',
+        Tablero: '',
+        Calentamiento: '',
+        Tipo: 1,
         id_empleado: id_empleado
     });
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axios.post(`${API_URL}/buddy/BuddyPartner1`, Formulario);
+            const response = await axios.post(`${API_URL}/buddy/BuddyPartner`, Formulario);
             if (response.status === 200) {
                 Swal.fire({
                     icon: 'success',
@@ -58,7 +64,7 @@ export default function Buddy1Page() {
 
     return (
         <div className='container mt-5 p-5 shadow rounded-5' style={{ maxWidth: '800px', backgroundColor: '#ffffff' }}>
-            <h2 className='text-center mb-4'>Formulario Buddy</h2>
+            <h2 className='text-center mb-4'>Formulario Buddy 1</h2>
             <form className='row g-3' onSubmit={handleSubmit}>
                 <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
                     <label htmlFor="num_cuadrilla" className="form-label">Número de Cuadrilla</label>
@@ -90,6 +96,20 @@ export default function Buddy1Page() {
                     </select>
                 </div>
 
+                {Formulario.Est_empl === 'Malo' && (
+                    <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                        <label htmlFor="Motivo" className="form-label">Motivo empleado</label>
+                        <textarea type="text" className="form-control" id="MotivoEmp" name="MotivoEmp" value={Formulario.MotivoEmp} onChange={handleInputChange} required />
+                    </div>
+                )}
+
+                {Formulario.Est_vehi === 'Malo' && (
+                    <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                        <label htmlFor="Motivo" className="form-label">Motivo vehiculo</label>
+                        <textarea type="text" className="form-control" id="MotivoVeh" name="MotivoVeh" value={Formulario.MotivoVeh} onChange={handleInputChange} required />
+                    </div>
+                )}
+
                 <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
                     <label htmlFor="Carnet" className="form-label">Carnet</label>
                     <input type="text" className="form-control" id="Carnet" name="Carnet" value={Formulario.Carnet} onChange={handleInputChange} required />
@@ -102,7 +122,7 @@ export default function Buddy1Page() {
 
                 <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
                     <label htmlFor="Fecha" className="form-label">Fecha</label>
-                    <input type="date" className="form-control" id="Fecha" name="Fecha" value={Formulario.Fecha} onChange={handleInputChange} required />
+                    <input max={moment().format('YYYY-MM-DD')} type="date" className="form-control" id="Fecha" name="Fecha" value={Formulario.Fecha} onChange={handleInputChange} required />
                 </div>
 
                 <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
@@ -131,6 +151,13 @@ export default function Buddy1Page() {
                         <option value="Malo">Malo</option>
                     </select>
                 </div>
+
+                {Formulario.Est_her === 'Malo' && (
+                    <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
+                        <label htmlFor="Motivo" className="form-label">Motivo herramienta</label>
+                        <textarea type="text" className="form-control" id="MotivoHer" name="MotivoHer" value={Formulario.MotivoHer} onChange={handleInputChange} required />
+                    </div>
+                )}
 
                 <div className="col-12 text-center mt-4">
                     <button type="submit" className="btn btn-primary">Confirmar</button>
