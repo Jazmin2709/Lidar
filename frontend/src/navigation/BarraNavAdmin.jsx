@@ -15,7 +15,7 @@ export default function BarraNavAdmin() {
             window.location.href = '/login';
         })
     };
-    
+
     return (
         <div>
             <nav className="navbar navbar-expand-lg px-5" style={{ backgroundColor: '#3483cd' }}>
@@ -31,6 +31,7 @@ export default function BarraNavAdmin() {
                     <ul className="dropdown-menu dropdown-menu-end">
                         <li><a className="dropdown-item fst-italic" href="/admin/dashboard/">Dashboard</a></li>
                         <li><a className="dropdown-item fst-italic" href="/admin/reportes/">Reportes</a></li>
+                        <li><a className="dropdown-item fst-italic" href="/admin/registrar/">Registrar</a></li>
                         <li><button className="dropdown-item fst-italic" onClick={cerrarSesion}>Cerrar Sesión</button></li>
                     </ul>
                 </div>

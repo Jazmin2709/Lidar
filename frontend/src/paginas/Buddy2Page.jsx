@@ -169,8 +169,21 @@ export default function Buddy2Page() {
         )}
 
         <div className="col-12 text-center mt-4">
-          <button type="submit" className="btn btn-primary">Confirmar</button>
+          <button
+            type="button"
+            onClick={() => window.location.href = '/IndexEmpleado'}
+            className="btn btn-primary me-2" // Margen a la derecha
+          >
+            Regresar
+          </button>
+          <button
+            type="submit"
+            className="btn btn-primary ms-2" // Margen a la izquierda
+          >
+            Confirmar
+          </button>
         </div>
+
 
         <style jsx>{`
                     button.btn.btn-primary:hover {

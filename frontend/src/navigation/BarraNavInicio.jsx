@@ -16,9 +16,6 @@ function BarraNavInicio() {
           <Link to="/quienessomos" className="btn btn-light mx-2">
             QUIENES SOMOS
           </Link>
-          <Link to="/Registrar" className="btn btn-light mx-2">
-            REGISTRARSE
-          </Link>
           <Link to="/login" className="btn btn-light mx-2">
             INICIAR SESIÓN
           </Link>

@@ -142,16 +142,17 @@ export default function Reportes() {
         },
     ];
 
-    return (
-        <div>
-            <h1>Reportes</h1>
-            <Table
-                className="shadow rounded-5 border-3"
-                columns={columns}
-                dataSource={buddyPartners}
-                rowKey="id_buddy1"
-                pagination={{ pageSize: 10 }}
-            />
-        </div>
-    );
+   return (
+    <div style={{ padding: '0 40px' }}>
+        <h1 style={{ textAlign: 'center', marginBottom: '24px' }}>Reportes</h1>
+        <Table
+            className="shadow rounded-5 border-3"
+            columns={columns}
+            dataSource={buddyPartners}
+            rowKey="id_buddy1"
+            pagination={{ pageSize: 10 }}
+        />
+    </div>
+);
+
 }
