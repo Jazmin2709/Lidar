@@ -7,6 +7,9 @@ const BuddyPartnersController = require('../controllers/BuddyPartnersController'
 // BuddyPartner1
 router.get('/BuddyPartner', BuddyPartnersController.GetBuddyPartner);
 router.post('/BuddyPartner', BuddyPartnersController.BuddyPartner);
+router.put('/BuddyPartner/:id', BuddyPartnersController.EditBuddyPartner);
+router.delete('/BuddyPartner/:id', BuddyPartnersController.DeleteBuddyPartner);
+
 
 // BuddyPartner2
 // router.get ('/BuddyPartner2', BuddyPartnersController.GetBuddyPartner2);
