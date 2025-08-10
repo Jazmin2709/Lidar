@@ -1,5 +1,10 @@
+// Importamos React
 import React from 'react';
+
+// Importamos componentes de React Router para manejar rutas en la aplicación
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+// Importamos las páginas públicas y privadas
 import Dashboard from './paginas/Dashboard';
 import PagInicio from './paginas/PagInicio';
 import Registrar from './paginas/Registrar';
@@ -8,29 +13,39 @@ import Buddy2Page from './paginas/Buddy2Page';
 import Buddy3Page from './paginas/Buddy3Page';
 import Reportes from './paginas/Reportes';
 import Login from './paginas/Login';
-import RoutePrivate from "./componentes/RoutePrivate";
-import './css/styles.css';
 import Lidar from './paginas/Lidar';
 import QuienesSomos from './paginas/QuienesSomos';
 import EnviarCorreo from './paginas/EnviarCorreo';
 import RecuperarContraseña from './paginas/RecuperarContraseña';
-import DefaultLayout from './componentes/DefaultLayout';
-import AdminLayout from './componentes/AdminLayout';
-import SupervisorLayout from './componentes/SupervisorLayout';
-import EmpleadoLayout from './componentes/EmpleadoLayout';
 import IndexEmpleado from './paginas/IndexEmpleado';
-import RoutePublic from './componentes/RoutePublic';
+
+// Importamos componentes para controlar el acceso a rutas
+import RoutePrivate from "./componentes/RoutePrivate"; // Rutas privadas (requieren autenticación)
+import RoutePublic from './componentes/RoutePublic';   // Rutas públicas (sin autenticación)
+
+// Importamos layouts según el tipo de usuario
+import DefaultLayout from './componentes/DefaultLayout';       // Layout general para rutas públicas
+import AdminLayout from './componentes/AdminLayout';           // Layout para administrador
+import SupervisorLayout from './componentes/SupervisorLayout'; // Layout para supervisor
+import EmpleadoLayout from './componentes/EmpleadoLayout';     // Layout para empleado
+
+// Importamos estilos CSS
+import './css/styles.css';
+
+// Componente de carga para rutas no encontradas
 import Loader from './componentes/Loader';
 
+// Componente principal de la aplicación
 function App() {
   return (
+    // Encapsulamos toda la app con BrowserRouter para habilitar el enrutamiento
     <BrowserRouter>
       <Routes>
-        {/* RUTAS PUBLICAS */}
+        {/* RUTAS PÚBLICAS */}
         <Route element={<RoutePublic />}>
           <Route element={<DefaultLayout />}>
             <Route path="/" element={<PagInicio />} />
-            <Route path="*" element={<Loader />} />
+            <Route path="*" element={<Loader />} /> {/* Ruta por defecto si no se encuentra otra */}
             <Route path="/Login" element={<Login />} />
             <Route path="/Lidar" element={<Lidar />} />
             <Route path="/QuienesSomos" element={<QuienesSomos />} />
@@ -41,7 +56,7 @@ function App() {
 
         {/* RUTAS PRIVADAS */}
 
-        {/* RUTAS ADMIN */}
+        {/* ADMINISTRADOR */}
         <Route element={<RoutePrivate requiredRole={3} />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<Dashboard />} />
@@ -50,7 +65,7 @@ function App() {
           </Route>
         </Route>
 
-        {/* RUTAS SUPERVISOR */}
+        {/* SUPERVISOR */}
         <Route element={<RoutePrivate requiredRole={1} />}>
           <Route element={<SupervisorLayout />}>
             <Route path="/supervisor/dashboard" element={<Dashboard />} />
@@ -59,7 +74,7 @@ function App() {
           </Route>
         </Route>
 
-        {/* RUTAS EMPLEADO */}
+        {/* EMPLEADO */}
         <Route element={<RoutePrivate requiredRole={2} />}>
           <Route element={<EmpleadoLayout />}>
             <Route path="/IndexEmpleado/" element={<IndexEmpleado />} />
@@ -73,4 +88,5 @@ function App() {
   );
 }
 
+// Exportamos el componente App para que pueda ser usado por React
 export default App;

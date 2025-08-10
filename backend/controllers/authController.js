@@ -150,8 +150,23 @@ exports.enviarCorreo = async (req, res) => {
             }
 
             if (results.length === 0) {
-                return res.status(401).json({ message: 'El correo no está registrado' });
+                return res.status(401).json({ message: 'El correo no está registrado' });
             }
+
+            const usuario = results[0];
+            const ahora = new Date();
+
+            if (usuario.UltimoEnvio) {
+                const ultimaFecha = new Date(usuario.UltimoEnvio);
+                const diferenciaMinutos = (ahora - ultimaFecha) / 60000;
+
+                if (diferenciaMinutos < 2) {
+                    return res.status(429).json({
+                        message: `Ya se envió un código recientemente. Espera ${Math.ceil(2 - diferenciaMinutos)} minuto(s).`
+                    });
+                }
+            }
+
             const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
             const mailOptions = {
@@ -160,8 +175,6 @@ exports.enviarCorreo = async (req, res) => {
                 subject: 'Código de verificación para restablecer contraseña || Lidar',
                 html: `
                 <div class="container" style="background-color: #3483CD; color: #fff; padding: 80px;">
-                    <div class="imagen" style="text-align: center;">
-                    </div>
                     <h1>Recuperación de Contraseña</h1>
                     <p style="font-size: 25px;">Tu código de verificación es:</p>
                     <h2 style="font-size: 40px; font-weight: bold; color:rgb(255, 255, 255);">${verificationCode}</h2>
@@ -172,15 +185,18 @@ exports.enviarCorreo = async (req, res) => {
                 </div>
                 `,
             };
+
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                     console.error(error);
                     return res.status(500).json({ message: 'Error al enviar el correo' });
                 }
-                db.query('UPDATE persona SET Codigo = ? WHERE Correo = ?', [verificationCode, Correo], (error) => {
+
+                const updateQuery = 'UPDATE persona SET Codigo = ?, UltimoEnvio = ? WHERE Correo = ?';
+                db.query(updateQuery, [verificationCode, ahora, Correo], (error) => {
                     if (error) {
                         console.error(error);
-                        return res.status(500).json({ message: 'Error al actualizar el correo' });
+                        return res.status(500).json({ message: 'Error al actualizar el código' });
                     }
                     return res.status(200).json({ correo: Correo, message: 'Correo enviado exitosamente' });
                 });
@@ -191,6 +207,7 @@ exports.enviarCorreo = async (req, res) => {
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 }
+
 
 exports.recuperarContrasena = async (req, res) => {
     try {

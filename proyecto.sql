@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 07-07-2025 a las 05:13:44
+-- Tiempo de generación: 10-08-2025 a las 23:15:25
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -76,18 +76,19 @@ CREATE TABLE `persona` (
   `Tipo_Doc` varchar(40) NOT NULL,
   `id_rol` int(10) NOT NULL,
   `agreeTerms` tinyint(1) NOT NULL,
-  `codigo` int(10) NOT NULL
+  `codigo` int(10) NOT NULL,
+  `UltimoEnvio` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `persona`
 --
 
-INSERT INTO `persona` (`id_per`, `Correo`, `Nombres`, `Apellidos`, `Cedula`, `Celular`, `Contrasena`, `Tipo_Doc`, `id_rol`, `agreeTerms`, `codigo`) VALUES
-(2, 'usuario@ejemplo.com', 'camilo', 'rodriguez', 1023, '1312313', '$2b$10$q6zJd4rTQxYqF4eXcWuYxubllM1E5yd76VIx1Q76ZceLHnnJV6XTK', 'CC', 1, 0, 0),
-(3, 'dilan@gmail.com', 'dilan', 'lopez', 9999, '1515115', '$2b$10$TQAN7DsIFNuxluvHhhCobezxYXIxNRuD0Qz2E2/CxxTSx8IDsyboC', 'CC', 1, 0, 0),
-(6, 'cielojvargas@gmail.com', 'Cielo Jazmin', 'Vargas Peña', 1032797544, '3246351899', '$2b$10$Yfs7GuLkIjSx6ZqBvQBS.umNbJb6kqsI8g5h.i1Bq6cFaqfLdss1K', 'CC', 2, 0, 0),
-(7, 'andres.romerp1473@gmail.com', 'camilo', 'rodriguez', 1023864182, '3173242675', '$2b$10$PiYSBwrNI5VZ5VKj6SY8cO7Us2keBgpcF0Up6ihh1RHvlX.VkNrk6', 'CC', 1, 0, 0);
+INSERT INTO `persona` (`id_per`, `Correo`, `Nombres`, `Apellidos`, `Cedula`, `Celular`, `Contrasena`, `Tipo_Doc`, `id_rol`, `agreeTerms`, `codigo`, `UltimoEnvio`) VALUES
+(2, 'usuario@ejemplo.com', 'camilo', 'rodriguez', 1023, '1312313', '$2b$10$q6zJd4rTQxYqF4eXcWuYxubllM1E5yd76VIx1Q76ZceLHnnJV6XTK', 'CC', 1, 0, 0, NULL),
+(3, 'dilan@gmail.com', 'dilan', 'lopez', 9999, '1515115', '$2b$10$TQAN7DsIFNuxluvHhhCobezxYXIxNRuD0Qz2E2/CxxTSx8IDsyboC', 'CC', 1, 0, 0, NULL),
+(6, 'cielojvargas@gmail.com', 'Cielo Jazmin', 'Vargas Peña', 1032797544, '3246351899', '$2b$10$Yfs7GuLkIjSx6ZqBvQBS.umNbJb6kqsI8g5h.i1Bq6cFaqfLdss1K', 'CC', 2, 0, 0, NULL),
+(7, 'andres.romerp1473@gmail.com', 'camilo', 'rodriguez', 1023864182, '3173242675', '$2b$10$PiYSBwrNI5VZ5VKj6SY8cO7Us2keBgpcF0Up6ihh1RHvlX.VkNrk6', 'CC', 1, 0, 0, NULL);
 
 -- --------------------------------------------------------
 

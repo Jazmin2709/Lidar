@@ -5,17 +5,28 @@ import Swal from "sweetalert2";
 const API_URL = 'http://localhost:3000/api';
 
 export default function RecuperarContraseña() {
-
     const correo = localStorage.getItem('correo');
 
     const [Usuario, setUsuario] = useState({
         Correo: correo,
         Codigo: '',
         NuevaContrasena: '',
+        ConfirmarContrasena: ''
     });
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        // Validar que las contraseñas coincidan
+        if (Usuario.NuevaContrasena !== Usuario.ConfirmarContrasena) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Las contraseñas no coinciden',
+            });
+            return;
+        }
+
         try {
             const response = await axios.post(`${API_URL}/auth/recuperarContrasena`, Usuario);
             if (response.status === 200) {
@@ -26,13 +37,12 @@ export default function RecuperarContraseña() {
                     window.location.href = '/Login';
                 });
             }
-
         } catch (error) {
             console.error('Error al ingresar:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error al ingresar',
-                text: error.response.data.message,
+                text: error.response?.data?.message || 'Ocurrió un error inesperado',
             });
         }
     };
@@ -45,17 +55,25 @@ export default function RecuperarContraseña() {
         }));
     };
 
-    return(
+    return (
         <div className='container-fluid'>
             <div className='justify-content-center align-items-center h-100'>
-                <div className='container mt-5 p-5 shadow rounded-5 border-3' style={{ marginBottom: '50px', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'auto', maxWidth: '400px', backgroundColor: '#ffffff' }}>
-                    <h1 className='text-center p-5'>
-                        Recuperar Contraseña
-                    </h1>
-                    <br />
+                <div
+                    className='container mt-5 p-5 shadow rounded-5 border-3'
+                    style={{
+                        marginBottom: '50px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        width: 'auto',
+                        maxWidth: '400px',
+                        backgroundColor: '#ffffff'
+                    }}
+                >
+                    <h1 className='text-center p-5'>Recuperar Contraseña</h1>
                     <form className='d-flex flex-column align-items-center' noValidate onSubmit={handleSubmit}>
                         <div className="mb-3" style={{ width: '300px' }}>
-                            <label htmlFor="Codigo" className="form-label">Codigo</label>
+                            <label htmlFor="Codigo" className="form-label">Código</label>
                             <input
                                 type="text"
                                 className="form-control"
@@ -65,10 +83,11 @@ export default function RecuperarContraseña() {
                                 onChange={handleInputChange}
                                 required
                             />
-                            <div className="invalid-feedback">Por favor ingresa tu nueva contraseña</div>
+                            <div className="invalid-feedback">Por favor ingresa el código que recibiste</div>
                         </div>
+
                         <div className="mb-3" style={{ width: '300px' }}>
-                            <label htmlFor="NuevaContrasena" className="form-label">Contraseña Nueva</label>
+                            <label htmlFor="NuevaContrasena" className="form-label">Nueva Contraseña</label>
                             <input
                                 type="password"
                                 className="form-control"
@@ -80,14 +99,46 @@ export default function RecuperarContraseña() {
                             />
                             <div className="invalid-feedback">Por favor ingresa tu nueva contraseña</div>
                         </div>
+
+                        <div className="mb-3" style={{ width: '300px' }}>
+                            <label htmlFor="ConfirmarContrasena" className="form-label">Confirmar Contraseña</label>
+                            <input
+                                type="password"
+                                className="form-control"
+                                id="ConfirmarContrasena"
+                                value={Usuario.ConfirmarContrasena}
+                                name='ConfirmarContrasena'
+                                onChange={handleInputChange}
+                                required
+                            />
+                            <div className="invalid-feedback">Por favor confirma tu nueva contraseña</div>
+                        </div>
+
                         <div className="text-center">
                             <button className="btn btn-primary" type="submit">
                                 Recuperar
                             </button>
                         </div>
+
+                        {/* Reenviar código */}
+                        <div className="text-center mt-3">
+                            <p style={{ fontSize: '14px' }}>
+                                ¿No te llegó el correo?{' '}
+                                <span
+                                    style={{ color: '#007bff', textDecoration: 'underline', cursor: 'pointer' }}
+                                    onClick={() => {
+                                        localStorage.removeItem('correo');
+                                        window.location.href = '/EnviarCorreo';
+                                    }}
+                                >
+                                    Reenviar código
+                                </span>
+                            </p>
+                        </div>
+
                         <style jsx>{`
                             button.btn.btn-primary:hover {
-                            background-color: rgb(73, 1, 141);
+                                background-color: rgb(73, 1, 141);
                             }
                         `}</style>
                     </form>
@@ -96,3 +147,4 @@ export default function RecuperarContraseña() {
         </div>
     );
 }
+

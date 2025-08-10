@@ -1,41 +1,57 @@
+// Importación de React y hooks
 import React, { useEffect, useState } from 'react';
+// Importación de axios para peticiones HTTP
 import axios from 'axios';
+// Importación de componentes de Ant Design para la UI
 import { Table, Button, Input, Modal, Form, message } from 'antd';
+// Icono de búsqueda
 import { SearchOutlined } from '@ant-design/icons';
+// Importación de estilos personalizados
 import '../css/styles.css';
+// Importación de moment para manejo de fechas
 import moment from 'moment';
+// Importación de Select de Ant Design
 import { Select } from 'antd';
 const { Option } = Select;
 
-
+// Componente principal de Reportes
 export default function Reportes() {
+    // Estado para guardar los datos de los reportes
     const [buddyPartners, setBuddyPartners] = useState([]);
+    // Estado para manejar el registro que se está editando
     const [editingRecord, setEditingRecord] = useState(null);
+    // Estado para mostrar u ocultar el modal
     const [isModalOpen, setIsModalOpen] = useState(false);
+    // Hook para manejar el formulario
     const [form] = Form.useForm();
 
+    // useEffect que se ejecuta al cargar el componente
     useEffect(() => {
         fetchBuddyPartners();
     }, []);
 
+    // Función para obtener los reportes desde el backend
     const fetchBuddyPartners = async () => {
         try {
             const response = await axios.get('http://localhost:3000/api/buddy/BuddyPartner/');
+            // Formatear la fecha con moment
             response.data.forEach(item => {
                 item.Fecha = moment(item.Fecha).format('YYYY-MM-DD');
             });
+            // Guardar los datos en el estado
             setBuddyPartners(response.data);
         } catch (error) {
             console.error(error);
         }
     };
 
+    // Función para eliminar un reporte
     const handleDelete = async (id) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar este reporte?')) {
             try {
                 await axios.delete(`http://localhost:3000/api/buddy/BuddyPartner/${id}`);
                 message.success('Reporte eliminado correctamente');
-                fetchBuddyPartners();
+                fetchBuddyPartners(); // Recargar datos
             } catch (error) {
                 console.error(error);
                 message.error('Error al eliminar el reporte');
@@ -43,25 +59,28 @@ export default function Reportes() {
         }
     };
 
+    // Función para abrir el modal y cargar el registro a editar
     const handleEdit = (record) => {
         setEditingRecord(record);
         form.setFieldsValue(record);
         setIsModalOpen(true);
     };
 
+    // Función para actualizar un reporte
     const handleUpdate = async () => {
         try {
             const values = await form.validateFields();
             await axios.put(`http://localhost:3000/api/buddy/BuddyPartner/${editingRecord.id_buddy1}`, values);
             message.success('Reporte actualizado correctamente');
             setIsModalOpen(false);
-            fetchBuddyPartners();
+            fetchBuddyPartners(); // Recargar datos
         } catch (error) {
             console.error(error);
             message.error('Error al actualizar el reporte');
         }
     };
 
+    // Definición de las columnas de la tabla
     const columns = [
         {
             title: 'Id',
@@ -134,9 +153,7 @@ export default function Reportes() {
                     </Button>
                     <Button
                         size="small"
-                        onClick={() => {
-                            clearFilters();
-                        }}
+                        onClick={() => clearFilters()}
                         style={{ marginLeft: 8 }}
                     >
                         Limpiar
@@ -189,11 +206,17 @@ export default function Reportes() {
             ),
         },
     ];
+
+    // Estado para forzar render del formulario cuando cambia un valor
     const [renderTrigger, setRenderTrigger] = useState(false);
 
+    // Retorno del componente
     return (
         <div style={{ padding: '0 40px' }}>
+            {/* Título */}
             <h1 style={{ textAlign: 'center', marginBottom: '24px' }}>Reportes</h1>
+
+            {/* Tabla de datos */}
             <Table
                 className="shadow rounded-5 border-3"
                 columns={columns}
@@ -202,7 +225,7 @@ export default function Reportes() {
                 pagination={{ pageSize: 10 }}
             />
 
-            {/* Modal de edición */}
+            {/* Modal para editar reporte */}
             <Modal
                 title="Editar Reporte"
                 open={isModalOpen}
@@ -290,13 +313,7 @@ export default function Reportes() {
                         <Input />
                     </Form.Item>
                 </Form>
-
             </Modal>
         </div>
     );
 }
-// Este código es un componente de React que muestra una tabla de reportes BuddyPartners
-// y permite editar y eliminar reportes. Utiliza Ant Design para la UI y Axios para
-// realizar peticiones HTTP al backend. La tabla incluye filtros y un modal para editar
-// los reportes. Los datos se obtienen de una API y se formatean antes de mostrarse.
-// El componente maneja el estado de los reportes, el registro que se está editando y la visibilidad del modal de edición. 

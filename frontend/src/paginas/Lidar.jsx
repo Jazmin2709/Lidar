@@ -1,20 +1,28 @@
+// Importación de React para poder usar JSX
 import React from 'react';
+
+// Importación de imágenes utilizadas en la interfaz
 import beneficiosImagen from '/src/assets/img/Beneficios.jpg';
 import herramientasImagen from '/src/assets/img/Herramientas.jpg';
 import lidarImagen from '/src/assets/img/LIDAR.webp';
 import topografiaImagen from '/src/assets/img/Topografia.jpg';
 import cartografiaImagen from '/src/assets/img/Cartografia.jpg';
 
+// Componente principal del módulo LIDAR
 export default function Lidar() {
     return (
         <div className='container'>
+            {/* Título principal */}
             <h1 className='text-dark text-center col p-5 fw-bold fw-lighter'>PROYECTO LIDAR</h1>
+
+            {/* Contenedor de secciones */}
             <div className='row row-cols-1 row-cols-md-2 align-items-center'>
 
                 {/* Sección 1: ¿Qué es el proyecto LIDAR? */}
                 <div className='col'>
                     <h2 className='text-center fw-lighter fw-bold'>¿Qué es LIDAR?</h2>
                     <div className='border border-secondary rounded-4 p-3'>
+                        {/* Explicación sobre la tecnología LIDAR */}
                         <p className='text-dark fw-lighter'>
                             LIDAR (Light Detection and Ranging) es una tecnología de teledetección que utiliza pulsos láser para medir distancias y crear modelos 3D precisos del entorno.
                             Funciona emitiendo pulsos de luz láser hacia un objeto o superficie y midiendo el tiempo que tarda la luz en regresar al sensor.
@@ -23,42 +31,55 @@ export default function Lidar() {
                         </p>
                     </div>
                 </div>
+
+                {/* Imagen relacionada con LIDAR */}
                 <div className="col" style={{ display: 'flex', justifyContent: 'center' }}>
                     <img src={lidarImagen} alt="Imagen de LIDAR" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
                 </div>
 
                 {/* Sección 2: Aplicaciones del Proyecto LIDAR */}
                 <div className="col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    {/* Imágenes de topografía y cartografía */}
                     <img src={topografiaImagen} alt="Imagen de Topografía" className="img-fluid rounded" style={{ width: '300px', height: '200px', marginBottom: '10px' }} />
                     <img src={cartografiaImagen} alt="Imagen de Cartografía" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
                 </div>
+
                 <div className="col">
                     <h2 className="text-center fw-lighter fw-bold">Aplicaciones del Proyecto LIDAR en Global Solutions & Dynamics</h2>
                     <div className="border border-secondary rounded-4 p-3">
+                        {/* Aplicaciones en topografía y cartografía */}
                         <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
                             Topografía y cartografía:
                             <li>Generación de modelos digitales del terreno (MDT) y modelos digitales de superficie (MDS) de alta precisión.</li>
                             <li>Creación de mapas topográficos detallados para proyectos de ingeniería, construcción y planificación urbana.</li>
                             <li>Levantamiento de infraestructuras lineales como carreteras, ferrocarriles y líneas eléctricas.</li>
                         </p>
+
+                        {/* Aplicaciones en recursos naturales */}
                         <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
                             Gestión de recursos naturales:
                             <li>Monitoreo de la deforestación y la salud de los bosques.</li>
                             <li>Evaluación de riesgos de inundaciones y deslizamientos de tierra.</li>
                             <li>Modelado de la biomasa forestal y el almacenamiento de carbono.</li>
                         </p>
+
+                        {/* Aplicaciones en agricultura */}
                         <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
                             Agricultura de precisión:
                             <li>Análisis de la estructura de los cultivos y la variabilidad del terreno</li>
                             <li>Optimización del uso de fertilizantes y pesticidas.</li>
                             <li>Monitoreo del crecimiento de los cultivos y la detección de enfermedades.</li>
                         </p>
+
+                        {/* Aplicaciones en inspección de infraestructuras */}
                         <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
                             Inspección de infraestructuras:
                             <li>Evaluación del estado de puentes, presas y otras estructuras.</li>
                             <li>Detección de deformaciones y daños estructurales.</li>
                             <li>Generación de modelos 3D para la planificación de mantenimiento.</li>
                         </p>
+
+                        {/* Aplicaciones en medio ambiente */}
                         <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
                             Medio ambiente:
                             <li>Monitoreo de cambios medioambientales.</li>
@@ -72,6 +93,7 @@ export default function Lidar() {
                 <div className="col">
                     <h2 className="text-center fw-lighter fw-bold">Beneficios del uso de LIDAR</h2>
                     <div className="border border-secondary rounded-4 p-3">
+                        {/* Lista de beneficios */}
                         <p className="text-dark fw-lighter">
                             <li>Alta precisión y densidad de datos.</li>
                             <li>Capacidad para penetrar la vegetación y obtener datos del terreno subyacente.</li>
@@ -80,6 +102,8 @@ export default function Lidar() {
                         </p>
                     </div>
                 </div>
+
+                {/* Imagen de beneficios */}
                 <div className="col" style={{ display: 'flex', justifyContent: 'center' }}>
                     <img src={beneficiosImagen} alt="Imagen de Beneficios" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
                 </div>
@@ -88,9 +112,11 @@ export default function Lidar() {
                 <div className="col" style={{ display: 'flex', justifyContent: 'center' }}>
                     <img src={herramientasImagen} alt="Imagen de Herramientas" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
                 </div>
-                <div className="col" style={{ marginBottom: '50px' }}> {/* Cambio aquí: agregado marginBottom */}
+
+                <div className="col" style={{ marginBottom: '50px' }}>
                     <h2 className="text-center fw-lighter fw-bold">Tecnología y software utilizados:</h2>
                     <div className="border border-secondary rounded-4 p-3">
+                        {/* Descripción del software y equipos usados */}
                         <p className="text-dark fw-lighter">
                             Global Solutions y Dynamics utiliza equipos LIDAR de última generación, tanto aéreos como terrestres, y software especializado para el procesamiento y análisis de los datos.
                             Esto incluye herramientas para la generación de nubes de puntos, la creación de MDT/MDS, la extracción de características y la visualización 3D.
