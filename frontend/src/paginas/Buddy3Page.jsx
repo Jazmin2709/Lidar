@@ -4,6 +4,8 @@ import { useState } from 'react';
 import axios from 'axios';
 // Importa la librería sweetalert2 para mostrar alertas bonitas
 import Swal from 'sweetalert2';
+// Importa moment para manejar fechas
+import moment from 'moment';
 
 // URL base de la API a la que se le enviarán los datos del formulario
 const API_URL = 'http://localhost:3000/api';
@@ -76,7 +78,7 @@ export default function Buddy3Page() {
   };
 
   return (
-    <div className='container mt-5 p-5 shadow rounded-5' sty  le={{ maxWidth: '800px', backgroundColor: '#ffffff' }}>
+    <div className='container mt-5 p-5 shadow rounded-5' style={{ maxWidth: '800px', backgroundColor: '#ffffff' }}>
       <h2 className='text-center mb-4'>Formulario Buddy 3</h2>
 
       {/* Formulario */}
@@ -135,19 +137,37 @@ export default function Buddy3Page() {
         {/* Campo: Carnet */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Carnet" className="form-label">Carnet</label>
-          <input type="text" className="form-control" id="Carnet" name="Carnet" value={Formulario.Carnet} onChange={handleInputChange} required />
+          <select className="form-select" id="Carnet" name="Carnet" value={Formulario.Carnet} onChange={handleInputChange} required>
+            <option value="">Seleccione una opción</option>
+            <option value="1">Si</option>
+            <option value="0">No</option>
+          </select>
         </div>
 
         {/* Campo: Tarjeta Vida */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="TarjetaVida" className="form-label">Tarjeta Vida</label>
-          <input type="text" className="form-control" id="TarjetaVida" name="TarjetaVida" value={Formulario.TarjetaVida} onChange={handleInputChange} required />
+          <select className="form-select" id="TarjetaVida" name="TarjetaVida" value={Formulario.TarjetaVida} onChange={handleInputChange} required>
+            <option value="">Seleccione una opción</option>
+            <option value="1">Si</option>
+            <option value="0">No</option>
+          </select>
         </div>
 
         {/* Campo: Fecha */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Fecha" className="form-label">Fecha</label>
-          <input type="date" className="form-control" id="Fecha" name="Fecha" value={Formulario.Fecha} onChange={handleInputChange} required />
+          <input 
+            type="date" 
+            className="form-control" 
+            id="Fecha" 
+            name="Fecha" 
+            value={Formulario.Fecha} 
+            onChange={handleInputChange} 
+            required
+            min={moment().subtract(30, 'days').format('YYYY-MM-DD')} 
+            max={moment().format('YYYY-MM-DD')}
+          />
         </div>
 
         {/* Campo: Estado de la etapa */}

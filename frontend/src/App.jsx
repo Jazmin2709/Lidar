@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './paginas/Dashboard';
 import PagInicio from './paginas/PagInicio';
 import Registrar from './paginas/Registrar';
+import Empleados from './paginas/Empleados';
 import Buddy1Page from './paginas/Buddy1Page';
 import Buddy2Page from './paginas/Buddy2Page';
 import Buddy3Page from './paginas/Buddy3Page';
@@ -62,6 +63,7 @@ function App() {
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/Reportes" element={<Reportes />} />
             <Route path="/admin/Registrar" element={<Registrar />} />
+            <Route path="/admin/empleados/" element={<Empleados />} />
           </Route>
         </Route>
 

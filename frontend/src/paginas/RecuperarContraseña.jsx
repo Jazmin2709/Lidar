@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+
 const API_URL = 'http://localhost:3000/api';
 
-export default function RecuperarContraseña() {
+
+export default function RecuperarContrasena() {
     const correo = localStorage.getItem('correo');
+
 
     const [Usuario, setUsuario] = useState({
         Correo: correo,
@@ -14,10 +17,15 @@ export default function RecuperarContraseña() {
         ConfirmarContrasena: ''
     });
 
+
+    const [showNueva, setShowNueva] = useState(false);
+    const [showConfirmar, setShowConfirmar] = useState(false);
+
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        // Validar que las contraseñas coincidan
+
         if (Usuario.NuevaContrasena !== Usuario.ConfirmarContrasena) {
             Swal.fire({
                 icon: 'error',
@@ -26,6 +34,7 @@ export default function RecuperarContraseña() {
             });
             return;
         }
+
 
         try {
             const response = await axios.post(`${API_URL}/auth/recuperarContrasena`, Usuario);
@@ -47,6 +56,7 @@ export default function RecuperarContraseña() {
         }
     };
 
+
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         setUsuario((prevState) => ({
@@ -54,6 +64,7 @@ export default function RecuperarContraseña() {
             [name]: value,
         }));
     };
+
 
     return (
         <div className='container-fluid'>
@@ -72,6 +83,8 @@ export default function RecuperarContraseña() {
                 >
                     <h1 className='text-center p-5'>Recuperar Contraseña</h1>
                     <form className='d-flex flex-column align-items-center' noValidate onSubmit={handleSubmit}>
+
+                        {/* Código */}
                         <div className="mb-3" style={{ width: '300px' }}>
                             <label htmlFor="Codigo" className="form-label">Código</label>
                             <input
@@ -86,10 +99,12 @@ export default function RecuperarContraseña() {
                             <div className="invalid-feedback">Por favor ingresa el código que recibiste</div>
                         </div>
 
-                        <div className="mb-3" style={{ width: '300px' }}>
+
+                        {/* Nueva Contraseña */}
+                        <div className="mb-3" style={{ width: '300px', position: 'relative' }}>
                             <label htmlFor="NuevaContrasena" className="form-label">Nueva Contraseña</label>
                             <input
-                                type="password"
+                                type={showNueva ? "text" : "password"}
                                 className="form-control"
                                 id="NuevaContrasena"
                                 value={Usuario.NuevaContrasena}
@@ -97,13 +112,27 @@ export default function RecuperarContraseña() {
                                 onChange={handleInputChange}
                                 required
                             />
+                            <span
+                                onClick={() => setShowNueva(!showNueva)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '5px',
+                                    top: '31px',
+                                    cursor: 'pointer',
+                                    fontSize: '1.5rem'
+                                }}
+                            >
+                                {showNueva ? "🙉" : "🙈"}
+                            </span>
                             <div className="invalid-feedback">Por favor ingresa tu nueva contraseña</div>
                         </div>
 
-                        <div className="mb-3" style={{ width: '300px' }}>
+
+                        {/* Confirmar Contraseña */}
+                        <div className="mb-3" style={{ width: '300px', position: 'relative' }}>
                             <label htmlFor="ConfirmarContrasena" className="form-label">Confirmar Contraseña</label>
                             <input
-                                type="password"
+                                type={showConfirmar ? "text" : "password"}
                                 className="form-control"
                                 id="ConfirmarContrasena"
                                 value={Usuario.ConfirmarContrasena}
@@ -111,14 +140,31 @@ export default function RecuperarContraseña() {
                                 onChange={handleInputChange}
                                 required
                             />
+                            <span
+                                onClick={() => setShowConfirmar(!showConfirmar)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '5px',
+                                    top: '31px',
+                                    cursor: 'pointer',
+                                    fontSize: '1.5rem'
+
+
+
+                                }}
+                            >
+                                {showConfirmar ? "🙉" : "🙈"}
+                            </span>
                             <div className="invalid-feedback">Por favor confirma tu nueva contraseña</div>
                         </div>
+
 
                         <div className="text-center">
                             <button className="btn btn-primary" type="submit">
                                 Recuperar
                             </button>
                         </div>
+
 
                         {/* Reenviar código */}
                         <div className="text-center mt-3">
@@ -136,6 +182,7 @@ export default function RecuperarContraseña() {
                             </p>
                         </div>
 
+
                         <style jsx>{`
                             button.btn.btn-primary:hover {
                                 background-color: rgb(73, 1, 141);
@@ -147,4 +194,3 @@ export default function RecuperarContraseña() {
         </div>
     );
 }
-

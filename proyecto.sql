@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 10-08-2025 a las 23:15:25
+-- Tiempo de generación: 26-08-2025 a las 03:17:12
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -33,9 +33,9 @@ CREATE TABLE `buddy` (
   `Hora_buddy` time NOT NULL,
   `Est_empl` varchar(10) NOT NULL,
   `Est_vehi` varchar(10) NOT NULL,
-  `Carnet` int(10) NOT NULL,
+  `Carnet` tinyint(1) NOT NULL,
   `Nombre_id` varchar(30) NOT NULL,
-  `TarjetaVida` varchar(10) NOT NULL,
+  `TarjetaVida` tinyint(1) NOT NULL,
   `Fecha` date NOT NULL,
   `Est_etapa` varchar(10) NOT NULL,
   `Est_her` varchar(10) NOT NULL,
@@ -53,11 +53,14 @@ CREATE TABLE `buddy` (
 --
 
 INSERT INTO `buddy` (`id_buddy1`, `num_cuadrilla`, `Hora_buddy`, `Est_empl`, `Est_vehi`, `Carnet`, `Nombre_id`, `TarjetaVida`, `Fecha`, `Est_etapa`, `Est_her`, `MotivoEmp`, `MotivoVeh`, `MotivoHer`, `Tablero`, `Calentamiento`, `Tipo`, `id_empleado`) VALUES
-(11, '12', '06:38:00', 'Excelente', 'Excelente', 0, '', 'Si', '2025-04-17', 'Inicio', 'Excelente', '', '', '', NULL, NULL, 0, 6),
-(15, '10', '22:23:00', 'Malo', 'Malo', 0, '', 'Si', '2025-07-06', 'Finalizó', 'Malo', NULL, NULL, NULL, NULL, NULL, 0, 7),
-(16, '10', '22:26:00', 'Malo', 'Malo', 0, '', 'Si', '2025-07-06', 'Finalizó', 'Malo', NULL, NULL, NULL, NULL, NULL, 3, 7),
-(17, '14', '22:29:00', 'Malo', 'Malo', 0, '', 'Si', '2025-07-13', 'Finalizó', 'Malo', NULL, NULL, NULL, 'si', 'si', 2, 7),
-(18, '16', '22:30:00', 'Malo', 'Malo', 0, '', 'Si', '2025-07-07', 'Finalizó', 'Malo', NULL, NULL, NULL, NULL, NULL, 1, 7);
+(11, '12', '06:38:00', 'Excelente', 'Excelente', 0, '', 0, '2025-04-17', 'Inicio', 'Excelente', '', '', '', NULL, NULL, 0, 6),
+(15, '10', '22:23:00', 'Malo', 'Malo', 0, '', 0, '2025-07-06', 'Finalizó', 'Malo', NULL, NULL, NULL, NULL, NULL, 0, 7),
+(16, '10', '22:26:00', 'Malo', 'Malo', 0, '', 0, '2025-07-06', 'Finalizó', 'Malo', NULL, NULL, NULL, NULL, NULL, 3, 7),
+(17, '14', '22:29:00', 'Malo', 'Malo', 0, '', 0, '2025-07-13', 'Finalizó', 'Malo', NULL, NULL, NULL, 'si', 'si', 2, 7),
+(18, '16', '22:30:00', 'Malo', 'Malo', 0, '', 0, '2025-07-07', 'Finalizó', 'Malo', NULL, NULL, NULL, NULL, NULL, 1, 7),
+(19, '3', '07:33:00', 'Excelente', 'Excelente', 0, '', 0, '2025-08-24', 'Inicio', 'Excelente', NULL, NULL, NULL, 'ko', 'ko', 2, 7),
+(20, '2', '09:47:00', 'Excelente', 'Excelente', 0, '', 0, '2025-08-24', 'Inicio', 'Excelente', NULL, NULL, NULL, 'ko', 'ko', 2, 7),
+(21, '6', '08:02:00', 'Excelente', 'Excelente', 1, '', 1, '2025-08-24', 'Inicio', 'Excelente', NULL, NULL, NULL, 'ko', 'ko', 2, 7);
 
 -- --------------------------------------------------------
 
@@ -142,7 +145,7 @@ ALTER TABLE `rol`
 -- AUTO_INCREMENT de la tabla `buddy`
 --
 ALTER TABLE `buddy`
-  MODIFY `id_buddy1` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id_buddy1` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `persona`

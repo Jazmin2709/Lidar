@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import moment from 'moment';
 
 // URL base de la API
 const API_URL = 'http://localhost:3000/api';
@@ -24,7 +25,7 @@ export default function Buddy2Page() {
     Est_vehi: '',
     Carnet: '',
     TarjetaVida: '',
-    Fecha: '',
+    Fecha: moment().format('YYYY-MM-DD'), // ✅ valor por defecto hoy
     Est_etapa: '',
     Est_her: '',
     MotivoEmp: '',
@@ -38,6 +39,17 @@ export default function Buddy2Page() {
   // Función que se ejecuta al enviar el formulario
   const handleSubmit = async (event) => {
     event.preventDefault(); // Previene el comportamiento por defecto del formulario
+
+    // ✅ Validar que la fecha no sea futura
+    if (moment(Formulario.Fecha).isAfter(moment(), 'day')) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Fecha inválida',
+        text: 'La fecha no puede ser futura.',
+      });
+      return;
+    }
+
     try {
       // Envía los datos a la API
       const response = await axios.post(`${API_URL}/buddy/BuddyPartner`, Formulario);
@@ -131,12 +143,20 @@ export default function Buddy2Page() {
         {/* Otros campos del formulario */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Carnet" className="form-label">Carnet</label>
-          <input type="text" className="form-control" id="Carnet" name="Carnet" value={Formulario.Carnet} onChange={handleInputChange} required />
+          <select className="form-select" id="Carnet" name="Carnet" value={Formulario.Carnet} onChange={handleInputChange} required>
+            <option value="">Seleccione una opción</option>
+            <option value="1">Si</option>
+            <option value="0">No</option>
+          </select>
         </div>
 
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="TarjetaVida" className="form-label">Tarjeta Vida</label>
-          <input type="text" className="form-control" id="TarjetaVida" name="TarjetaVida" value={Formulario.TarjetaVida} onChange={handleInputChange} required />
+          <select className="form-select" id="TarjetaVida" name="TarjetaVida" value={Formulario.TarjetaVida} onChange={handleInputChange} required>
+            <option value="">Seleccione una opción</option>
+            <option value="1">Si</option>
+            <option value="0">No</option>
+          </select>
         </div>
 
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
@@ -149,9 +169,20 @@ export default function Buddy2Page() {
           <input type="text" className="form-control" id="Calentamiento" name="Calentamiento" value={Formulario.Calentamiento} onChange={handleInputChange} required />
         </div>
 
+        {/* ✅ Campo Fecha con mínimo hace 30 días y máximo hoy */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Fecha" className="form-label">Fecha</label>
-          <input type="date" className="form-control" id="Fecha" name="Fecha" value={Formulario.Fecha} onChange={handleInputChange} required />
+          <input
+            type="date"
+            className="form-control"
+            id="Fecha"
+            name="Fecha"
+            value={Formulario.Fecha}
+            onChange={handleInputChange}
+            min={moment().subtract(30, 'days').format('YYYY-MM-DD')}
+            max={moment().format('YYYY-MM-DD')}
+            required
+          />
         </div>
 
         {/* Estado de la etapa */}

@@ -18,18 +18,24 @@ exports.BuddyPartner = (req, res) => {
         Fecha, Est_etapa, Est_her, Tablero, Calentamiento, Tipo, id_empleado
     } = req.body;
 
-    if (!num_cuadrilla || !Hora_buddy || !Est_empl || !Est_vehi || !Carnet || !TarjetaVida ||
+    // Validar campos obligatorios (excepto Tablero y Calentamiento que son opcionales)
+    if (!num_cuadrilla || !Hora_buddy || !Est_empl || !Est_vehi ||
+        Carnet === undefined || TarjetaVida === undefined ||
         !Fecha || !Est_etapa || !Est_her || !id_empleado || !Tipo) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
+
+    // Convertir Carnet y TarjetaVida a enteros (0 o 1)
+    const carnetValue = Carnet === "1" || Carnet === 1 ? 1 : 0;
+    const tarjetaVidaValue = TarjetaVida === "1" || TarjetaVida === 1 ? 1 : 0;
 
     const values = {
         num_cuadrilla,
         Hora_buddy,
         Est_empl,
         Est_vehi,
-        Carnet,
-        TarjetaVida,
+        Carnet: carnetValue,
+        TarjetaVida: tarjetaVidaValue,
         Fecha,
         Est_etapa,
         Est_her,
@@ -52,6 +58,14 @@ exports.BuddyPartner = (req, res) => {
 exports.EditBuddyPartner = (req, res) => {
     const { id } = req.params;
     const data = req.body;
+
+    // Si vienen los campos Carnet/TarjetaVida, asegurar que sean 0 o 1
+    if (data.Carnet !== undefined) {
+        data.Carnet = data.Carnet === "1" || data.Carnet === 1 ? 1 : 0;
+    }
+    if (data.TarjetaVida !== undefined) {
+        data.TarjetaVida = data.TarjetaVida === "1" || data.TarjetaVida === 1 ? 1 : 0;
+    }
 
     db.query('UPDATE buddy SET ? WHERE id_buddy1 = ?', [data, id], (err, result) => {
         if (err) {

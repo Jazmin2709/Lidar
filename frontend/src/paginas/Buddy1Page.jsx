@@ -8,9 +8,7 @@ const API_URL = 'http://localhost:3000/api';
 export default function Buddy1Page() {
 
     const token = localStorage.getItem('token');
-
     const decoded_token = token ? JSON.parse(atob(token.split('.')[1])) : null;
-
     const id_empleado = decoded_token ? decoded_token.id : null;
 
     const [Formulario, setFormulario] = useState({
@@ -20,7 +18,7 @@ export default function Buddy1Page() {
         Est_vehi: '',
         Carnet: '',
         TarjetaVida: '',
-        Fecha: '',
+        Fecha: moment().format('YYYY-MM-DD'), // ✅ valor por defecto hoy
         Est_etapa: '',
         Est_her: '',
         MotivoEmp: '',
@@ -33,6 +31,17 @@ export default function Buddy1Page() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        // ✅ Validar que la fecha no sea futura
+        if (moment(Formulario.Fecha).isAfter(moment(), 'day')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Fecha inválida',
+                text: 'La fecha no puede ser futura.',
+            });
+            return;
+        }
+
         try {
             const response = await axios.post(`${API_URL}/buddy/BuddyPartner`, Formulario);
             if (response.status === 200) {
@@ -112,17 +121,36 @@ export default function Buddy1Page() {
 
                 <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
                     <label htmlFor="Carnet" className="form-label">Carnet</label>
-                    <input type="text" className="form-control" id="Carnet" name="Carnet" value={Formulario.Carnet} onChange={handleInputChange} required />
+                    <select className="form-select" id="Carnet" name="Carnet" value={Formulario.Carnet} onChange={handleInputChange} required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="1">Si</option>
+                        <option value="0">No</option>
+                    </select>
                 </div>
 
                 <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
                     <label htmlFor="TarjetaVida" className="form-label">Tarjeta Vida</label>
-                    <input type="text" className="form-control" id="TarjetaVida" name="TarjetaVida" value={Formulario.TarjetaVida} onChange={handleInputChange} required />
+                    <select className="form-select" id="TarjetaVida" name="TarjetaVida" value={Formulario.TarjetaVida} onChange={handleInputChange} required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="1">Si</option>
+                        <option value="0">No</option>
+                    </select>
                 </div>
 
+                {/* ✅ Campo Fecha con mínimo hace 30 días y máximo hoy */}
                 <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
                     <label htmlFor="Fecha" className="form-label">Fecha</label>
-                    <input max={moment().format('YYYY-MM-DD')} type="date" className="form-control" id="Fecha" name="Fecha" value={Formulario.Fecha} onChange={handleInputChange} required />
+                    <input
+                        type="date"
+                        className="form-control"
+                        id="Fecha"
+                        name="Fecha"
+                        value={Formulario.Fecha}
+                        onChange={handleInputChange}
+                        min={moment().subtract(30, 'days').format('YYYY-MM-DD')}
+                        max={moment().format('YYYY-MM-DD')}
+                        required
+                    />
                 </div>
 
                 <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
@@ -163,13 +191,13 @@ export default function Buddy1Page() {
                     <button
                         type="button"
                         onClick={() => window.location.href = '/IndexEmpleado'}
-                        className="btn btn-primary me-2" // Margen a la derecha
+                        className="btn btn-primary me-2"
                     >
                         Regresar
                     </button>
                     <button
                         type="submit"
-                        className="btn btn-primary ms-2" // Margen a la izquierda
+                        className="btn btn-primary ms-2"
                     >
                         Confirmar
                     </button>
