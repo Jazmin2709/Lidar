@@ -35,6 +35,12 @@ function BarraNavInicio() {
             QUIENES SOMOS
           </Link>
 
+          {/* Botón que redirige a registro */}
+          <Link to="/registrar" className="btn btn-light mx-2">
+            REGISTRAR
+          </Link>
+
+          
           {/* Botón que redirige al login */}
           <Link to="/login" className="btn btn-light mx-2">
             INICIAR SESIÓN

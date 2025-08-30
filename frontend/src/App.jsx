@@ -51,6 +51,8 @@ function App() {
             <Route path="/Lidar" element={<Lidar />} />
             <Route path="/QuienesSomos" element={<QuienesSomos />} />
             <Route path="/EnviarCorreo" element={<EnviarCorreo />} />
+            <Route path="/Registrar" element={<Registrar/>}/>
+            
             <Route path='/RecuperarContraseña' element={<RecuperarContraseña />} />
           </Route>
         </Route>
@@ -62,7 +64,6 @@ function App() {
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/Reportes" element={<Reportes />} />
-            <Route path="/admin/Registrar" element={<Registrar />} />
             <Route path="/admin/empleados/" element={<Empleados />} />
           </Route>
         </Route>
@@ -72,7 +73,6 @@ function App() {
           <Route element={<SupervisorLayout />}>
             <Route path="/supervisor/dashboard" element={<Dashboard />} />
             <Route path="/supervisor/Reportes" element={<Reportes />} />
-            <Route path="/supervisor/Registrar" element={<Registrar />} />
           </Route>
         </Route>
 
@@ -83,6 +83,7 @@ function App() {
             <Route path="/BuddyPartner1/" element={<Buddy1Page />} />
             <Route path="/BuddyPartner2/" element={<Buddy2Page />} />
             <Route path="/BuddyPartner3/" element={<Buddy3Page />} />
+            <Route path="/Registrar" element={<Registrar />}/>
           </Route>
         </Route>
       </Routes>

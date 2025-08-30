@@ -64,7 +64,7 @@ exports.registrar = async (req, res) => {
                 return res.status(400).json({ message: 'El correo ya está registrado' });
             }
 
-            const query = 'INSERT INTO persona (Correo, Nombres, Apellidos, Cedula, Celular, Contrasena, Tipo_Doc, agreeTerms, id_rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 2)';
+            const query = 'INSERT INTO persona (Correo, Nombres, Apellidos, Cedula, Celular, Contrasena, Tipo_Doc, agreeTerms, id_rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)';
             const values = [Correo, Nombres, Apellidos, Cedula, Celular, hashedPassword, Tipo_Doc, agreeTerms];
 
             db.query(query, values, (error) => {

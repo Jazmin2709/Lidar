@@ -78,6 +78,12 @@ export default function Buddy2Page() {
   // Función para manejar cambios en los campos del formulario
   const handleInputChange = (event) => {
     const { name, value } = event.target;
+
+    // ✅ Validaciones según el campo
+    if (name === "num_cuadrilla" && !/^\d*$/.test(value)) return; // Solo números
+    if ((name === "Tablero" || name === "Calentamiento") && !/^[a-zA-Z\s]*$/.test(value)) return; // Solo texto
+    if ((name === "MotivoEmp" || name === "MotivoVeh" || name === "MotivoHer") && !/^[a-zA-Z0-9\s]*$/.test(value)) return; // Texto y números
+
     setFormulario((prevState) => ({
       ...prevState,
       [name]: value,
@@ -93,13 +99,29 @@ export default function Buddy2Page() {
         {/* Campo: Número de Cuadrilla */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="num_cuadrilla" className="form-label">Número de Cuadrilla</label>
-          <input type="text" className="form-control" id="num_cuadrilla" name="num_cuadrilla" value={Formulario.num_cuadrilla} onChange={handleInputChange} required />
+          <input
+            type="text"
+            className="form-control"
+            id="num_cuadrilla"
+            name="num_cuadrilla"
+            value={Formulario.num_cuadrilla}
+            onChange={handleInputChange}
+            required
+          />
         </div>
 
         {/* Campo: Hora Buddy */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Hora_buddy" className="form-label">Hora Buddy</label>
-          <input type="time" className="form-control" id="Hora_buddy" name="Hora_buddy" value={Formulario.Hora_buddy} onChange={handleInputChange} required />
+          <input
+            type="time"
+            className="form-control"
+            id="Hora_buddy"
+            name="Hora_buddy"
+            value={Formulario.Hora_buddy}
+            onChange={handleInputChange}
+            required
+          />
         </div>
 
         {/* Campo: Estado Empleado */}
@@ -161,12 +183,28 @@ export default function Buddy2Page() {
 
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Tablero" className="form-label">Tablero</label>
-          <input type="text" className="form-control" id="Tablero" name="Tablero" value={Formulario.Tablero} onChange={handleInputChange} required />
+          <input
+            type="text"
+            className="form-control"
+            id="Tablero"
+            name="Tablero"
+            value={Formulario.Tablero}
+            onChange={handleInputChange}
+            required
+          />
         </div>
 
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Calentamiento" className="form-label">Calentamiento</label>
-          <input type="text" className="form-control" id="Calentamiento" name="Calentamiento" value={Formulario.Calentamiento} onChange={handleInputChange} required />
+          <input
+            type="text"
+            className="form-control"
+            id="Calentamiento"
+            name="Calentamiento"
+            value={Formulario.Calentamiento}
+            onChange={handleInputChange}
+            required
+          />
         </div>
 
         {/* ✅ Campo Fecha con mínimo hace 30 días y máximo hoy */}

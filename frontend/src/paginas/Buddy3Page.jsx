@@ -35,6 +35,7 @@ export default function Buddy3Page() {
     Est_her: '',
     MotivoEmp: '',
     MotivoVeh: '',
+    MotivoHer: '',
     Tablero: '',
     Calentamiento: '',
     Tipo: 3, // Tipo 3 representa este tipo específico de formulario
@@ -45,20 +46,17 @@ export default function Buddy3Page() {
   const handleSubmit = async (event) => {
     event.preventDefault(); // Previene que se recargue la página
     try {
-      // Se hace la petición POST al endpoint con los datos del formulario
       const response = await axios.post(`${API_URL}/buddy/BuddyPartner`, Formulario);
-      // Si la respuesta es exitosa, se muestra un mensaje de éxito y se recarga la página
       if (response.status === 200) {
         Swal.fire({
           icon: 'success',
           title: response.data.message,
           text: response.data.results,
         }).then(() => {
-          window.location.reload(); // Recarga la página después de cerrar la alerta
+          window.location.reload();
         });
       }
     } catch (error) {
-      // En caso de error, se muestra un mensaje de error con los detalles
       console.error('Error al registrar:', error);
       Swal.fire({
         icon: 'error',
@@ -68,12 +66,25 @@ export default function Buddy3Page() {
     }
   };
 
-  // Función que actualiza los valores del formulario cuando el usuario escribe o selecciona algo
+  // Función que actualiza los valores del formulario con validaciones
   const handleInputChange = (event) => {
     const { name, value } = event.target;
+
+    let newValue = value;
+
+    // Validación: solo números en "num_cuadrilla"
+    if (name === "num_cuadrilla") {
+      newValue = value.replace(/[^0-9]/g, ""); // elimina todo lo que no sea número
+    }
+
+    // Validación: solo letras y espacios en los campos de "Motivo"
+    if (["MotivoEmp", "MotivoVeh", "MotivoHer"].includes(name)) {
+      newValue = value.replace(/[^a-zA-Z\sáéíóúÁÉÍÓÚñÑ]/g, ""); // solo letras y espacios
+    }
+
     setFormulario((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: newValue,
     }));
   };
 
@@ -81,13 +92,22 @@ export default function Buddy3Page() {
     <div className='container mt-5 p-5 shadow rounded-5' style={{ maxWidth: '800px', backgroundColor: '#ffffff' }}>
       <h2 className='text-center mb-4'>Formulario Buddy 3</h2>
 
-      {/* Formulario */}
       <form className='row g-3' onSubmit={handleSubmit}>
 
-        {/* Campo: Número de cuadrilla */}
+        {/* Campo: Número de cuadrilla (solo números) */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="num_cuadrilla" className="form-label">Número de Cuadrilla</label>
-          <input type="text" className="form-control" id="num_cuadrilla" name="num_cuadrilla" value={Formulario.num_cuadrilla} onChange={handleInputChange} required />
+          <input
+            type="text"
+            className="form-control"
+            id="num_cuadrilla"
+            name="num_cuadrilla"
+            value={Formulario.num_cuadrilla}
+            onChange={handleInputChange}
+            required
+            pattern="[0-9]+"
+            title="Solo se permiten números"
+          />
         </div>
 
         {/* Campo: Hora buddy */}
@@ -118,19 +138,37 @@ export default function Buddy3Page() {
           </select>
         </div>
 
-        {/* Campo condicional: Motivo del empleado (solo si está en estado 'Malo') */}
+        {/* Campo condicional: Motivo empleado (solo letras) */}
         {Formulario.Est_empl === 'Malo' && (
           <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
-            <label htmlFor="Motivo" className="form-label">Motivo empleado</label>
-            <textarea className="form-control" id="MotivoEmp" name="MotivoEmp" value={Formulario.MotivoEmp} onChange={handleInputChange} required />
+            <label htmlFor="MotivoEmp" className="form-label">Motivo empleado</label>
+            <textarea
+              className="form-control"
+              id="MotivoEmp"
+              name="MotivoEmp"
+              value={Formulario.MotivoEmp}
+              onChange={handleInputChange}
+              required
+              pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+"
+              title="Solo se permiten letras y espacios"
+            />
           </div>
         )}
 
-        {/* Campo condicional: Motivo del vehículo (solo si está en estado 'Malo') */}
+        {/* Campo condicional: Motivo vehículo (solo letras) */}
         {Formulario.Est_vehi === 'Malo' && (
           <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
-            <label htmlFor="Motivo" className="form-label">Motivo vehículo</label>
-            <textarea className="form-control" id="MotivoVeh" name="MotivoVeh" value={Formulario.MotivoVeh} onChange={handleInputChange} required />
+            <label htmlFor="MotivoVeh" className="form-label">Motivo vehículo</label>
+            <textarea
+              className="form-control"
+              id="MotivoVeh"
+              name="MotivoVeh"
+              value={Formulario.MotivoVeh}
+              onChange={handleInputChange}
+              required
+              pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+"
+              title="Solo se permiten letras y espacios"
+            />
           </div>
         )}
 
@@ -157,20 +195,20 @@ export default function Buddy3Page() {
         {/* Campo: Fecha */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Fecha" className="form-label">Fecha</label>
-          <input 
-            type="date" 
-            className="form-control" 
-            id="Fecha" 
-            name="Fecha" 
-            value={Formulario.Fecha} 
-            onChange={handleInputChange} 
+          <input
+            type="date"
+            className="form-control"
+            id="Fecha"
+            name="Fecha"
+            value={Formulario.Fecha}
+            onChange={handleInputChange}
             required
-            min={moment().subtract(30, 'days').format('YYYY-MM-DD')} 
+            min={moment().subtract(30, 'days').format('YYYY-MM-DD')}
             max={moment().format('YYYY-MM-DD')}
           />
         </div>
 
-        {/* Campo: Estado de la etapa */}
+        {/* Campo: Estado etapa */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Est_etapa" className="form-label">Estado Etapa</label>
           <select className="form-select" id="Est_etapa" name="Est_etapa" value={Formulario.Est_etapa} onChange={handleInputChange} required>
@@ -192,41 +230,34 @@ export default function Buddy3Page() {
           </select>
         </div>
 
-        {/* Campo condicional: Motivo herramienta (si está en mal estado) */}
+        {/* Campo condicional: Motivo herramienta (solo letras) */}
         {Formulario.Est_her === 'Malo' && (
           <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
-            <label htmlFor="Motivo" className="form-label">Motivo herramienta</label>
-            <textarea className="form-control" id="MotivoHer" name="MotivoHer" value={Formulario.MotivoHer} onChange={handleInputChange} required />
+            <label htmlFor="MotivoHer" className="form-label">Motivo herramienta</label>
+            <textarea
+              className="form-control"
+              id="MotivoHer"
+              name="MotivoHer"
+              value={Formulario.MotivoHer}
+              onChange={handleInputChange}
+              required
+              pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+"
+              title="Solo se permiten letras y espacios"
+            />
           </div>
         )}
 
-        {/* Botones de acción */}
+        {/* Botones */}
         <div className="col-12 text-center mt-4">
-          {/* Botón para regresar */}
-          <button
-            type="button"
-            onClick={() => window.location.href = '/IndexEmpleado'}
-            className="btn btn-primary me-2"
-          >
-            Regresar
-          </button>
-
-          {/* Botón para confirmar (enviar el formulario) */}
-          <button
-            type="submit"
-            className="btn btn-primary ms-2"
-          >
-            Confirmar
-          </button>
+          <button type="button" onClick={() => window.location.href = '/IndexEmpleado'} className="btn btn-primary me-2">Regresar</button>
+          <button type="submit" className="btn btn-primary ms-2">Confirmar</button>
         </div>
 
-        {/* Estilo personalizado para el hover del botón */}
         <style jsx>{`
           button.btn.btn-primary:hover {
             background-color: rgb(73, 1, 141);
           }
         `}</style>
-
       </form>
     </div>
   );

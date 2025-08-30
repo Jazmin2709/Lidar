@@ -16,7 +16,7 @@ export default function EmpleadoForm({ roles, editData, onSaved }) {
     id_rol: 2, // por defecto "empleado"
   });
 
-  const [showPassword, setShowPassword] = useState(false); // 👁️🙈
+  const [showPassword, setShowPassword] = useState(false); // 👀🙈
 
   useEffect(() => {
     if (editData) {
@@ -90,6 +90,19 @@ export default function EmpleadoForm({ roles, editData, onSaved }) {
       const msg = error?.response?.data?.message || 'Error al guardar';
       Swal.fire('Error', msg, 'error');
     }
+  };
+
+  const onClear = () => {
+    setForm({
+      Correo: '',
+      Nombres: '',
+      Apellidos: '',
+      Cedula: '',
+      Celular: '',
+      Contrasena: '',
+      Tipo_Doc: 'CC',
+      id_rol: 2,
+    });
   };
 
   return (
@@ -209,6 +222,13 @@ export default function EmpleadoForm({ roles, editData, onSaved }) {
       <div className='col-12'>
         <button className='btn btn-primary' type='submit'>
           {editData ? 'Actualizar' : 'Agregar'}
+        </button>
+        <button
+          className='btn btn-secondary ms-2'
+          type='button'
+          onClick={onClear}
+        >
+          Limpiar
         </button>
       </div>
     </form>

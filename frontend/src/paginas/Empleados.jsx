@@ -44,13 +44,13 @@ export default function Empleados() {
   useEffect(() => { cargarTodo(); }, []);
 
   const onEdit = (emp) => {
-    // ✅ Validación extra de empleado
-    if (!emp || typeof emp !== 'object' || !emp.id) {
+    if (!emp || typeof emp !== 'object') {
       Swal.fire('Error', 'Datos inválidos del empleado a editar', 'error');
       return;
     }
-    setEditData(emp);
+    setEditData(emp); // ahora sí carga los datos en el formulario
   };
+
 
   const onDelete = async (id) => {
     // ✅ Validación extra para el ID

@@ -1,0 +1,1 @@
+Almacena temporalmente la imagen que se envie
