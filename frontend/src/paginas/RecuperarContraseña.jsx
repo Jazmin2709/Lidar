@@ -78,6 +78,21 @@ export default function RecuperarContraseña() {
                                 onChange={handleInputChange}
                                 required
                             />
+<<<<<<< Updated upstream
+=======
+                            <span
+                                onClick={() => setShowNueva(!showNueva)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '5px',
+                                    top: '31px',
+                                    cursor: 'pointer',
+                                    fontSize: '1.5rem'
+                                }}
+                            >
+                                {showNueva ? "👀" : "🙈"}
+                            </span>
+>>>>>>> Stashed changes
                             <div className="invalid-feedback">Por favor ingresa tu nueva contraseña</div>
                         </div>
                         <div className="text-center">

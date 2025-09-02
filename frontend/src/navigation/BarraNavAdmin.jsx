@@ -29,8 +29,18 @@ export default function BarraNavAdmin() {
                         <i className='bi bi-person'>Administrador</i>
                     </button>
                     <ul className="dropdown-menu dropdown-menu-end">
+<<<<<<< Updated upstream
                         <li><a className="dropdown-item fst-italic" href="/ajustes">Ajustes</a></li>
                         <li><a className="dropdown-item fst-italic" href="/dashboard">Reportes</a></li>
+=======
+                        {/* Enlace al dashboard del administrador */}
+                        <li><a className="dropdown-item fst-italic" href="/admin/dashboard/">Dashboard</a></li>
+                        {/* Enlace a la sección de reportes */}
+                        <li><a className="dropdown-item fst-italic" href="/admin/reportes/">Reportes</a></li>
+                        {/* Enlace a la gestión de empleados */}
+                        <li><a className="dropdown-item fst-italic" href="/admin/empleados/">Empleados</a></li>
+                        {/* Botón para cerrar sesión */}
+>>>>>>> Stashed changes
                         <li><button className="dropdown-item fst-italic" onClick={cerrarSesion}>Cerrar Sesión</button></li>
                     </ul>
                 </div>
