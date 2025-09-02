@@ -50,8 +50,6 @@ export default function BarraNavAdmin() {
                         <li><a className="dropdown-item fst-italic" href="/admin/dashboard/">Dashboard</a></li>
                         {/* Enlace a la sección de reportes */}
                         <li><a className="dropdown-item fst-italic" href="/admin/reportes/">Reportes</a></li>
-                        {/* Enlace al formulario de registro */}
-                        <li><a className="dropdown-item fst-italic" href="/admin/registrar/">Registrar</a></li>
                         {/* Enlace a la gestión de empleados */}
                         <li><a className="dropdown-item fst-italic" href="/admin/empleados/">Empleados</a></li>
                         {/* Botón para cerrar sesión */}

@@ -122,7 +122,7 @@ export default function RecuperarContrasena() {
                                     fontSize: '1.5rem'
                                 }}
                             >
-                                {showNueva ? "🙉" : "🙈"}
+                                {showNueva ? "👀" : "🙈"}
                             </span>
                             <div className="invalid-feedback">Por favor ingresa tu nueva contraseña</div>
                         </div>
