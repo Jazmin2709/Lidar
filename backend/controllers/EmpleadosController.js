@@ -131,3 +131,60 @@ exports.eliminar = (req, res) => {
     return res.status(200).json({ message: 'Empleado eliminado' });
   });
 };
+
+// Listar todos los empleados activos
+exports.listar = (req, res) => {
+  const q = `
+    SELECT id_per, Correo, Nombres, Apellidos, Cedula, Celular, Tipo_Doc, id_rol
+    FROM persona
+    WHERE activo = 1
+  `;
+  db.query(q, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error al obtener empleados' });
+    }
+    return res.status(200).json(results);
+  });
+};
+
+
+// Borrado lógico de empleado
+exports.eliminar = (req, res) => {
+  const { id } = req.params;
+
+  const q = 'UPDATE persona SET activo = 0 WHERE id_per = ?';
+  db.query(q, [id], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error al desactivar empleado' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Empleado no encontrado' });
+    }
+    return res.status(200).json({ message: 'Empleado desactivado (borrado lógico)' });
+  });
+};
+
+
+// Cambiar estado activo/inactivo (borrado lógico)
+exports.toggleActivo = (req, res) => {
+  const { id } = req.params;
+  const { activo } = req.body;
+
+  if (typeof activo === 'undefined') {
+    return res.status(400).json({ message: 'El estado activo es requerido' });
+  }
+
+  const q = 'UPDATE persona SET activo = ? WHERE id_per = ?';
+  db.query(q, [activo, id], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error al actualizar estado' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Empleado no encontrado' });
+    }
+    return res.status(200).json({ message: 'Estado actualizado correctamente' });
+  });
+};

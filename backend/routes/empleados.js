@@ -17,4 +17,7 @@ router.put('/:id', Empleados.editar);
 // DELETE /api/empleados/:id
 router.delete('/:id', Empleados.eliminar);
 
+// PUT /api/empleados/:id/activo
+router.put('/:id/activo', Empleados.toggleActivo);
+
 module.exports = router;

@@ -20,15 +20,8 @@ export default function Empleados() {
         axios.get(`${API_URL}/empleados/roles`),
       ]);
 
-      // ✅ Validación extra: aseguramos que sean arrays válidos y no estén vacíos
       if (!Array.isArray(e.data) || !Array.isArray(r.data)) {
         throw new Error('Los datos recibidos no tienen el formato esperado');
-      }
-      if (e.data.length === 0) {
-        Swal.fire('Atención', 'No se encontraron empleados', 'info');
-      }
-      if (r.data.length === 0) {
-        Swal.fire('Atención', 'No se encontraron roles disponibles', 'info');
       }
 
       setEmpleados(e.data);
@@ -48,35 +41,37 @@ export default function Empleados() {
       Swal.fire('Error', 'Datos inválidos del empleado a editar', 'error');
       return;
     }
-    setEditData(emp); // ahora sí carga los datos en el formulario
+    setEditData(emp);
   };
 
-
-  const onDelete = async (id) => {
-    // ✅ Validación extra para el ID
-    if (!id || isNaN(id) || Number(id) <= 0) {
-      Swal.fire('Atención', 'ID de empleado inválido', 'warning');
+  const onToggleActivo = async (emp) => {
+    if (!emp || !emp.id_per) {
+      Swal.fire('Atención', 'Empleado inválido', 'warning');
       return;
     }
 
+    const accion = emp.activo === 1 ? 'desactivar' : 'activar';
+
     const confirm = await Swal.fire({
-      title: '¿Eliminar empleado?',
-      text: 'Esta acción no se puede deshacer',
-      icon: 'warning',
+      title: `¿Deseas ${accion} a este empleado?`,
+      text: 'Puedes revertir esta acción después',
+      icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
+      confirmButtonText: `Sí, ${accion}`,
       cancelButtonText: 'Cancelar',
-      reverseButtons: true, // Para prevenir clics accidentales
+      reverseButtons: true,
     });
 
     if (!confirm.isConfirmed) return;
 
     try {
-      await axios.delete(`${API_URL}/empleados/${id}`);
-      Swal.fire('Eliminado', 'Empleado eliminado correctamente', 'success');
+      await axios.put(`${API_URL}/empleados/${emp.id_per}/activo`, {
+        activo: emp.activo === 1 ? 0 : 1
+      });
+      Swal.fire('Éxito', `Empleado ${accion} correctamente`, 'success');
       cargarTodo();
     } catch (error) {
-      const msg = error?.response?.data?.message || 'Error al eliminar';
+      const msg = error?.response?.data?.message || `Error al ${accion}`;
       Swal.fire('Atención', msg, 'warning');
     }
   };
@@ -96,7 +91,7 @@ export default function Empleados() {
       {loading ? (
         <p>Cargando...</p>
       ) : (
-        <EmpleadosTable empleados={empleados} onEdit={onEdit} onDelete={onDelete} />
+        <EmpleadosTable empleados={empleados} onEdit={onEdit} onToggleActivo={onToggleActivo} />
       )}
     </div>
   );

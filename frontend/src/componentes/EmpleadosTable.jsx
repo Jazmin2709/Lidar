@@ -1,4 +1,4 @@
-export default function EmpleadosTable({ empleados, onEdit, onDelete }) {
+export default function EmpleadosTable({ empleados, onEdit, onToggleActivo }) {
   return (
     <div className='table-responsive'>
       <table className='table table-striped table-bordered align-middle'>
@@ -12,7 +12,8 @@ export default function EmpleadosTable({ empleados, onEdit, onDelete }) {
             <th>Celular</th>
             <th>Tipo Doc</th>
             <th>Rol</th>
-            <th style={{ minWidth: 160 }}>Acciones</th>
+            <th>Estado</th>
+            <th style={{ minWidth: 180 }}>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -27,15 +28,32 @@ export default function EmpleadosTable({ empleados, onEdit, onDelete }) {
               <td>{emp.Tipo_Doc}</td>
               <td>{emp.id_rol}</td>
               <td>
+                {emp.activo === 1 ? (
+                  <span className="badge bg-success">Activo</span>
+                ) : (
+                  <span className="badge bg-secondary">Inactivo</span>
+                )}
+              </td>
+              <td>
                 <div className='d-flex gap-2'>
-                  <button className='btn btn-sm btn-primary' onClick={() => onEdit(emp)}>Editar</button>
-                  <button className='btn btn-sm btn-danger' onClick={() => onDelete(emp.id_per)}>Eliminar</button>
+                  <button 
+                    className='btn btn-sm btn-primary' 
+                    onClick={() => onEdit(emp)}
+                  >
+                    Editar
+                  </button>
+                  <button 
+                    className={`btn btn-sm ${emp.activo === 1 ? 'btn-danger' : 'btn-success'}`} 
+                    onClick={() => onToggleActivo(emp)}
+                  >
+                    {emp.activo === 1 ? 'Desactivar' : 'Activar'}
+                  </button>
                 </div>
               </td>
             </tr>
           ))}
           {empleados.length === 0 && (
-            <tr><td colSpan={9} className='text-center py-4'>Sin empleados</td></tr>
+            <tr><td colSpan={10} className='text-center py-4'>Sin empleados</td></tr>
           )}
         </tbody>
       </table>
