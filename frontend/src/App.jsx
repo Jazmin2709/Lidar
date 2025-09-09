@@ -19,6 +19,7 @@ import QuienesSomos from './paginas/QuienesSomos';
 import EnviarCorreo from './paginas/EnviarCorreo';
 import RecuperarContraseña from './paginas/RecuperarContraseña';
 import IndexEmpleado from './paginas/IndexEmpleado';
+import ActualizarPerfil from './paginas/ActualizarPerfil';
 
 // Importamos componentes para controlar el acceso a rutas
 import RoutePrivate from "./componentes/RoutePrivate"; // Rutas privadas (requieren autenticación)
@@ -73,6 +74,7 @@ function App() {
           <Route element={<SupervisorLayout />}>
             <Route path="/supervisor/dashboard" element={<Dashboard />} />
             <Route path="/supervisor/Reportes" element={<Reportes />} />
+            <Route path="/supervisor/actualizar-perfil" element={<ActualizarPerfil />} />
           </Route>
         </Route>
 
@@ -84,6 +86,7 @@ function App() {
             <Route path="/BuddyPartner2/" element={<Buddy2Page />} />
             <Route path="/BuddyPartner3/" element={<Buddy3Page />} />
             <Route path="/Registrar" element={<Registrar />}/>
+            <Route path="/empleado/actualizar-perfil" element={<ActualizarPerfil />} />
           </Route>
         </Route>
       </Routes>

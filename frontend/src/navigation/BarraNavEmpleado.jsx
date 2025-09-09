@@ -48,6 +48,10 @@ export default function BarraNavEmpleado() {
                         <li><a className="dropdown-item fst-italic" href="/ajustes">Ajustes</a></li>
                         {/* Enlace a reportes */}
                         <li><a className="dropdown-item fst-italic" href="/dashboard">Reportes</a></li>
+                        {/* Enlace a actualizar perfil */}
+                        <li>
+                            <a className="dropdown-item fst-italic" href="/empleado/actualizar-perfil">Actualizar Perfil</a>
+                        </li>
                         {/* Botón para cerrar sesión que llama a la función cerrarSesion */}
                         <li><button className="dropdown-item fst-italic" onClick={cerrarSesion}>Cerrar Sesión</button></li>
                     </ul>

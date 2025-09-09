@@ -73,6 +73,11 @@ export default function BarraNavSupervisor() {
                             </Link>
                         </li>
 
+                        {/* Enlace a la sección de actualizar perfil */}
+                        <li>
+                            <a className="dropdown-item fst-italic" href="/supervisor/actualizar-perfil">Actualizar Perfil</a>
+                        </li>
+
                         {/* Botón para cerrar sesión */}
                         <li>
                             <button className="dropdown-item fst-italic" onClick={cerrarSesion}>
