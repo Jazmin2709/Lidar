@@ -36,6 +36,9 @@ import './css/styles.css';
 // Componente de carga para rutas no encontradas
 import Loader from './componentes/Loader';
 
+// Importamos el chatbot (con ruta relativa correcta ✅)
+import ChatBotComponent from './../componentes/ChatBot';
+
 // Componente principal de la aplicación
 function App() {
   return (
@@ -51,8 +54,7 @@ function App() {
             <Route path="/Lidar" element={<Lidar />} />
             <Route path="/QuienesSomos" element={<QuienesSomos />} />
             <Route path="/EnviarCorreo" element={<EnviarCorreo />} />
-            <Route path="/Registrar" element={<Registrar/>}/>
-            
+            <Route path="/Registrar" element={<Registrar />} />
             <Route path='/RecuperarContraseña' element={<RecuperarContraseña />} />
           </Route>
         </Route>
@@ -83,10 +85,13 @@ function App() {
             <Route path="/BuddyPartner1/" element={<Buddy1Page />} />
             <Route path="/BuddyPartner2/" element={<Buddy2Page />} />
             <Route path="/BuddyPartner3/" element={<Buddy3Page />} />
-            <Route path="/Registrar" element={<Registrar />}/>
+            <Route path="/Registrar" element={<Registrar />} />
           </Route>
         </Route>
       </Routes>
+
+      {/* Chatbot siempre visible en la app */}
+      <ChatBotComponent />
     </BrowserRouter>
   );
 }
