@@ -115,29 +115,12 @@ exports.editar = async (req, res) => {
   }
 };
 
-// Eliminar empleado
-exports.eliminar = (req, res) => {
-  const { id } = req.params;
-
-  db.query('DELETE FROM persona WHERE id_per = ?', [id], (err) => {
-    if (err) {
-      console.error(err);
-      // Si está referenciado en buddy, MySQL lanzará error por la FK
-      if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.errno === 1451) {
-        return res.status(400).json({ message: 'No se puede eliminar: el empleado tiene reportes asociados (buddy)' });
-      }
-      return res.status(500).json({ message: 'Error al eliminar empleado' });
-    }
-    return res.status(200).json({ message: 'Empleado eliminado' });
-  });
-};
 
 // Listar todos los empleados activos
 exports.listar = (req, res) => {
   const q = `
-    SELECT id_per, Correo, Nombres, Apellidos, Cedula, Celular, Tipo_Doc, id_rol
+    SELECT id_per, Correo, Nombres, Apellidos, Cedula, Celular, Tipo_Doc, id_rol, activo
     FROM persona
-    WHERE activo = 1
   `;
   db.query(q, (err, results) => {
     if (err) {
@@ -179,12 +162,12 @@ exports.toggleActivo = (req, res) => {
   const q = 'UPDATE persona SET activo = ? WHERE id_per = ?';
   db.query(q, [activo, id], (err, result) => {
     if (err) {
-      console.error(err);
+      console.error('Error en toggleActivo:', err);
       return res.status(500).json({ message: 'Error al actualizar estado' });
     }
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Empleado no encontrado' });
     }
-    return res.status(200).json({ message: 'Estado actualizado correctamente' });
+    return res.status(200).json({ message: `Empleado ${activo === 1 ? 'activado' : 'desactivado'}` });
   });
 };
