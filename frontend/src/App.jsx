@@ -37,7 +37,7 @@ import './css/styles.css';
 import Loader from './componentes/Loader';
 
 // Importamos el chatbot (con ruta relativa correcta ✅)
-import ChatBotComponent from './../componentes/ChatBot';
+import ChatBotComponent from '././componentes/ChatBot';
 
 // Componente principal de la aplicación
 function App() {

@@ -36,7 +36,7 @@ const ChatBotComponent = () => {
                     borderRadius: '50%',
                     width: '60px',
                     height: '60px',
-                    backgroundColor: '#4CAF50',
+                    backgroundColor: '#3483cd',
                     color: 'white',
                     fontSize: '24px',
                     border: 'none',
@@ -44,7 +44,7 @@ const ChatBotComponent = () => {
                     boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
                 }}
             >
-                💬
+                ⁈
             </button>
 
             {/* Ventana del chat */}
@@ -68,7 +68,7 @@ const ChatBotComponent = () => {
                     {/* Encabezado */}
                     <div
                         style={{
-                            backgroundColor: '#4CAF50',
+                            backgroundColor: '#3483cd',
                             color: 'white',
                             padding: '10px',
                             textAlign: 'center',
@@ -99,7 +99,7 @@ const ChatBotComponent = () => {
                                         display: 'inline-block',
                                         padding: '8px 12px',
                                         borderRadius: '15px',
-                                        backgroundColor: msg.from === 'user' ? '#DCF8C6' : '#F1F0F0',
+                                        backgroundColor: msg.from === 'user' ? '#b2eaf3ff' : '#def7c7ff',
                                         maxWidth: '80%'
                                     }}
                                 >
@@ -126,7 +126,7 @@ const ChatBotComponent = () => {
                         <button
                             onClick={handleSend}
                             style={{
-                                backgroundColor: '#4CAF50',
+                                backgroundColor: '#3483cd',
                                 color: 'white',
                                 border: 'none',
                                 padding: '10px 15px',
