@@ -4,6 +4,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const buddyRoutes = require('./routes/BuddyPartners');
 const empleadosRoutes = require('./routes/empleados');
+const imagenesRoutes = require('./routes/imagenes');
 
 const port = process.env.PORT || 3000;
 
@@ -24,6 +25,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/buddy', buddyRoutes);
 app.use('/api/empleados', empleadosRoutes);
+app.use('/api/imagenes', imagenesRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

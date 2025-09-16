@@ -1,41 +1,24 @@
-const cloudinary = require('cloudinary').v2;
-const fs = require('fs');
+const imagenesServices = require('../services/ImagenesServices');
 
-// Configurar Cloudinary
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'df6nzkgi2',
-    api_key: process.env.CLOUDINARY_API_KEY || '849495386851471',
-    api_secret: process.env.CLOUDINARY_API_SECRET || 'Hb54iF3CWK6vOHNt-4xTKbBZjZY',
-});
-
-// Función para subir una imagen
-exports.subirImagen = async (filePath, upload_preset, public_id) => {
+exports.subirImagen = async (req, res) => {
     try {
-        const result = await cloudinary.uploader.upload(filePath, {
-            public_id: public_id,
-            upload_preset: upload_preset,
-            transformation: [
-                { width: 800, height: 600, crop: 'limit' },
-                { quality: 'auto' },
-                { fetch_format: 'webp' }
-            ]
-        });
+        const file = req.file;
+        const upload_preset = req.body.upload_preset;
+        const public_id = req.body.public_id;
+        const imageUrl = await imagenesServices.subirImagen(file.path, upload_preset, public_id);
 
-        // Eliminar archivo local después de la subida
-        fs.unlinkSync(filePath);
-
-        return result.secure_url;
+        res.status(200).json({ url: imageUrl });
     } catch (error) {
-        console.error('Error al subir imagen a Cloudinary:', error);
-        throw new Error('Error al subir imagen');
-    }
-};
-
-exports.eliminarImagen = async (public_id) => {
-    try {
-        await cloudinary.uploader.destroy(public_id);
-    } catch (error) {
-        console.error('Error al eliminar imagen de Cloudinary:', error);
-        throw new Error('Error al eliminar imagen');
+        res.status(500).json({ error: error.message });
     }
 }
+
+exports.eliminarImagen = async (req, res) => {
+    try {
+        const public_id = req.params.public_id;
+        await imagenesServices.eliminarImagen(public_id);
+        res.status(200).json({ message: 'Imagen eliminada correctamente' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
