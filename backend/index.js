@@ -9,7 +9,7 @@ const empleadosRoutes = require('./routes/empleados');
 
 const imagenesRoutes = require('./routes/imagenes');
 const chatbotRoutes = require('./routes/chatbotRoutes');
-app.use('/api/chatbot', chatbotRoutes);
+
 
 
 const PORT = process.env.PORT || 3000;
@@ -30,6 +30,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/buddy', buddyRoutes);
 app.use('/api/empleados', empleadosRoutes);
 app.use('/api/imagenes', imagenesRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 
 // Ruta de prueba

@@ -35,14 +35,14 @@ export default function ChatBotComponent() {
         <>
             {/* Botón flotante */}
             <button className="chatbot-toggle" onClick={() => setIsOpen(!isOpen)}>
-                💬
+                ⁉︎
             </button>
 
             {/* Ventana del chat */}
             {isOpen && (
                 <div className="chatbot-container">
                     <div className="chatbot-header">
-                        Asistente Virtual 🤖
+                        Help Oca 🤖
                         <button onClick={() => setIsOpen(false)}>✖</button>
                     </div>
 
