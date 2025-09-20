@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import "../css/ChatBot.css";
 
@@ -7,7 +7,17 @@ export default function ChatBotComponent() {
         { from: "bot", text: "¡Hola! Soy tu asistente virtual 🤖. ¿En qué puedo ayudarte?" }
     ]);
     const [input, setInput] = useState("");
-    const [isOpen, setIsOpen] = useState(false); // controla si el chat está abierto o cerrado
+    const [isOpen, setIsOpen] = useState(false);
+
+    const messagesEndRef = useRef(null); // referencia al final del chat
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom(); // cada vez que cambien los mensajes, baja al final
+    }, [messages]);
 
     const sendMessage = async () => {
         if (!input.trim()) return;
@@ -16,11 +26,14 @@ export default function ChatBotComponent() {
         setMessages(newMessages);
 
         try {
-            const res = await axios.post("http://localhost:5000/api/chatbot/chat", {
-                message: input,
+            const res = await axios.post("http://localhost:3000/api/chatbot/chat", {
+                mensaje: input, // ✅ backend espera 'mensaje'
             });
 
-            setMessages([...newMessages, { from: "bot", text: res.data.reply }]);
+            setMessages([
+                ...newMessages,
+                { from: "bot", text: res.data.respuesta } // ✅ backend devuelve 'respuesta'
+            ]);
         } catch (error) {
             setMessages([
                 ...newMessages,
@@ -52,6 +65,8 @@ export default function ChatBotComponent() {
                                 {msg.text}
                             </div>
                         ))}
+                        {/* marcador invisible para hacer scroll */}
+                        <div ref={messagesEndRef} />
                     </div>
 
                     <div className="chatbot-input">
