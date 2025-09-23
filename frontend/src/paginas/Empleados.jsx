@@ -16,7 +16,7 @@ export default function Empleados() {
     try {
       setLoading(true);
       const [e, r] = await Promise.all([
-        axios.get(`${API_URL}/empleados`),
+        axios.get(`${API_URL}/empleados/estado`).catch(() => axios.get(`${API_URL}/empleados`)),
         axios.get(`${API_URL}/empleados/roles`),
       ]);
 
@@ -80,7 +80,34 @@ export default function Empleados() {
       Swal.fire('Atención', msg, 'warning');
     }
   };
+    const onToggleActivo = async (emp) => {
+    const nuevoEstado = emp.activo === 1 ? 0 : 1;
+    const accion = nuevoEstado === 1 ? 'activar' : 'desactivar';
 
+    const confirm = await Swal.fire({
+      title: `¿${accion.charAt(0).toUpperCase() + accion.slice(1)} empleado?`,
+      text: `Estás a punto de ${accion} a ${emp.Nombres} ${emp.Apellidos}`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: `Sí, ${accion}`,
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      await axios.put(`${API_URL}/empleados/${emp.id_per}/activo`, { 
+        activo: nuevoEstado 
+      });
+      
+      Swal.fire('Éxito', `Empleado ${accion}do correctamente`, 'success');
+      cargarTodo();
+    } catch (error) {
+      const msg = error?.response?.data?.message || `Error al ${accion} empleado`;
+      Swal.fire('Error', msg, 'error');
+    }
+  }; 
   return (
     <div className='container py-4'>
       <h1 className='mb-4'>Gestión de Empleados</h1>
@@ -96,7 +123,12 @@ export default function Empleados() {
       {loading ? (
         <p>Cargando...</p>
       ) : (
-        <EmpleadosTable empleados={empleados} onEdit={onEdit} onDelete={onDelete} />
+        <EmpleadosTable 
+          empleados={empleados} 
+          onEdit={onEdit} 
+          onDelete={onDelete} 
+          onToggleActivo={onToggleActivo}
+        />
       )}
     </div>
   );

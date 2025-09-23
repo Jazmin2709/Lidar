@@ -131,3 +131,45 @@ exports.eliminar = (req, res) => {
     return res.status(200).json({ message: 'Empleado eliminado' });
   });
 };
+
+
+// === NUEVAS FUNCIONES PARA BORRADO LÓGICO (AGREGAR AL FINAL) ===
+
+// Activar/desactivar empleado (NUEVA función)
+exports.toggleActivo = (req, res) => {
+  const { id } = req.params;
+  const { activo } = req.body;
+  
+  if (typeof activo === 'undefined') {
+    return res.status(400).json({ message: 'El campo activo es requerido (0 o 1)' });
+  }
+
+  console.log(`[DEBUG] Actualizando usuario ${id} a activo=${activo}`);
+
+  const q = 'UPDATE persona SET activo = ? WHERE id_per = ?';
+  db.query(q, [activo, id], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error al actualizar estado' });
+    }
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Empleado no encontrado' });
+    }
+
+    const accion = activo === 1 ? 'activado' : 'desactivado';
+    return res.status(200).json({ message: `Empleado ${accion} correctamente` });
+  });
+};
+
+// Listar empleados incluyendo campo activo (NUEVA función alternativa)
+exports.listarConEstado = (req, res) => {
+  const q = 'SELECT id_per, Correo, Nombres, Apellidos, Cedula, Celular, Tipo_Doc, id_rol, activo FROM persona';
+  db.query(q, (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error al obtener empleados' });
+    }
+    return res.status(200).json(results);
+  });
+};
