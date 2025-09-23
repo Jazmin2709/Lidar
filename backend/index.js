@@ -31,7 +31,7 @@ app.use('/api/buddy', buddyRoutes);
 app.use('/api/empleados', empleadosRoutes);
 app.use('/api/imagenes', imagenesRoutes);
 app.use('/api/chatbot', chatbotRoutes);
-app.use('/api/chatbot', chatbotRoutes);
+
 
 // Ruta de prueba
 app.get('/', (req, res) => {

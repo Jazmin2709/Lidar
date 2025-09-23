@@ -3,13 +3,14 @@ const router = express.Router();
 
 // Lista de respuestas con palabras clave y el id de la sección para hacer scroll
 const respuestas = [
+    { keys: ['hola' ,'holi'], texto: 'Hola, como estás? En que puedo ayudarte?', scrollTo: 'Hola' },
     { keys: ['inicio', 'home'], texto: 'Puedes volver al inicio usando el menú o desplazándote hacia arriba.', scrollTo: 'inicio' },
-    { keys: ['buddypages', 'buddy pages', 'buddypage'], texto: 'En Buddy Pages verás los apartados principales de la aplicación.', scrollTo: 'buddypages' },
-    { keys: ['empleados', 'empleado'], texto: 'En Empleados puedes gestionar la información del personal.', scrollTo: 'empleados' },
-    { keys: ['login', 'iniciar sesión'], texto: 'Para iniciar sesión usa el botón Login en la esquina superior derecha.', scrollTo: 'login' },
-    { keys: ['registro', 'registrarse', 'signup'], texto: 'En Registro puedes crear una nueva cuenta.', scrollTo: 'registro' },
+    { keys: ['buddy', 'buddy pages'], texto: 'En Buddy encontrarás los formularios que los empleados deben llenar diariamente, los encontraras al iniciar sesión', scrollTo: 'buddypages' },
+    { keys: ['empleados', 'empleado'], texto: 'Empleados lo encuentras al iniciar sesión, ahí podrás llenar los formularios y gestionar tu cuenta.', scrollTo: 'empleados' },
+    { keys: ['login', 'iniciar sesión'], texto: 'Para iniciar sesión usa el botón "Iniciar Sesión" en la esquina superior derecha.', scrollTo: 'login' },
+    { keys: ['registro', 'registrarse', 'signup'], texto: 'Registro lo encuentras en la parte superior derecha al lado izquierdo del botón "Iniciar Sesión".', scrollTo: 'registro' },
     { keys: ['lidar'], texto: 'La sección LIDAR explica cómo usamos esta tecnología para topografía y cartografía.', scrollTo: 'lidar' },
-    { keys: ['quienes somos', 'quiénes somos', 'sobre nosotros'], texto: 'En "Quiénes somos" conocerás nuestro equipo y misión.', scrollTo: 'quienes-somos' },
+    { keys: ['quienes somos', 'quiénes somos', 'sobre nosotros'], texto: 'En "Quiénes somos" conocerás nuestro equipo, que servicios ofrecemos y los sectores de actividad donde nos desarrollamos.', scrollTo: 'quienes-somos' },
     { keys: ['beneficios'], texto: 'En Beneficios verás las ventajas de usar nuestra plataforma.', scrollTo: 'beneficios' },
 ];
 
