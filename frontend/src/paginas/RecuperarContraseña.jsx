@@ -153,7 +153,7 @@ export default function RecuperarContrasena() {
 
                                 }}
                             >
-                                {showConfirmar ? "🙉" : "🙈"}
+                                {showConfirmar ? "👀" : "🙈"}
                             </span>
                             <div className="invalid-feedback">Por favor confirma tu nueva contraseña</div>
                         </div>
