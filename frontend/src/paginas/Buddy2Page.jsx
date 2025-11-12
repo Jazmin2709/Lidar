@@ -10,14 +10,10 @@ const API_URL = 'http://localhost:3000/api';
 // Componente principal de la página Buddy 2
 export default function Buddy2Page() {
 
-  // Obtiene el token de autenticación del almacenamiento local
   const token = localStorage.getItem('token');
-
-  // Decodifica el token para obtener información del usuario (id_empleado)
   const decoded_token = token ? JSON.parse(atob(token.split('.')[1])) : null;
   const id_empleado = decoded_token ? decoded_token.id : null;
 
-  // Estado para almacenar los datos del formulario
   const [Formulario, setFormulario] = useState({
     num_cuadrilla: '',
     Hora_buddy: '',
@@ -25,22 +21,38 @@ export default function Buddy2Page() {
     Est_vehi: '',
     Carnet: '',
     TarjetaVida: '',
-    Fecha: moment().format('YYYY-MM-DD'), // ✅ valor por defecto hoy
+    Fecha: moment().format('YYYY-MM-DD'),
     Est_etapa: '',
     Est_her: '',
     MotivoEmp: '',
     MotivoVeh: '',
+    MotivoHer: '',
     Tablero: '',
     Calentamiento: '',
-    Tipo: 2, // Tipo 2 hace referencia al formulario Buddy 2
+    Tipo: 2,
     id_empleado: id_empleado
   });
 
-  // Función que se ejecuta al enviar el formulario
-  const handleSubmit = async (event) => {
-    event.preventDefault(); // Previene el comportamiento por defecto del formulario
+  // Estados para los archivos seleccionados
+  const [selectedFileTablero, setSelectedFileTablero] = useState(null);
+  const [selectedFileCalentamiento, setSelectedFileCalentamiento] = useState(null);
 
-    // ✅ Validar que la fecha no sea futura
+  // Subir imagen al servidor/Cloudinary
+  const uploadImage = async (file, preset, publicId) => {
+    const formData = new FormData();
+    formData.append("foto", file);
+    formData.append("upload_preset", preset);
+    formData.append("public_id", publicId);
+
+    const response = await axios.post(`${API_URL}/imagenes/subir`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data.url;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     if (moment(Formulario.Fecha).isAfter(moment(), 'day')) {
       Swal.fire({
         icon: 'error',
@@ -51,21 +63,31 @@ export default function Buddy2Page() {
     }
 
     try {
-      // Envía los datos a la API
-      const response = await axios.post(`${API_URL}/buddy/BuddyPartner`, Formulario);
+      // Validar imágenes
+      if (!selectedFileTablero || !selectedFileCalentamiento) {
+        Swal.fire("Faltan imágenes", "Debes subir tablero y calentamiento.", "warning");
+        return;
+      }
 
-      // Si la respuesta es exitosa, muestra mensaje de éxito
+      // Subir ambas imágenes
+      const publicIdBase = `${id_empleado || "anon"}_${Date.now()}`;
+      const urlTablero = await uploadImage(selectedFileTablero, "tableros", `tablero_${publicIdBase}`);
+      const urlCal = await uploadImage(selectedFileCalentamiento, "calentamientos", `calentamiento_${publicIdBase}`);
+
+      const payload = { ...Formulario, Tablero: urlTablero, Calentamiento: urlCal };
+
+      const response = await axios.post(`${API_URL}/buddy/BuddyPartner`, payload);
+
       if (response.status === 200) {
         Swal.fire({
           icon: 'success',
           title: response.data.message,
           text: response.data.results,
         }).then(() => {
-          window.location.reload(); // Recarga la página luego de confirmar
+          window.location.reload();
         });
       }
     } catch (error) {
-      // Maneja errores y muestra un mensaje al usuario
       console.error('Error al registrar:', error);
       Swal.fire({
         icon: 'error',
@@ -75,14 +97,11 @@ export default function Buddy2Page() {
     }
   };
 
-  // Función para manejar cambios en los campos del formulario
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
-    // ✅ Validaciones según el campo
-    if (name === "num_cuadrilla" && !/^\d*$/.test(value)) return; // Solo números
-    if ((name === "Tablero" || name === "Calentamiento") && !/^[a-zA-Z\s]*$/.test(value)) return; // Solo texto
-    if ((name === "MotivoEmp" || name === "MotivoVeh" || name === "MotivoHer") && !/^[a-zA-Z0-9\s]*$/.test(value)) return; // Texto y números
+    if (name === "num_cuadrilla" && !/^\d*$/.test(value)) return;
+    if ((name === "MotivoEmp" || name === "MotivoVeh" || name === "MotivoHer") && !/^[a-zA-Z0-9\s]*$/.test(value)) return;
 
     setFormulario((prevState) => ({
       ...prevState,
@@ -90,13 +109,12 @@ export default function Buddy2Page() {
     }));
   };
 
-  // Renderizado del formulario
   return (
     <div className='container mt-5 p-5 shadow rounded-5' style={{ maxWidth: '800px', backgroundColor: '#ffffff' }}>
       <h2 className='text-center mb-4'>Formulario Buddy 2</h2>
       <form className='row g-3' onSubmit={handleSubmit}>
 
-        {/* Campo: Número de Cuadrilla */}
+        {/* Número de Cuadrilla */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="num_cuadrilla" className="form-label">Número de Cuadrilla</label>
           <input
@@ -110,7 +128,7 @@ export default function Buddy2Page() {
           />
         </div>
 
-        {/* Campo: Hora Buddy */}
+        {/* Hora Buddy */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Hora_buddy" className="form-label">Hora Buddy</label>
           <input
@@ -124,7 +142,7 @@ export default function Buddy2Page() {
           />
         </div>
 
-        {/* Campo: Estado Empleado */}
+        {/* Estado Empleado */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Est_empl" className="form-label">Estado Empleado</label>
           <select className="form-select" id="Est_empl" name="Est_empl" value={Formulario.Est_empl} onChange={handleInputChange} required>
@@ -135,7 +153,7 @@ export default function Buddy2Page() {
           </select>
         </div>
 
-        {/* Campo: Estado Vehículo */}
+        {/* Estado Vehículo */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Est_vehi" className="form-label">Estado Vehículo</label>
           <select className="form-select" id="Est_vehi" name="Est_vehi" value={Formulario.Est_vehi} onChange={handleInputChange} required>
@@ -146,7 +164,6 @@ export default function Buddy2Page() {
           </select>
         </div>
 
-        {/* Campo Condicional: Motivo empleado si el estado es Malo */}
         {Formulario.Est_empl === 'Malo' && (
           <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
             <label className="form-label">Motivo empleado</label>
@@ -154,7 +171,6 @@ export default function Buddy2Page() {
           </div>
         )}
 
-        {/* Campo Condicional: Motivo vehículo si el estado es Malo */}
         {Formulario.Est_vehi === 'Malo' && (
           <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
             <label className="form-label">Motivo vehículo</label>
@@ -162,7 +178,7 @@ export default function Buddy2Page() {
           </div>
         )}
 
-        {/* Otros campos del formulario */}
+        {/* Carnet */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Carnet" className="form-label">Carnet</label>
           <select className="form-select" id="Carnet" name="Carnet" value={Formulario.Carnet} onChange={handleInputChange} required>
@@ -172,6 +188,7 @@ export default function Buddy2Page() {
           </select>
         </div>
 
+        {/* Tarjeta Vida */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="TarjetaVida" className="form-label">Tarjeta Vida</label>
           <select className="form-select" id="TarjetaVida" name="TarjetaVida" value={Formulario.TarjetaVida} onChange={handleInputChange} required>
@@ -181,33 +198,35 @@ export default function Buddy2Page() {
           </select>
         </div>
 
+        {/* Imagen del tablero */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
-          <label htmlFor="Tablero" className="form-label">Tablero</label>
+          <label htmlFor="Tablero" className="form-label">Imagen Tablero</label>
           <input
-            type="text"
+            type="file"
             className="form-control"
             id="Tablero"
             name="Tablero"
-            value={Formulario.Tablero}
-            onChange={handleInputChange}
+            accept="image/*"
+            onChange={(e) => setSelectedFileTablero(e.target.files[0])}
             required
           />
         </div>
 
+        {/* Imagen del calentamiento */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
-          <label htmlFor="Calentamiento" className="form-label">Calentamiento</label>
+          <label htmlFor="Calentamiento" className="form-label">Imagen Calentamiento</label>
           <input
-            type="text"
+            type="file"
             className="form-control"
             id="Calentamiento"
             name="Calentamiento"
-            value={Formulario.Calentamiento}
-            onChange={handleInputChange}
+            accept="image/*"
+            onChange={(e) => setSelectedFileCalentamiento(e.target.files[0])}
             required
           />
         </div>
 
-        {/* ✅ Campo Fecha con mínimo hace 30 días y máximo hoy */}
+        {/* Fecha */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Fecha" className="form-label">Fecha</label>
           <input
@@ -223,7 +242,7 @@ export default function Buddy2Page() {
           />
         </div>
 
-        {/* Estado de la etapa */}
+        {/* Estado Etapa */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Est_etapa" className="form-label">Estado Etapa</label>
           <select className="form-select" id="Est_etapa" name="Est_etapa" value={Formulario.Est_etapa} onChange={handleInputChange} required>
@@ -234,7 +253,7 @@ export default function Buddy2Page() {
           </select>
         </div>
 
-        {/* Estado de herramienta */}
+        {/* Estado Herramienta */}
         <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
           <label htmlFor="Est_her" className="form-label">Estado Herramienta</label>
           <select className="form-select" id="Est_her" name="Est_her" value={Formulario.Est_her} onChange={handleInputChange} required>
@@ -245,7 +264,6 @@ export default function Buddy2Page() {
           </select>
         </div>
 
-        {/* Campo Condicional: Motivo herramienta si está en mal estado */}
         {Formulario.Est_her === 'Malo' && (
           <div className="col-md-6 mx-auto" style={{ maxWidth: '350px' }}>
             <label className="form-label">Motivo herramienta</label>
@@ -253,24 +271,16 @@ export default function Buddy2Page() {
           </div>
         )}
 
-        {/* Botones: Regresar y Confirmar */}
+        {/* Botones */}
         <div className="col-12 text-center mt-4">
-          <button
-            type="button"
-            onClick={() => window.location.href = '/IndexEmpleado'}
-            className="btn btn-primary me-2"
-          >
+          <button type="button" onClick={() => window.location.href = '/IndexEmpleado'} className="btn btn-primary me-2">
             Regresar
           </button>
-          <button
-            type="submit"
-            className="btn btn-primary ms-2"
-          >
+          <button type="submit" className="btn btn-primary ms-2">
             Confirmar
           </button>
         </div>
 
-        {/* Estilos personalizados para el botón */}
         <style jsx>{`
           button.btn.btn-primary:hover {
             background-color: rgb(73, 1, 141);

@@ -80,6 +80,11 @@ export default function Reportes() {
         }
     };
 
+    // 🚀 Función para exportar PDF desde el backend
+    const exportPDF = () => {
+        window.open("http://localhost:3000/api/buddy/BuddyPartner/export-pdf", "_blank");
+    };
+
     // Definición de las columnas de la tabla
     const columns = [
         {
@@ -215,6 +220,11 @@ export default function Reportes() {
         <div style={{ padding: '0 40px' }}>
             {/* Título */}
             <h1 style={{ textAlign: 'center', marginBottom: '24px' }}>Reportes</h1>
+
+            {/* Botón para exportar a PDF */}
+            <Button type="primary" onClick={exportPDF} style={{ marginBottom: 16 }}>
+                Exportar PDF
+            </Button>
 
             {/* Tabla de datos */}
             <Table
