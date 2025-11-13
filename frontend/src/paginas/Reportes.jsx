@@ -24,6 +24,9 @@ export default function Reportes() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     // Hook para manejar el formulario
     const [form] = Form.useForm();
+    //filtros 
+    const [activeFilters, setActiveFilters] = useState({});
+
 
     // useEffect que se ejecuta al cargar el componente
     useEffect(() => {
@@ -82,8 +85,21 @@ export default function Reportes() {
 
     // 🚀 Función para exportar PDF desde el backend
     const exportPDF = () => {
-        window.open("http://localhost:3000/api/buddy/BuddyPartner/export-pdf", "_blank");
-    };
+    const queryParams = new URLSearchParams();
+
+    if (activeFilters.Est_empl && activeFilters.Est_empl.length > 0)
+        queryParams.append("Est_empl", activeFilters.Est_empl[0]);
+    if (activeFilters.Est_vehi && activeFilters.Est_vehi.length > 0)
+        queryParams.append("Est_vehi", activeFilters.Est_vehi[0]);
+    if (activeFilters.Est_etapa && activeFilters.Est_etapa.length > 0)
+        queryParams.append("Est_etapa", activeFilters.Est_etapa[0]);
+    if (activeFilters.Fecha && activeFilters.Fecha.length > 0)
+        queryParams.append("Fecha", activeFilters.Fecha[0]);
+
+    const url = `http://localhost:3000/api/buddy/BuddyPartner/export-pdf?${queryParams.toString()}`;
+    window.open(url, "_blank");
+};
+
 
     // Definición de las columnas de la tabla
     const columns = [
@@ -233,6 +249,10 @@ export default function Reportes() {
                 dataSource={buddyPartners}
                 rowKey="id_buddy1"
                 pagination={{ pageSize: 10 }}
+                onChange={(pagination, filters, sorter) => {
+                    setActiveFilters(filters);
+    }}
+                
             />
 
             {/* Modal para editar reporte */}

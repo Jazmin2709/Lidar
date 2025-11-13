@@ -96,25 +96,52 @@ exports.DeleteBuddyPartner = (req, res) => {
 };
 
 // ========================
-// Exportar PDF con estilos mejorados
+// Exportar PDF filtrado
 // ========================
 exports.ExportPDF = (req, res) => {
-    db.query("SELECT * FROM buddy", (err, results) => {
+    const filters = req.query;
+    let sql = "SELECT * FROM buddy WHERE 1=1";
+    const params = [];
+
+    // Construcción dinámica del filtro
+    if (filters.Est_empl) {
+        sql += " AND Est_empl = ?";
+        params.push(filters.Est_empl);
+    }
+    if (filters.Est_vehi) {
+        sql += " AND Est_vehi = ?";
+        params.push(filters.Est_vehi);
+    }
+    if (filters.Est_etapa) {
+        sql += " AND Est_etapa = ?";
+        params.push(filters.Est_etapa);
+    }
+    if (filters.Fecha) {
+        sql += " AND DATE(Fecha) = ?";
+        params.push(filters.Fecha);
+    }
+
+    db.query(sql, params, (err, results) => {
         if (err) {
             console.error(err);
             return res.status(500).send("Error al generar PDF");
         }
 
+        const PDFDocument = require("pdfkit-table");
         const doc = new PDFDocument({ margin: 30, size: "A4", layout: "landscape" });
         res.setHeader("Content-Disposition", "attachment; filename=Reporte_BuddyPartners.pdf");
         res.setHeader("Content-Type", "application/pdf");
         doc.pipe(res);
 
-        // Encabezado
+        // ========================
+        // Encabezado principal
+        // ========================
         doc.fontSize(20).fillColor("#1f4e79").text("Reporte de Buddy Partners", { align: "center" });
         doc.moveDown(2);
 
-        // Definir tabla
+        // ========================
+        // Configurar tabla
+        // ========================
         const table = {
             headers: [
                 { label: "Id", align: "center" },
@@ -146,53 +173,40 @@ exports.ExportPDF = (req, res) => {
             ]),
         };
 
-        // Dibujar barra de degradado en el encabezado
+        // ========================
+        // Dibujar fondo degradado del encabezado de la tabla
+        // ========================
         const tableTop = 100;
-        const tableWidth = 780;
+        const tableLeft = 30;
+        const tableWidth = 785;   // Ajustado al ancho total aproximado de columnas
         const headerHeight = 25;
 
-        const gradient = doc.linearGradient(30, tableTop, tableWidth, tableTop);
-        gradient.stop(0, "#1e3c72");   // azul oscuro
-        gradient.stop(1, "#2a5298");   // azul claro
+        // Crear degradado azul
+        const gradient = doc.linearGradient(tableLeft, tableTop, tableLeft + tableWidth, tableTop);
+        gradient.stop(0, "#004aad");  // Azul oscuro
+        gradient.stop(1, "#1e88e5");  // Azul claro
 
-        doc.rect(30, tableTop, tableWidth, headerHeight).fill(gradient);
+        // Dibujar rectángulo del fondo del encabezado
+        doc.rect(tableLeft, tableTop, tableWidth, headerHeight).fill(gradient);
 
-        // Renderizar tabla con colores
+        // ========================
+        // Dibujar tabla
+        // ========================
         doc.table(table, {
-            prepareHeader: () => {
-                doc.fontSize(10).fillColor("white").font("Helvetica-Bold");
-            },
-            prepareHeaderOptions: () => {
-                return { fill: null, textColor: "white" }; // usamos el degradado que ya pintamos
-            },
+            prepareHeader: () => doc.fontSize(10).fillColor("white").font("Helvetica-Bold"),
+            prepareHeaderOptions: () => ({ fill: null }), // Evita sobreescribir el degradado
             prepareRow: (row, iCol, iRow) => {
                 doc.fontSize(9).font("Helvetica");
-
-                // Estados coloreados
-                if (iCol === 3 || iCol === 4 || iCol === 9) {
-                    if (row[iCol] === "Excelente") doc.fillColor("#2e7d32").font("Helvetica-Bold");
-                    if (row[iCol] === "Malo") doc.fillColor("#c62828").font("Helvetica-Bold");
-                } else if (iCol === 8) {
-                    if (row[iCol] === "Finalizó") doc.fillColor("#ef6c00").font("Helvetica-Bold");
-                    if (row[iCol] === "Inicio") doc.fillColor("#1565c0").font("Helvetica-Bold");
-                } else {
-                    doc.fillColor("black");
-                }
+                if (iRow % 2 === 0) doc.fillColor("black");
             },
-            prepareRowOptions: (row, iRow) => {
-                return {
-                    fill: iRow % 2 === 0 ? "#f9f9f9" : "white",
-                    textColor: "black"
-                };
-            },
-            // Ajustamos tamaños (más espacio en "Tipo")
-            columnsSize: [35, 70, 70, 110, 110, 55, 80, 80, 90, 110, 80, 70],
-            x: 30,
-            y: 100,
-            padding: 6
+            columnsSize: [35, 70, 70, 70, 70, 70, 70, 70, 70, 70, 59, 59],
+            x: tableLeft,
+            y: tableTop,
         });
 
+        // ========================
         // Pie de página
+        // ========================
         doc.moveDown(2);
         doc.fontSize(8).fillColor("gray")
             .text(`Generado el: ${new Date().toLocaleDateString()}`, { align: "right" });
@@ -200,4 +214,6 @@ exports.ExportPDF = (req, res) => {
         doc.end();
     });
 };
+
+
 
