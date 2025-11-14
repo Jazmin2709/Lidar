@@ -24,9 +24,8 @@ export default function Reportes() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     // Hook para manejar el formulario
     const [form] = Form.useForm();
-    //filtros 
+    // Estado de filtros activos
     const [activeFilters, setActiveFilters] = useState({});
-
 
     // useEffect que se ejecuta al cargar el componente
     useEffect(() => {
@@ -85,21 +84,20 @@ export default function Reportes() {
 
     // 🚀 Función para exportar PDF desde el backend
     const exportPDF = () => {
-    const queryParams = new URLSearchParams();
+        const queryParams = new URLSearchParams();
 
-    if (activeFilters.Est_empl && activeFilters.Est_empl.length > 0)
-        queryParams.append("Est_empl", activeFilters.Est_empl[0]);
-    if (activeFilters.Est_vehi && activeFilters.Est_vehi.length > 0)
-        queryParams.append("Est_vehi", activeFilters.Est_vehi[0]);
-    if (activeFilters.Est_etapa && activeFilters.Est_etapa.length > 0)
-        queryParams.append("Est_etapa", activeFilters.Est_etapa[0]);
-    if (activeFilters.Fecha && activeFilters.Fecha.length > 0)
-        queryParams.append("Fecha", activeFilters.Fecha[0]);
+        if (activeFilters.Est_empl && activeFilters.Est_empl.length > 0)
+            queryParams.append("Est_empl", activeFilters.Est_empl[0]);
+        if (activeFilters.Est_vehi && activeFilters.Est_vehi.length > 0)
+            queryParams.append("Est_vehi", activeFilters.Est_vehi[0]);
+        if (activeFilters.Est_etapa && activeFilters.Est_etapa.length > 0)
+            queryParams.append("Est_etapa", activeFilters.Est_etapa[0]);
+        if (activeFilters.Fecha && activeFilters.Fecha.length > 0)
+            queryParams.append("Fecha", activeFilters.Fecha[0]);
 
-    const url = `http://localhost:3000/api/buddy/BuddyPartner/export-pdf?${queryParams.toString()}`;
-    window.open(url, "_blank");
-};
-
+        const url = `http://localhost:3000/api/buddy/BuddyPartner/export-pdf?${queryParams.toString()}`;
+        window.open(url, "_blank");
+    };
 
     // Definición de las columnas de la tabla
     const columns = [
@@ -190,9 +188,9 @@ export default function Reportes() {
             dataIndex: 'Est_etapa',
             key: 'Est_etapa',
             filters: [
-                { text: 'Iniciando', value: 'Iniciando' },
+                { text: 'Inicio', value: 'Inicio' },
                 { text: 'En proceso', value: 'En proceso' },
-                { text: 'Finalizado', value: 'Finalizado' },
+                { text: 'Finalizó', value: 'Finalizó' },
             ],
             onFilter: (value, record) => record.Est_etapa.includes(value),
         },
@@ -204,7 +202,7 @@ export default function Reportes() {
                 { text: 'Excelente', value: 'Excelente' },
                 { text: 'Malo', value: 'Malo' },
             ],
-            onFilter: (value, record) => record.Est_vehi.includes(value),
+            onFilter: (value, record) => record.Est_her.includes(value),
         },
         {
             title: 'Id Empleado',
@@ -231,7 +229,6 @@ export default function Reportes() {
     // Estado para forzar render del formulario cuando cambia un valor
     const [renderTrigger, setRenderTrigger] = useState(false);
 
-    // Retorno del componente
     return (
         <div style={{ padding: '0 40px' }}>
             {/* Título */}
@@ -251,8 +248,7 @@ export default function Reportes() {
                 pagination={{ pageSize: 10 }}
                 onChange={(pagination, filters, sorter) => {
                     setActiveFilters(filters);
-    }}
-                
+                }}
             />
 
             {/* Modal para editar reporte */}
