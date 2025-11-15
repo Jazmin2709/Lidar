@@ -1,0 +1,124 @@
+/* Contenedor del chatbot */
+.chatbot-container {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 320px;
+    height: 420px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+}
+
+/* Encabezado */
+.chatbot-header {
+    background: #3483CD;
+    color: #fff;
+    padding: 10px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-header button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* Cuerpo del chat */
+.chatbot-body {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilo de mensajes */
+.msg {
+    max-width: 75%;
+    padding: 8px 12px;
+    border-radius: 18px;
+    margin: 5px 0;
+    word-wrap: break-word;
+    font-size: 14px;
+}
+
+/* Mensaje del bot */
+.msg.bot {
+    align-self: flex-start;
+    background: #c5e5a0;
+    color: #000;
+    border-bottom-left-radius: 4px;
+}
+
+/* Mensaje del usuario */
+.msg.user {
+    align-self: flex-end;
+    background: #3483CD;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+/* Input y botón */
+.chatbot-input {
+    display: flex;
+    border-top: 1px solid #ddd;
+}
+
+.chatbot-input input {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+.chatbot-input button {
+    background: #3483CD;
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    cursor: pointer;
+    border-radius: 0 0 12px 0;
+    transition: background 0.3s;
+}
+
+.chatbot-input button:hover {
+    background: #3483CD;
+}
+
+/* Botón flotante */
+.chatbot-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #3483CD;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    cursor: pointer;
+    font-size: 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s;
+    z-index: 1001;
+}
+
+.chatbot-toggle:hover {
+    background: #2568af;
+}
