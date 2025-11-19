@@ -10,6 +10,9 @@ router.post('/BuddyPartner', BuddyPartnersController.BuddyPartner);
 router.put('/BuddyPartner/:id', BuddyPartnersController.EditBuddyPartner);
 router.delete('/BuddyPartner/:id', BuddyPartnersController.DeleteBuddyPartner);
 router.get('/BuddyPartner/export-pdf', BuddyPartnersController.ExportPDF);
+router.get("/BuddyPartner/export-excel", BuddyPartnersController.ExportExcel);
+
+
 
 
 

@@ -5,14 +5,33 @@ const PDFDocument = require("pdfkit-table");
 // Obtener todos los registros
 // ========================
 exports.GetBuddyPartner = (req, res) => {
-    db.query("SELECT * FROM buddy", (error, results) => {
+    db.query("SELECT *, DATE(Fecha) AS fecha_sola FROM buddy", (error, results) => {
         if (error) {
             console.error(error);
             return res.status(500).json({ message: "Error al obtener BuddyPartners1" });
         }
-        return res.status(200).json(results);
+
+        const hoy = new Date().toISOString().split("T")[0];
+
+        const data = results.map(r => {
+            const etapa = r.Est_etapa?.toLowerCase();
+            const fechaRegistro = r.fecha_sola;
+
+            const esPendiente =
+                (r.Tipo === 1 || r.Tipo === 2) &&
+                (etapa === "inicio" || etapa === "en proceso") &&
+                fechaRegistro < hoy; // si la fecha es menor → es otro día
+
+            return {
+                ...r,
+                pendiente: esPendiente
+            };
+        });
+
+        return res.status(200).json(data);
     });
 };
+
 
 // ========================
 // Crear nuevo registro
@@ -212,6 +231,93 @@ exports.ExportPDF = (req, res) => {
             .text(`Generado el: ${new Date().toLocaleDateString()}`, { align: "right" });
 
         doc.end();
+    });
+};
+
+// ========================
+// Exportar Excel filtrado
+// ========================
+exports.ExportExcel = (req, res) => {
+    const filters = req.query;
+    let sql = "SELECT * FROM buddy WHERE 1=1";
+    const params = [];
+
+    // Filtros dinámicos
+    if (filters.Est_empl) {
+        sql += " AND Est_empl = ?";
+        params.push(filters.Est_empl);
+    }
+    if (filters.Est_vehi) {
+        sql += " AND Est_vehi = ?";
+        params.push(filters.Est_vehi);
+    }
+    if (filters.Est_etapa) {
+        sql += " AND Est_etapa = ?";
+        params.push(filters.Est_etapa);
+    }
+    if (filters.Fecha) {
+        sql += " AND DATE(Fecha) = ?";
+        params.push(filters.Fecha);
+    }
+
+    db.query(sql, params, async (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send("Error al generar Excel");
+        }
+
+        const ExcelJS = require('exceljs');
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet("Reporte Buddy Partners");
+
+        // Encabezados
+        worksheet.columns = [
+            { header: "Id", key: "id_buddy1", width: 10 },
+            { header: "Cuadrilla", key: "num_cuadrilla", width: 15 },
+            { header: "Hora", key: "Hora_buddy", width: 15 },
+            { header: "Estado Empleado", key: "Est_empl", width: 20 },
+            { header: "Estado Vehículo", key: "Est_vehi", width: 20 },
+            { header: "Carnet", key: "Carnet", width: 10 },
+            { header: "Tarjeta Vida", key: "TarjetaVida", width: 15 },
+            { header: "Fecha", key: "Fecha", width: 15 },
+            { header: "Etapa", key: "Est_etapa", width: 15 },
+            { header: "Herramienta", key: "Est_her", width: 15 },
+            { header: "Id Empleado", key: "id_empleado", width: 15 },
+            { header: "Tipo", key: "Tipo", width: 10 },
+        ];
+
+        // Estilos del encabezado
+        worksheet.getRow(1).eachCell((cell) => {
+            cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+            cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FF1F4E79" }
+            };
+        });
+
+        // Agregar los datos
+        results.forEach((r) => {
+            worksheet.addRow({
+                ...r,
+                Fecha: r.Fecha ? new Date(r.Fecha).toISOString().split("T")[0] : "",
+                Carnet: r.Carnet ? "Sí" : "No",
+                TarjetaVida: r.TarjetaVida ? "Sí" : "No",
+            });
+        });
+
+        // Enviar archivo
+        res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=Reporte_BuddyPartners.xlsx"
+        );
+
+        await workbook.xlsx.write(res);
+        res.end();
     });
 };
 

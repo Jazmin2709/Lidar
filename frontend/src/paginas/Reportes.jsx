@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 // Importación de axios para peticiones HTTP
 import axios from 'axios';
 // Importación de componentes de Ant Design para la UI
-import { Table, Button, Input, Modal, Form, message } from 'antd';
+import { Table, Button, Input, Modal, Form, message, Alert } from 'antd';
 // Icono de búsqueda
 import { SearchOutlined } from '@ant-design/icons';
 // Importación de estilos personalizados
@@ -16,44 +16,51 @@ const { Option } = Select;
 
 // Componente principal de Reportes
 export default function Reportes() {
-    // Estado para guardar los datos de los reportes
+
     const [buddyPartners, setBuddyPartners] = useState([]);
-    // Estado para manejar el registro que se está editando
+    const [pendingBuddies, setPendingBuddies] = useState([]);  // ⬅ NUEVO
     const [editingRecord, setEditingRecord] = useState(null);
-    // Estado para mostrar u ocultar el modal
     const [isModalOpen, setIsModalOpen] = useState(false);
-    // Hook para manejar el formulario
     const [form] = Form.useForm();
-    // Estado de filtros activos
     const [activeFilters, setActiveFilters] = useState({});
 
-    // useEffect que se ejecuta al cargar el componente
     useEffect(() => {
         fetchBuddyPartners();
     }, []);
 
-    // Función para obtener los reportes desde el backend
     const fetchBuddyPartners = async () => {
         try {
             const response = await axios.get('http://localhost:3000/api/buddy/BuddyPartner/');
-            // Formatear la fecha con moment
+
             response.data.forEach(item => {
                 item.Fecha = moment(item.Fecha).format('YYYY-MM-DD');
             });
-            // Guardar los datos en el estado
+
             setBuddyPartners(response.data);
+
+            // ==========================
+            // 🔍 DETECTAR BUDDIES PENDIENTES
+            // ==========================
+            const hoy = moment().format("YYYY-MM-DD");
+
+            const pendientes = response.data.filter(b =>
+                (b.Est_etapa === "Inicio" || b.Est_etapa === "En proceso") &&
+                b.Fecha < hoy
+            );
+
+            setPendingBuddies(pendientes);
+
         } catch (error) {
             console.error(error);
         }
     };
 
-    // Función para eliminar un reporte
     const handleDelete = async (id) => {
         if (window.confirm('¿Estás seguro de que deseas eliminar este reporte?')) {
             try {
                 await axios.delete(`http://localhost:3000/api/buddy/BuddyPartner/${id}`);
                 message.success('Reporte eliminado correctamente');
-                fetchBuddyPartners(); // Recargar datos
+                fetchBuddyPartners();
             } catch (error) {
                 console.error(error);
                 message.error('Error al eliminar el reporte');
@@ -61,31 +68,28 @@ export default function Reportes() {
         }
     };
 
-    // Función para abrir el modal y cargar el registro a editar
     const handleEdit = (record) => {
         setEditingRecord(record);
         form.setFieldsValue(record);
         setIsModalOpen(true);
     };
 
-    // Función para actualizar un reporte
     const handleUpdate = async () => {
         try {
             const values = await form.validateFields();
             await axios.put(`http://localhost:3000/api/buddy/BuddyPartner/${editingRecord.id_buddy1}`, values);
             message.success('Reporte actualizado correctamente');
             setIsModalOpen(false);
-            fetchBuddyPartners(); // Recargar datos
+            fetchBuddyPartners();
         } catch (error) {
             console.error(error);
             message.error('Error al actualizar el reporte');
         }
     };
 
-    // 🚀 Función para exportar PDF desde el backend
+    // Exportar PDF
     const exportPDF = () => {
         const queryParams = new URLSearchParams();
-
         if (activeFilters.Est_empl && activeFilters.Est_empl.length > 0)
             queryParams.append("Est_empl", activeFilters.Est_empl[0]);
         if (activeFilters.Est_vehi && activeFilters.Est_vehi.length > 0)
@@ -99,30 +103,27 @@ export default function Reportes() {
         window.open(url, "_blank");
     };
 
-    // Definición de las columnas de la tabla
+    const exportExcel = () => {
+        const queryParams = new URLSearchParams();
+        if (activeFilters.Est_empl && activeFilters.Est_empl.length > 0)
+            queryParams.append("Est_empl", activeFilters.Est_empl[0]);
+        if (activeFilters.Est_vehi && activeFilters.Est_vehi.length > 0)
+            queryParams.append("Est_vehi", activeFilters.Est_vehi[0]);
+        if (activeFilters.Est_etapa && activeFilters.Est_etapa.length > 0)
+            queryParams.append("Est_etapa", activeFilters.Est_etapa[0]);
+        if (activeFilters.Fecha && activeFilters.Fecha.length > 0)
+            queryParams.append("Fecha", activeFilters.Fecha[0]);
+
+        const url = `http://localhost:3000/api/buddy/BuddyPartner/export-excel?${queryParams.toString()}`;
+        window.open(url, "_blank");
+    };
+
     const columns = [
+        { title: 'Id', dataIndex: 'id_buddy1', key: 'id_buddy1', sorter: (a, b) => a.id_buddy1 - b.id_buddy1 },
+        { title: 'Numero Cuadrilla', dataIndex: 'num_cuadrilla', key: 'num_cuadrilla' },
+        { title: 'Hora', dataIndex: 'Hora_buddy', key: 'Hora_buddy' },
         {
-            title: 'Id',
-            dataIndex: 'id_buddy1',
-            key: 'id_buddy1',
-            sorter: (a, b) => a.id_buddy1 - b.id_buddy1,
-        },
-        {
-            title: 'Numero Cuadrilla',
-            dataIndex: 'num_cuadrilla',
-            key: 'num_cuadrilla',
-            sorter: (a, b) => a.num_cuadrilla - b.num_cuadrilla,
-        },
-        {
-            title: 'Hora',
-            dataIndex: 'Hora_buddy',
-            key: 'Hora_buddy',
-            sorter: (a, b) => a.Hora_buddy.localeCompare(b.Hora_buddy),
-        },
-        {
-            title: 'Estado Empleado',
-            dataIndex: 'Est_empl',
-            key: 'Est_empl',
+            title: 'Estado Empleado', dataIndex: 'Est_empl', key: 'Est_empl',
             filters: [
                 { text: 'Excelente', value: 'Excelente' },
                 { text: 'Malo', value: 'Malo' },
@@ -130,25 +131,15 @@ export default function Reportes() {
             onFilter: (value, record) => record.Est_empl.includes(value),
         },
         {
-            title: 'Estado Vehiculo',
-            dataIndex: 'Est_vehi',
-            key: 'Est_vehi',
+            title: 'Estado Vehiculo', dataIndex: 'Est_vehi', key: 'Est_vehi',
             filters: [
                 { text: 'Excelente', value: 'Excelente' },
                 { text: 'Malo', value: 'Malo' },
             ],
             onFilter: (value, record) => record.Est_vehi.includes(value),
         },
-        {
-            title: 'Carnet',
-            dataIndex: 'Carnet',
-            key: 'Carnet',
-        },
-        {
-            title: 'Tarjeta Vida',
-            dataIndex: 'TarjetaVida',
-            key: 'TarjetaVida',
-        },
+        { title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet' },
+        { title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida' },
         {
             title: 'Fecha',
             dataIndex: 'Fecha',
@@ -159,29 +150,14 @@ export default function Reportes() {
                         type="date"
                         value={selectedKeys[0]}
                         onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                        onPressEnter={() => confirm()}
-                        style={{ marginBottom: 8, display: 'block' }}
+                        style={{ marginBottom: 8 }}
                     />
-                    <Button
-                        type="primary"
-                        size="small"
-                        onClick={() => confirm()}
-                        icon={<SearchOutlined />}
-                    >
-                        Buscar
-                    </Button>
-                    <Button
-                        size="small"
-                        onClick={() => clearFilters()}
-                        style={{ marginLeft: 8 }}
-                    >
-                        Limpiar
-                    </Button>
+                    <Button type="primary" size="small" onClick={() => confirm()} icon={<SearchOutlined />}>Buscar</Button>
+                    <Button size="small" onClick={() => clearFilters()} style={{ marginLeft: 8 }}>Limpiar</Button>
                 </div>
             ),
             filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
-            onFilter: (value, record) =>
-                record.Fecha ? record.Fecha.includes(value) : '',
+            onFilter: (value, record) => record.Fecha.includes(value),
         },
         {
             title: 'Estado Etapa',
@@ -204,16 +180,8 @@ export default function Reportes() {
             ],
             onFilter: (value, record) => record.Est_her.includes(value),
         },
-        {
-            title: 'Id Empleado',
-            dataIndex: 'id_empleado',
-            key: 'id_empleado',
-        },
-        {
-            title: 'Tipo',
-            dataIndex: 'Tipo',
-            key: 'Tipo',
-        },
+        { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado' },
+        { title: 'Tipo', dataIndex: 'Tipo', key: 'Tipo' },
         {
             title: 'Acciones',
             key: 'acciones',
@@ -226,32 +194,54 @@ export default function Reportes() {
         },
     ];
 
-    // Estado para forzar render del formulario cuando cambia un valor
     const [renderTrigger, setRenderTrigger] = useState(false);
 
     return (
         <div style={{ padding: '0 40px' }}>
-            {/* Título */}
+
             <h1 style={{ textAlign: 'center', marginBottom: '24px' }}>Reportes</h1>
 
-            {/* Botón para exportar a PDF */}
+            {/* ================================================== */}
+            {/* 🔔 ALERTA DE BUDDY PARTNERS PENDIENTES */}
+            {/* ================================================== */}
+            {pendingBuddies.length > 0 && (
+                <Alert
+                    message="Hay Buddy Partners pendientes de completar"
+                    description={
+                        <ul>
+                            {pendingBuddies.map(b => (
+                                <li key={b.id_buddy1}>
+                                    Cuadrilla {b.num_cuadrilla} — Tipo {b.Tipo} — Fecha {b.Fecha}
+                                </li>
+                            ))}
+                        </ul>
+                    }
+                    type="warning"
+                    showIcon
+                    style={{ marginBottom: 20 }}
+                />
+            )}
+
+            {/* Botones exportar */}
             <Button type="primary" onClick={exportPDF} style={{ marginBottom: 16 }}>
                 Exportar PDF
             </Button>
 
-            {/* Tabla de datos */}
+            <Button type="default" onClick={exportExcel} style={{ marginLeft: 10, marginBottom: 16 }}>
+                Exportar Excel
+            </Button>
+
+            {/* Tabla */}
             <Table
                 className="shadow rounded-5 border-3"
                 columns={columns}
                 dataSource={buddyPartners}
                 rowKey="id_buddy1"
                 pagination={{ pageSize: 10 }}
-                onChange={(pagination, filters, sorter) => {
-                    setActiveFilters(filters);
-                }}
+                onChange={(pagination, filters, sorter) => setActiveFilters(filters)}
             />
 
-            {/* Modal para editar reporte */}
+            {/* Modal */}
             <Modal
                 title="Editar Reporte"
                 open={isModalOpen}
@@ -260,7 +250,7 @@ export default function Reportes() {
                 okText="Guardar"
                 cancelText="Cancelar"
             >
-                <Form form={form} layout="vertical" onValuesChange={() => setRenderTrigger((prev) => !prev)}>
+                <Form form={form} layout="vertical">
                     <Form.Item label="Numero Cuadrilla" name="num_cuadrilla">
                         <Input disabled />
                     </Form.Item>
@@ -270,7 +260,7 @@ export default function Reportes() {
                     </Form.Item>
 
                     <Form.Item label="Estado Empleado" name="Est_empl">
-                        <Select onChange={value => form.setFieldValue("Est_empl", value)}>
+                        <Select>
                             <Option value="Excelente">Excelente</Option>
                             <Option value="Bueno">Bueno</Option>
                             <Option value="Malo">Malo</Option>
@@ -284,7 +274,7 @@ export default function Reportes() {
                     )}
 
                     <Form.Item label="Estado Vehiculo" name="Est_vehi">
-                        <Select onChange={value => form.setFieldValue("Est_vehi", value)}>
+                        <Select>
                             <Option value="Excelente">Excelente</Option>
                             <Option value="Bueno">Bueno</Option>
                             <Option value="Malo">Malo</Option>
@@ -310,7 +300,7 @@ export default function Reportes() {
                     </Form.Item>
 
                     <Form.Item label="Estado Etapa" name="Est_etapa">
-                        <Select onChange={value => form.setFieldValue("Est_etapa", value)}>
+                        <Select>
                             <Option value="Inicio">Inicio</Option>
                             <Option value="En proceso">En proceso</Option>
                             <Option value="Finalizó">Finalizó</Option>
@@ -318,7 +308,7 @@ export default function Reportes() {
                     </Form.Item>
 
                     <Form.Item label="Estado Herramienta" name="Est_her">
-                        <Select onChange={value => form.setFieldValue("Est_her", value)}>
+                        <Select>
                             <Option value="Excelente">Excelente</Option>
                             <Option value="Bueno">Bueno</Option>
                             <Option value="Malo">Malo</Option>
