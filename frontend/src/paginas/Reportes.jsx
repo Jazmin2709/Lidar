@@ -99,7 +99,7 @@ export default function Reportes() {
         if (activeFilters.Fecha && activeFilters.Fecha.length > 0)
             queryParams.append("Fecha", activeFilters.Fecha[0]);
 
-        const url = `http://localhost:3000/api/buddy/BuddyPartner/export-pdf?${queryParams.toString()}`;
+        const url = `http://localhost:3000/api/buddy/BuddyPartner/export-pdf?${queryParams.toString()}`; 
         window.open(url, "_blank");
     };
 
@@ -193,8 +193,6 @@ export default function Reportes() {
     { title: 'Motivo Emp', dataIndex: 'MotivoEmp', key: 'MotivoEmp' },
     { title: 'Motivo Veh', dataIndex: 'MotivoVeh', key: 'MotivoVeh' },
     { title: 'Motivo Her', dataIndex: 'MotivoHer', key: 'MotivoHer' },
-    { title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero' },
-    { title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento' },
     // --------------------------------------------------------------------
 
     { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado' },
@@ -216,9 +214,9 @@ export default function Reportes() {
     const [renderTrigger, setRenderTrigger] = useState(false);
 
     return (
-        <div style={{ padding: '0 40px' }}>
+        <div style={{ padding: '0 50px 50px' }}>
 
-            <h1 style={{ textAlign: 'center', marginBottom: '24px' }}>Reportes</h1>
+            <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Reportes</h1>
 
             {/* ================================================== */}
             {/* 🔔 ALERTA DE BUDDY PARTNERS PENDIENTES */}
@@ -327,11 +325,11 @@ export default function Reportes() {
                     )}
 
                     <Form.Item label="Carnet" name="Carnet">
-                        <Input />
+                        <Input disabled />
                     </Form.Item>
 
                     <Form.Item label="Tarjeta Vida" name="TarjetaVida">
-                        <Input />
+                        <Input disabled />
                     </Form.Item>
 
                     <Form.Item label="Fecha" name="Fecha">
@@ -365,7 +363,7 @@ export default function Reportes() {
                     </Form.Item>
 
                     <Form.Item label="Tipo" name="Tipo">
-                        <Input />
+                        <Input disabled />
                     </Form.Item>
                 </Form>
             </Modal>
