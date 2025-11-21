@@ -68,7 +68,7 @@ export default function IndexEmpleado() {
                 <h1>Formularios</h1>
             </div>
 
-            <div className="row my-5 row-cols-1 row-cols-md-3 g-4 align-items-stretch">
+            <div className="row my-5 row-cols-1 row-cols-md-3 g-4 align-items-stretch" style={{padding: '50px 50px 50px width 100%'}}>
 
                 {/* Tarjeta Buddy Partner 1 */}
                 <div className="col d-flex">
