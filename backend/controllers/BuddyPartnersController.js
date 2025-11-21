@@ -321,5 +321,32 @@ exports.ExportExcel = (req, res) => {
     });
 };
 
+// ========================
+// Obtener Buddys pendientes por usuario
+// ========================
+exports.GetPendingByUser = (req, res) => {
+    const { id } = req.params; // id del usuario logueado
 
+    const hoy = new Date().toISOString().split("T")[0];
 
+    const sql = `
+        SELECT 
+            Tipo AS tipo, 
+            Est_etapa AS estado, 
+            DATE(Fecha) AS fecha
+        FROM buddy
+        WHERE id_empleado = ?
+        AND (Est_etapa = 'Inicio' OR Est_etapa = 'En proceso')
+        AND DATE(Fecha) < ?
+        ORDER BY Tipo ASC
+    `;
+
+    db.query(sql, [id, hoy], (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ message: "Error al obtener pendientes" });
+        }
+
+        return res.status(200).json(results);
+    });
+};

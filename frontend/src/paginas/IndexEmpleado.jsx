@@ -1,34 +1,85 @@
 // Importamos React desde la librería 'react'
-import React from 'react';
+import React, { useEffect } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import moment from "moment";
+import { jwtDecode } from "jwt-decode";
 
-// Componente funcional llamado IndexEmpleado
 export default function IndexEmpleado() {
+
+    // -------------------------
+    // 🔥 ALERTA DE BUDDYS PENDIENTES
+    // -------------------------
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        let decoded;
+        try {
+            decoded = jwtDecode(token);
+        } catch (e) {
+            console.error("Error al decodificar token:", e);
+            return;
+        }
+
+        const id_usuario = decoded.id;
+
+        axios
+            .get(`http://localhost:3000/BuddyPartner/pending/${id_usuario}`)
+            .then((res) => {
+                const pendientes = res.data;
+
+                if (pendientes.length === 0) return;
+
+                let detalleHTML = "<ul style='text-align:left'>";
+                pendientes.forEach((p) => {
+                    detalleHTML += `
+                        <li>
+                            <b>Buddy ${p.Tipo}</b> quedó en 
+                            <b>${p.Est_etapa}</b> el día 
+                            <b>${moment(p.Fecha).format("DD/MM/YYYY")}</b>
+                        </li>
+                    `;
+                });
+                detalleHTML += "</ul>";
+
+                Swal.fire({
+                    icon: "warning",
+                    title: "Tienes Buddy Partners pendientes",
+                    html: `
+                        <p>Las siguientes actividades quedaron sin finalizar:</p>
+                        ${detalleHTML}
+                        <p><b>Debes completarlas hoy para continuar.</b></p>
+                    `,
+                    confirmButtonColor: "#3085d6",
+                });
+            })
+            .catch((err) => console.log(err));
+    }, []);
+
+
+    // -------------------------
+    // 🖼️ TU DISEÑO ORIGINAL
+    // -------------------------
     return (
-        // Contenedor principal con la clase Bootstrap 'container' para dar margen horizontal
         <div className='container'>
 
-            {/* Encabezado centrado */}
             <div className="text-center">
                 <h1>Formularios</h1>
             </div>
 
-            {/* Fila que contiene las tarjetas, con separación vertical y columnas responsivas */}
             <div className="row my-5 row-cols-1 row-cols-md-3 g-4 align-items-stretch">
 
-                {/* Primera tarjeta: Buddy Partner 1 */}
+                {/* Tarjeta Buddy Partner 1 */}
                 <div className="col d-flex">
                     <div className="card h-100 w-100">
-                        {/* Cuerpo de la tarjeta con disposición vertical y espaciado entre elementos */}
                         <div className="card-body d-flex flex-column justify-content-between">
                             <div>
-                                {/* Título centrado */}
                                 <h5 className="card-title text-center">Buddy Partner 1</h5>
-                                {/* Descripción del formulario */}
                                 <p className="card-text">
                                     Antes de salir de la empresa, se realiza un reporte sobre el estado de las herramientas, del vehículo y del bienestar emocional de los empleados.
                                 </p>
                             </div>
-                            {/* Botón que redirige al formulario BuddyPartner1 */}
                             <div className="text-center mt-3">
                                 <a href="/BuddyPartner1" className="btn btn-primary w-100">Ir</a>
                             </div>
@@ -36,7 +87,7 @@ export default function IndexEmpleado() {
                     </div>
                 </div>
 
-                {/* Segunda tarjeta: Buddy Partner 2 */}
+                {/* Tarjeta Buddy Partner 2 */}
                 <div className="col d-flex">
                     <div className="card h-100 w-100">
                         <div className="card-body d-flex flex-column justify-content-between">
@@ -54,7 +105,7 @@ export default function IndexEmpleado() {
                     </div>
                 </div>
 
-                {/* Tercera tarjeta: Buddy Partner 3 */}
+                {/* Tarjeta Buddy Partner 3 */}
                 <div className="col d-flex">
                     <div className="card h-100 w-100">
                         <div className="card-body d-flex flex-column justify-content-between">
@@ -71,7 +122,7 @@ export default function IndexEmpleado() {
                     </div>
                 </div>
 
-            </div> {/* Fin de la fila de tarjetas */}
-        </div> // Fin del contenedor principal
+            </div>
+        </div>
     );
 }

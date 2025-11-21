@@ -119,80 +119,99 @@ export default function Reportes() {
     };
 
     const columns = [
-        { title: 'Id', dataIndex: 'id_buddy1', key: 'id_buddy1', sorter: (a, b) => a.id_buddy1 - b.id_buddy1 },
-        { title: 'Numero Cuadrilla', dataIndex: 'num_cuadrilla', key: 'num_cuadrilla' },
-        { title: 'Hora', dataIndex: 'Hora_buddy', key: 'Hora_buddy' },
-        {
-            title: 'Estado Empleado', dataIndex: 'Est_empl', key: 'Est_empl',
-            filters: [
-                { text: 'Excelente', value: 'Excelente' },
-                { text: 'Malo', value: 'Malo' },
-            ],
-            onFilter: (value, record) => record.Est_empl.includes(value),
-        },
-        {
-            title: 'Estado Vehiculo', dataIndex: 'Est_vehi', key: 'Est_vehi',
-            filters: [
-                { text: 'Excelente', value: 'Excelente' },
-                { text: 'Malo', value: 'Malo' },
-            ],
-            onFilter: (value, record) => record.Est_vehi.includes(value),
-        },
-        { title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet' },
-        { title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida' },
-        {
-            title: 'Fecha',
-            dataIndex: 'Fecha',
-            key: 'Fecha',
-            filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
-                <div style={{ padding: 8 }}>
-                    <Input
-                        type="date"
-                        value={selectedKeys[0]}
-                        onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                        style={{ marginBottom: 8 }}
-                    />
-                    <Button type="primary" size="small" onClick={() => confirm()} icon={<SearchOutlined />}>Buscar</Button>
-                    <Button size="small" onClick={() => clearFilters()} style={{ marginLeft: 8 }}>Limpiar</Button>
-                </div>
-            ),
-            filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
-            onFilter: (value, record) => record.Fecha.includes(value),
-        },
-        {
-            title: 'Estado Etapa',
-            dataIndex: 'Est_etapa',
-            key: 'Est_etapa',
-            filters: [
-                { text: 'Inicio', value: 'Inicio' },
-                { text: 'En proceso', value: 'En proceso' },
-                { text: 'Finalizó', value: 'Finalizó' },
-            ],
-            onFilter: (value, record) => record.Est_etapa.includes(value),
-        },
-        {
-            title: 'Estado Herramienta',
-            dataIndex: 'Est_her',
-            key: 'Est_her',
-            filters: [
-                { text: 'Excelente', value: 'Excelente' },
-                { text: 'Malo', value: 'Malo' },
-            ],
-            onFilter: (value, record) => record.Est_her.includes(value),
-        },
-        { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado' },
-        { title: 'Tipo', dataIndex: 'Tipo', key: 'Tipo' },
-        {
-            title: 'Acciones',
-            key: 'acciones',
-            render: (_, record) => (
-                <>
-                    <Button type="link" onClick={() => handleEdit(record)}>Editar</Button>
-                    <Button type="link" danger onClick={() => handleDelete(record.id_buddy1)}>Eliminar</Button>
-                </>
-            ),
-        },
-    ];
+    { title: 'Id', dataIndex: 'id_buddy1', key: 'id_buddy1', sorter: (a, b) => a.id_buddy1 - b.id_buddy1 },
+    { title: 'Numero Cuadrilla', dataIndex: 'num_cuadrilla', key: 'num_cuadrilla' },
+    { title: 'Hora', dataIndex: 'Hora_buddy', key: 'Hora_buddy' },
+
+    {
+        title: 'Estado Empleado', dataIndex: 'Est_empl', key: 'Est_empl',
+        filters: [
+            { text: 'Excelente', value: 'Excelente' },
+            { text: 'Malo', value: 'Malo' },
+        ],
+        onFilter: (value, record) => record.Est_empl.includes(value),
+    },
+
+    {
+        title: 'Estado Vehiculo', dataIndex: 'Est_vehi', key: 'Est_vehi',
+        filters: [
+            { text: 'Excelente', value: 'Excelente' },
+            { text: 'Malo', value: 'Malo' },
+        ],
+        onFilter: (value, record) => record.Est_vehi.includes(value),
+    },
+
+    { title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet' },
+    { title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida' },
+
+    {
+        title: 'Fecha',
+        dataIndex: 'Fecha',
+        key: 'Fecha',
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <Input
+                    type="date"
+                    value={selectedKeys[0]}
+                    onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    style={{ marginBottom: 8 }}
+                />
+                <Button type="primary" size="small" onClick={() => confirm()} icon={<SearchOutlined />}>Buscar</Button>
+                <Button size="small" onClick={() => clearFilters()} style={{ marginLeft: 8 }}>Limpiar</Button>
+            </div>
+        ),
+        filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
+        onFilter: (value, record) => record.Fecha.includes(value),
+    },
+
+    {
+        title: 'Estado Etapa',
+        dataIndex: 'Est_etapa',
+        key: 'Est_etapa',
+        filters: [
+            { text: 'Inicio', value: 'Inicio' },
+            { text: 'En proceso', value: 'En proceso' },
+            { text: 'Finalizó', value: 'Finalizó' },
+        ],
+        onFilter: (value, record) => record.Est_etapa.includes(value),
+    },
+
+    {
+        title: 'Estado Herramienta',
+        dataIndex: 'Est_her',
+        key: 'Est_her',
+        filters: [
+            { text: 'Excelente', value: 'Excelente' },
+            { text: 'Malo', value: 'Malo' },
+        ],
+        onFilter: (value, record) => record.Est_her.includes(value),
+    },
+
+    // --------------------------------------------------------------------
+    // 🔥 CAMPOS FALTANTES (según tu tabla)
+    // --------------------------------------------------------------------
+    { title: 'Motivo Emp', dataIndex: 'MotivoEmp', key: 'MotivoEmp' },
+    { title: 'Motivo Veh', dataIndex: 'MotivoVeh', key: 'MotivoVeh' },
+    { title: 'Motivo Her', dataIndex: 'MotivoHer', key: 'MotivoHer' },
+    { title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero' },
+    { title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento' },
+    // --------------------------------------------------------------------
+
+    { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado' },
+    { title: 'Tipo', dataIndex: 'Tipo', key: 'Tipo' },
+
+    {
+        title: 'Acciones',
+        key: 'acciones',
+        render: (_, record) => (
+            <>
+                <Button type="link" onClick={() => handleEdit(record)}>Editar</Button>
+                <Button type="link" danger onClick={() => handleDelete(record.id_buddy1)}>Eliminar</Button>
+            </>
+        ),
+    },
+];
+
 
     const [renderTrigger, setRenderTrigger] = useState(false);
 
@@ -239,7 +258,27 @@ export default function Reportes() {
                 rowKey="id_buddy1"
                 pagination={{ pageSize: 10 }}
                 onChange={(pagination, filters, sorter) => setActiveFilters(filters)}
+                rowClassName={(record) => {
+                    const hoy = moment().format("YYYY-MM-DD");
+
+                    // Pendientes (se mantienen)
+                    if (
+                        (record.Est_etapa === "Inicio" || record.Est_etapa === "En proceso") &&
+                        record.Fecha < hoy
+                    ) {
+                        return "row-pendiente";
+                    }
+
+                    // Colores por estado
+                    if (record.Est_etapa === "Inicio") return "estado-inicio";
+                    if (record.Est_etapa === "En proceso") return "estado-proceso";
+                    if (record.Est_etapa === "Finalizó") return "estado-finalizo";
+
+                    return "";
+                }}
             />
+
+
 
             {/* Modal */}
             <Modal

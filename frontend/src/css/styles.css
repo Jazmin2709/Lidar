@@ -5,3 +5,22 @@ body {
     min-height: 100vh;
     margin: 0;
 }
+/* Pendientes atrasados */
+.row-pendiente {
+    background-color: #f8d7da !important; /* Rojo suave */
+}
+
+/* Inicio */
+.estado-inicio {
+    background-color: #fff3cd !important; /* Amarillo */
+}
+
+/* En proceso */
+.estado-proceso {
+    background-color: #cfe2ff !important; /* Azul */
+}
+
+/* Finalizado */
+.estado-finalizo {
+    background-color: #d1e7dd !important; /* Verde */
+}
