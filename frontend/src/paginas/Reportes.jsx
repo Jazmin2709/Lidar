@@ -32,6 +32,7 @@ export default function Reportes() {
         try {
             const response = await axios.get('http://localhost:3000/api/buddy/BuddyPartner/');
 
+            // Formatear fechas
             response.data.forEach(item => {
                 item.Fecha = moment(item.Fecha).format('YYYY-MM-DD');
             });
@@ -193,8 +194,32 @@ export default function Reportes() {
     { title: 'Motivo Emp', dataIndex: 'MotivoEmp', key: 'MotivoEmp' },
     { title: 'Motivo Veh', dataIndex: 'MotivoVeh', key: 'MotivoVeh' },
     { title: 'Motivo Her', dataIndex: 'MotivoHer', key: 'MotivoHer' },
-    { title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero' },
-    { title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento' },
+    {
+    title: 'Tablero',
+    dataIndex: 'Tablero',
+    key: 'Tablero',
+    render: (url) =>
+        url ? (
+            <img 
+                src={url} 
+                alt="tablero"
+                style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
+            />
+        ) : '—'
+},
+    {
+    title: 'Calentamiento',
+    dataIndex: 'Calentamiento',
+    key: 'Calentamiento',
+    render: (url) =>
+        url ? (
+            <img 
+                src={url} 
+                alt="calentamiento"
+                style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
+            />
+        ) : '—'
+},
     // --------------------------------------------------------------------
 
     { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado' },
@@ -281,94 +306,149 @@ export default function Reportes() {
 
 
             {/* Modal */}
-            <Modal
-                title="Editar Reporte"
-                open={isModalOpen}
-                onOk={handleUpdate}
-                onCancel={() => setIsModalOpen(false)}
-                okText="Guardar"
-                cancelText="Cancelar"
-            >
-                <Form form={form} layout="vertical">
-                    <Form.Item label="Numero Cuadrilla" name="num_cuadrilla">
-                        <Input disabled />
-                    </Form.Item>
+           <Modal
+    title="Editar Reporte"
+    open={isModalOpen}
+    onOk={handleUpdate}
+    onCancel={() => setIsModalOpen(false)}
+    okText="Guardar"
+    cancelText="Cancelar"
+>
+    <Form form={form} layout="vertical">
 
-                    <Form.Item label="Hora" name="Hora_buddy">
-                        <Input type="time" />
-                    </Form.Item>
+        {/* NUM CUADRILLA */}
+        <Form.Item label="Numero Cuadrilla" name="num_cuadrilla">
+            <Input disabled />
+        </Form.Item>
 
-                    <Form.Item label="Estado Empleado" name="Est_empl">
-                        <Select>
-                            <Option value="Excelente">Excelente</Option>
-                            <Option value="Bueno">Bueno</Option>
-                            <Option value="Malo">Malo</Option>
-                        </Select>
-                    </Form.Item>
+        {/* HORA */}
+        <Form.Item label="Hora" name="Hora_buddy">
+            <Input type="time" />
+        </Form.Item>
 
-                    {form.getFieldValue("Est_empl") === "Malo" && (
-                        <Form.Item label="Motivo empleado" name="MotivoEmp">
-                            <Input.TextArea />
-                        </Form.Item>
-                    )}
+        {/* ESTADO EMPLEADO */}
+        <Form.Item label="Estado Empleado" name="Est_empl">
+            <Select>
+                <Option value="Excelente">Excelente</Option>
+                <Option value="Bueno">Bueno</Option>
+                <Option value="Malo">Malo</Option>
+            </Select>
+        </Form.Item>
 
-                    <Form.Item label="Estado Vehiculo" name="Est_vehi">
-                        <Select>
-                            <Option value="Excelente">Excelente</Option>
-                            <Option value="Bueno">Bueno</Option>
-                            <Option value="Malo">Malo</Option>
-                        </Select>
-                    </Form.Item>
+        {form.getFieldValue("Est_empl") === "Malo" && (
+            <Form.Item label="Motivo empleado" name="MotivoEmp">
+                <Input.TextArea />
+            </Form.Item>
+        )}
 
-                    {form.getFieldValue("Est_vehi") === "Malo" && (
-                        <Form.Item label="Motivo vehículo" name="MotivoVeh">
-                            <Input.TextArea />
-                        </Form.Item>
-                    )}
+        {/* ESTADO VEHICULO */}
+        <Form.Item label="Estado Vehiculo" name="Est_vehi">
+            <Select>
+                <Option value="Excelente">Excelente</Option>
+                <Option value="Bueno">Bueno</Option>
+                <Option value="Malo">Malo</Option>
+            </Select>
+        </Form.Item>
 
-                    <Form.Item label="Carnet" name="Carnet">
-                        <Input />
-                    </Form.Item>
+        {form.getFieldValue("Est_vehi") === "Malo" && (
+            <Form.Item label="Motivo vehículo" name="MotivoVeh">
+                <Input.TextArea />
+            </Form.Item>
+        )}
 
-                    <Form.Item label="Tarjeta Vida" name="TarjetaVida">
-                        <Input />
-                    </Form.Item>
+        {/* CARNET */}
+        <Form.Item label="Carnet" name="Carnet">
+            <Input />
+        </Form.Item>
 
-                    <Form.Item label="Fecha" name="Fecha">
-                        <Input type="date" />
-                    </Form.Item>
+        {/* TARJETA VIDA */}
+        <Form.Item label="Tarjeta Vida" name="TarjetaVida">
+            <Input />
+        </Form.Item>
 
-                    <Form.Item label="Estado Etapa" name="Est_etapa">
-                        <Select>
-                            <Option value="Inicio">Inicio</Option>
-                            <Option value="En proceso">En proceso</Option>
-                            <Option value="Finalizó">Finalizó</Option>
-                        </Select>
-                    </Form.Item>
+        {/* FECHA */}
+        <Form.Item label="Fecha" name="Fecha">
+            <Input type="date" />
+        </Form.Item>
 
-                    <Form.Item label="Estado Herramienta" name="Est_her">
-                        <Select>
-                            <Option value="Excelente">Excelente</Option>
-                            <Option value="Bueno">Bueno</Option>
-                            <Option value="Malo">Malo</Option>
-                        </Select>
-                    </Form.Item>
+        {/* ESTADO ETAPA */}
+        <Form.Item label="Estado Etapa" name="Est_etapa">
+            <Select>
+                <Option value="Inicio">Inicio</Option>
+                <Option value="En proceso">En proceso</Option>
+                <Option value="Finalizó">Finalizó</Option>
+            </Select>
+        </Form.Item>
 
-                    {form.getFieldValue("Est_her") === "Malo" && (
-                        <Form.Item label="Motivo herramienta" name="MotivoHer">
-                            <Input.TextArea />
-                        </Form.Item>
-                    )}
+        {/* ESTADO HERRAMIENTA */}
+        <Form.Item label="Estado Herramienta" name="Est_her">
+            <Select>
+                <Option value="Excelente">Excelente</Option>
+                <Option value="Bueno">Bueno</Option>
+                <Option value="Malo">Malo</Option>
+            </Select>
+        </Form.Item>
 
-                    <Form.Item label="Id Empleado" name="id_empleado">
-                        <Input disabled />
-                    </Form.Item>
+        {form.getFieldValue("Est_her") === "Malo" && (
+            <Form.Item label="Motivo herramienta" name="MotivoHer">
+                <Input.TextArea />
+            </Form.Item>
+        )}
 
-                    <Form.Item label="Tipo" name="Tipo">
-                        <Input />
-                    </Form.Item>
-                </Form>
-            </Modal>
+    {/* IMAGEN TABLERO */}
+<Form.Item label="Imagen Tablero">
+    {form.getFieldValue("Tablero") ? (
+        <img
+            src={form.getFieldValue("Tablero")}
+            alt="Imagen del tablero"
+            style={{
+                width: "100%",
+                maxHeight: "250px",
+                objectFit: "cover",
+                borderRadius: "10px",
+                border: "1px solid #ddd",
+                marginBottom: "10px",
+            }}
+        />
+    ) : (
+        <p style={{ color: "#888" }}>No hay imagen</p>
+    )}
+</Form.Item>
+
+{/* IMAGEN CALENTAMIENTO */}
+<Form.Item label="Imagen Calentamiento">
+    {form.getFieldValue("Calentamiento") ? (
+        <img
+            src={form.getFieldValue("Calentamiento")}
+            alt="Imagen de calentamiento"
+            style={{
+                width: "100%",
+                maxHeight: "250px",
+                objectFit: "cover",
+                borderRadius: "10px",
+                border: "1px solid #ddd",
+                marginBottom: "10px",
+            }}
+        />
+    ) : (
+        <p style={{ color: "#888" }}>No hay imagen</p>
+    )}
+</Form.Item>
+
+
+        {/* ID EMPLEADO */}
+        <Form.Item label="Id Empleado" name="id_empleado">
+            <Input disabled />
+        </Form.Item>
+
+        {/* TIPO */}
+        <Form.Item label="Tipo" name="Tipo">
+            <Input />
+        </Form.Item>
+
+    </Form>
+</Modal>
+
         </div>
     );
 }
