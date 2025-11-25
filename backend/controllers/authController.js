@@ -20,51 +20,23 @@ exports.registrar = async (req, res) => {
 
         console.log(req.body);
 
-        if (!Correo) {
-            return res.status(400).json({ message: 'El correo es obligatorio' });
-        }
-
-        if (!Nombres) {
-            return res.status(400).json({ message: 'Los nombres son obligatorios' });
-        }
-
-        if (!Apellidos) {
-            return res.status(400).json({ message: 'Los apellidos son obligatorios' });
-        }
-
-        if (!Cedula) {
-            return res.status(400).json({ message: 'La cédula es obligatoria' });
-        }
-
-        if (!Celular) {
-            return res.status(400).json({ message: 'El celular es obligatorio' });
-        }
-
-        if (!Contrasena) {
-            return res.status(400).json({ message: 'La contraseña es obligatoria' });
-        }
-
-        if (!Tipo_Doc) {
-            return res.status(400).json({ message: 'El tipo de documento es obligatorio' });
-        }
-
-        if (!agreeTerms) {
-            return res.status(400).json({ message: 'Debes aceptar los términos y condiciones' });
+        if (!Correo || !Nombres || !Apellidos || !Cedula || !Celular || !Contrasena || !Tipo_Doc || !agreeTerms) {
+            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
         }
 
         const hashedPassword = await bcrypt.hash(Contrasena, 10);
 
-        const qUsuario = 'SELECT * FROM persona WHERE Correo = ?';
-        db.query(qUsuario, [Correo], (error, results) => {
+        const qUsuario = 'SELECT * FROM persona WHERE Correo = ? OR Cedula = ?';
+        db.query(qUsuario, [Correo, Cedula], (error, results) => {
             if (error) {
                 console.error(error);
                 return res.status(500).json({ message: 'Error al registrar el usuario' });
             }
             if (results.length > 0) {
-                return res.status(400).json({ message: 'El correo ya está registrado' });
+                return res.status(400).json({ message: 'El correo o cédula ya está registrado' });
             }
 
-            const query = 'INSERT INTO persona (Correo, Nombres, Apellidos, Cedula, Celular, Contrasena, Tipo_Doc, agreeTerms, id_rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 2)';
+            const query = 'INSERT INTO persona (Correo, Nombres, Apellidos, Cedula, Celular, Contrasena, Tipo_Doc, agreeTerms, id_rol, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 2, 1)';
             const values = [Correo, Nombres, Apellidos, Cedula, Celular, hashedPassword, Tipo_Doc, agreeTerms];
 
             db.query(query, values, (error) => {
@@ -81,50 +53,71 @@ exports.registrar = async (req, res) => {
     }
 };
 
+// FUNCIÓN INGRESAR MEJORADA - ACEPTA EMAIL O CÉDULA
 exports.ingresar = async (req, res) => {
     try {
         const { Documento, Contrasena } = req.body;
-        console.log(req.body);
+        console.log('Login attempt:', req.body);
+        
         if (!Documento) {
-            return res.status(400).json({ message: 'La cédula es obligatoria' });
+            return res.status(400).json({ message: 'El correo o cédula es obligatorio' });
         }
 
         if (!Contrasena) {
-            return res.status(400).json({ message: 'La contraseña es obligatoria' });
+            return res.status(400).json({ message: 'La contraseña es obligatoria' });
         }
 
-        const query = 'SELECT * FROM persona WHERE Cedula = ?';
-        db.query(query, [Documento], async (error, results) => {
+        // BUSCAR POR EMAIL O CÉDULA
+        const query = 'SELECT * FROM persona WHERE Correo = ? OR Cedula = ?';
+        db.query(query, [Documento, Documento], async (error, results) => {
             if (error) {
                 console.error(error);
                 return res.status(500).json({ message: 'Error al ingresar' });
             }
 
             if (results.length === 0) {
-                return res.status(401).json({ message: 'La cédula no está registrada' });
+                return res.status(401).json({ message: 'Credenciales incorrectas' });
             }
 
             const user = results[0];
 
-            if (bcrypt.compareSync(Contrasena, user.Contrasena)) {
+            // VALIDAR USUARIO INACTIVO
+            if (user.activo === 0) {
+                return res.status(403).json({ 
+                    message: 'Cuenta deshabilitada. Contacta al administrador.' 
+                });
+            }
+
+            // VERIFICAR CONTRASEÑA
+            const isPasswordValid = await bcrypt.compare(Contrasena, user.Contrasena);
+            if (isPasswordValid) {
                 const token = jwt.sign({ id: user.id_per, rol: user.id_rol }, secret, { expiresIn: '30d' });
-                return res.status(200).json({ rol: user.id_rol, message: 'Ingreso exitoso', token: token });
+                return res.status(200).json({ 
+                    rol: user.id_rol, 
+                    message: 'Ingreso exitoso', 
+                    token: token,
+                    usuario: {
+                        id: user.id_per,
+                        nombre: user.Nombres,
+                        email: user.Correo
+                    }
+                });
             } else {
-                return res.status(401).json({ message: 'la contraseña es incorrecta' });
+                return res.status(401).json({ message: 'Contraseña incorrecta' });
             }
         });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
-}
+};
 
 exports.validarToken = async (req, res) => {
     try {
         const token = req.headers.authorization.split(' ')[1];
         jwt.verify(token, secret, (error, decoded) => {
             if (error) {
-                return res.status(401).json({ message: 'Token inválido' });
+                return res.status(401).json({ message: 'Token inválido' });
             }
             req.userId = decoded.id;
             return res.send({ id: decoded.id, rol: decoded.rol });
@@ -154,6 +147,14 @@ exports.enviarCorreo = async (req, res) => {
             }
 
             const usuario = results[0];
+            
+            // Validar usuario inactivo también para recuperación
+            if (usuario.activo === 0) {
+                return res.status(403).json({ 
+                    message: 'Cuenta deshabilitada. Contacta al administrador.' 
+                });
+            }
+
             const ahora = new Date();
 
             if (usuario.UltimoEnvio) {
@@ -208,7 +209,6 @@ exports.enviarCorreo = async (req, res) => {
     }
 }
 
-
 exports.recuperarContrasena = async (req, res) => {
     try {
         const { Correo, Codigo, NuevaContrasena } = req.body;
@@ -218,11 +218,11 @@ exports.recuperarContrasena = async (req, res) => {
         }
 
         if (!Codigo) {
-            return res.status(400).json({ message: 'El codigo es obligatorio' });
+            return res.status(400).json({ message: 'El código es obligatorio' });
         }
 
         if (!NuevaContrasena) {
-            return res.status(400).json({ message: 'La nueva contraseña es obligatoria' });
+            return res.status(400).json({ message: 'La nueva contraseña es obligatoria' });
         }
 
         const query = 'SELECT * FROM persona WHERE Correo = ? AND Codigo = ?';
@@ -233,7 +233,7 @@ exports.recuperarContrasena = async (req, res) => {
             }
 
             if (results.length === 0) {
-                return res.status(401).json({ message: 'El correo no está registrado' });
+                return res.status(401).json({ message: 'Código incorrecto o correo no registrado' });
             }
 
             const hashedPassword = await bcrypt.hash(NuevaContrasena, 10);
@@ -241,7 +241,7 @@ exports.recuperarContrasena = async (req, res) => {
             db.query('UPDATE persona SET Contrasena = ? WHERE Correo = ?', [hashedPassword, Correo], (error) => {
                 if (error) {
                     console.error(error);
-                    return res.status(500).json({ message: 'Error al actualizar la contraseña' });
+                    return res.status(500).json({ message: 'Error al actualizar la contraseña' });
                 }
                 return res.status(200).json({ message: 'Contraseña actualizada exitosamente' });
             });

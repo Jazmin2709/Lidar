@@ -1,44 +1,61 @@
-export default function EmpleadosTable({ empleados, onEdit, onDelete }) {
+import React from 'react';
+
+const EmpleadosTable = ({ empleados, onToggleActivo, onEditar }) => {
   return (
-    <div className='table-responsive'>
-      <table className='table table-striped table-bordered align-middle'>
-        <thead className='table-light'>
+    <div className="table-responsive">
+      <table className="table table-striped table-hover">
+        <thead className="table-dark">
           <tr>
-            <th>#</th>
-            <th>Correo</th>
-            <th>Nombres</th>
-            <th>Apellidos</th>
+            <th>Nombre</th>
+            <th>Email</th>
             <th>Cédula</th>
             <th>Celular</th>
-            <th>Tipo Doc</th>
             <th>Rol</th>
-            <th style={{ minWidth: 160 }}>Acciones</th>
+            <th>Estado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {empleados.map((emp, idx) => (
+          {empleados.map(emp => (
             <tr key={emp.id_per}>
-              <td>{idx + 1}</td>
+              <td>{emp.Nombres} {emp.Apellidos}</td>
               <td>{emp.Correo}</td>
-              <td>{emp.Nombres}</td>
-              <td>{emp.Apellidos}</td>
               <td>{emp.Cedula}</td>
               <td>{emp.Celular}</td>
-              <td>{emp.Tipo_Doc}</td>
-              <td>{emp.id_rol}</td>
               <td>
-                <div className='d-flex gap-2'>
-                  <button className='btn btn-sm btn-primary' onClick={() => onEdit(emp)}>Editar</button>
-                  <button className='btn btn-sm btn-danger' onClick={() => onDelete(emp.id_per)}>Eliminar</button>
-                </div>
+                {emp.id_rol === 3 ? 'Administrador' : 
+                emp.id_rol === 1 ? 'Supervisor' : 
+                emp.id_rol === 2 ? 'Empleado' : 
+                'Sin rol'}
+              </td>
+              <td>
+                <span className={`badge ${emp.activo === 1 ? 'bg-success' : 'bg-danger'}`}>
+                  {emp.activo === 1 ? 'Activo' : 'Inactivo'}
+                </span>
+              </td>
+              <td>
+                <button 
+                  className="btn btn-sm btn-outline-primary me-1"
+                  onClick={() => onEditar(emp)}
+                >
+                  <i className="bi bi-pencil"></i> Editar
+                </button>
+                
+                <button 
+                  className={`btn btn-sm ${emp.activo === 1 ? 'btn-outline-warning' : 'btn-outline-success'}`}
+                  onClick={() => onToggleActivo(emp)}
+                >
+                  {emp.activo === 1 ? 
+                    <><i className="bi bi-person-x"></i> Desactivar</> : 
+                    <><i className="bi bi-person-check"></i> Activar</>}
+                </button>
               </td>
             </tr>
           ))}
-          {empleados.length === 0 && (
-            <tr><td colSpan={9} className='text-center py-4'>Sin empleados</td></tr>
-          )}
         </tbody>
       </table>
     </div>
   );
-}
+};
+
+export default EmpleadosTable;

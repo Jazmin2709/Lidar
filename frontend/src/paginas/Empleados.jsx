@@ -1,103 +1,203 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Swal from 'sweetalert2';
-import EmpleadosTable from '../componentes/EmpleadosTable.jsx';
-import EmpleadoForm from '../componentes/EmpleadoForm';
+import EmpleadosTable from '../componentes/EmpleadosTable';
 
-const API_URL = 'http://localhost:3000/api';
-
-export default function Empleados() {
+const Empleados = () => {
   const [empleados, setEmpleados] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [editData, setEditData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [form, setForm] = useState({
+    Correo: '', Nombres: '', Apellidos: '', Cedula: '', 
+    Celular: '', Contrasena: '', Tipo_Doc: '', id_rol: ''
+  });
 
-  const cargarTodo = async () => {
+  const API_URL = 'http://localhost:3000/api/empleados';
+
+  const cargarEmpleados = async () => {
     try {
-      setLoading(true);
-      const [e, r] = await Promise.all([
-        axios.get(`${API_URL}/empleados`),
-        axios.get(`${API_URL}/empleados/roles`),
-      ]);
-
-      // ✅ Validación extra: aseguramos que sean arrays válidos y no estén vacíos
-      if (!Array.isArray(e.data) || !Array.isArray(r.data)) {
-        throw new Error('Los datos recibidos no tienen el formato esperado');
-      }
-      if (e.data.length === 0) {
-        Swal.fire('Atención', 'No se encontraron empleados', 'info');
-      }
-      if (r.data.length === 0) {
-        Swal.fire('Atención', 'No se encontraron roles disponibles', 'info');
-      }
-
-      setEmpleados(e.data);
-      setRoles(r.data);
+      const response = await axios.get(API_URL);
+      setEmpleados(response.data);
     } catch (error) {
-      console.error(error);
-      Swal.fire('Error', 'No se pudieron cargar los datos correctamente', 'error');
-    } finally {
-      setLoading(false);
+      console.error('Error cargando empleados:', error);
+      alert('Error al cargar empleados');
     }
   };
 
-  useEffect(() => { cargarTodo(); }, []);
-
-  const onEdit = (emp) => {
-    if (!emp || typeof emp !== 'object') {
-      Swal.fire('Error', 'Datos inválidos del empleado a editar', 'error');
-      return;
+  const cargarRoles = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/roles`);
+      setRoles(response.data);
+    } catch (error) {
+      console.error('Error cargando roles:', error);
     }
-    setEditData(emp); // ahora sí carga los datos en el formulario
   };
 
-
-  const onDelete = async (id) => {
-    // ✅ Validación extra para el ID
-    if (!id || isNaN(id) || Number(id) <= 0) {
-      Swal.fire('Atención', 'ID de empleado inválido', 'warning');
+  const handleToggleActivo = async (empleado) => {
+    if (!window.confirm(`¿Estás seguro de ${empleado.activo === 1 ? 'desactivar' : 'activar'} a ${empleado.Nombres}?`)) {
       return;
     }
 
-    const confirm = await Swal.fire({
-      title: '¿Eliminar empleado?',
-      text: 'Esta acción no se puede deshacer',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      reverseButtons: true, // Para prevenir clics accidentales
+    try {
+      const nuevoEstado = empleado.activo === 1 ? 0 : 1;
+      await axios.put(`${API_URL}/${empleado.id_per}/activo`, { 
+        activo: nuevoEstado 
+      });
+      
+      alert(`Empleado ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
+      cargarEmpleados();
+    } catch (error) {
+      console.error('Error cambiando estado:', error);
+      alert('Error al cambiar estado del empleado');
+    }
+  };
+
+  const handleEditar = (emp) => {
+    setEditando(emp);
+    setForm({
+      Correo: emp.Correo,
+      Nombres: emp.Nombres,
+      Apellidos: emp.Apellidos,
+      Cedula: emp.Cedula,
+      Celular: emp.Celular,
+      Contrasena: '',
+      Tipo_Doc: emp.Tipo_Doc,
+      id_rol: emp.id_rol
     });
+    setShowModal(true);
+  };
 
-    if (!confirm.isConfirmed) return;
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await axios.delete(`${API_URL}/empleados/${id}`);
-      Swal.fire('Eliminado', 'Empleado eliminado correctamente', 'success');
-      cargarTodo();
+      if (editando) {
+        await axios.put(`${API_URL}/${editando.id_per}`, form);
+        alert('Empleado actualizado correctamente');
+      } else {
+        await axios.post(API_URL, form);
+        alert('Empleado creado correctamente');
+      }
+      setShowModal(false);
+      cargarEmpleados();
     } catch (error) {
-      const msg = error?.response?.data?.message || 'Error al eliminar';
-      Swal.fire('Atención', msg, 'warning');
+      console.error('Error guardando empleado:', error);
+      alert(error.response?.data?.message || 'Error al guardar empleado');
     }
   };
+
+  useEffect(() => {
+    cargarEmpleados();
+    cargarRoles();
+  }, []);
 
   return (
-    <div className='container py-4'>
-      <h1 className='mb-4'>Gestión de Empleados</h1>
-
-      <div className='mb-4'>
-        <EmpleadoForm
-          roles={roles}
-          editData={editData}
-          onSaved={() => { setEditData(null); cargarTodo(); }}
-        />
+    <div className="container-fluid">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gestión de Empleados</h2>
+        <button 
+          className="btn btn-primary"
+          onClick={() => {
+            setEditando(null);
+            setForm({
+              Correo: '', Nombres: '', Apellidos: '', Cedula: '', 
+              Celular: '', Contrasena: '', Tipo_Doc: '', id_rol: ''
+            });
+            setShowModal(true);
+          }}
+        >
+          <i className="bi bi-person-plus"></i> Nuevo Empleado
+        </button>
       </div>
 
-      {loading ? (
-        <p>Cargando...</p>
-      ) : (
-        <EmpleadosTable empleados={empleados} onEdit={onEdit} onDelete={onDelete} />
+      <EmpleadosTable 
+        empleados={empleados}
+        onToggleActivo={handleToggleActivo}
+        onEditar={handleEditar}
+      />
+
+      {showModal && (
+        <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {editando ? 'Editar Empleado' : 'Nuevo Empleado'}
+                </h5>
+                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div className="modal-body">
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <label className="form-label">Nombres *</label>
+                      <input type="text" className="form-control" value={form.Nombres} 
+                        onChange={(e) => setForm({...form, Nombres: e.target.value})} required />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Apellidos *</label>
+                      <input type="text" className="form-control" value={form.Apellidos} 
+                        onChange={(e) => setForm({...form, Apellidos: e.target.value})} required />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Email *</label>
+                      <input type="email" className="form-control" value={form.Correo} 
+                        onChange={(e) => setForm({...form, Correo: e.target.value})} required />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Cédula *</label>
+                      <input type="text" className="form-control" value={form.Cedula} 
+                        onChange={(e) => setForm({...form, Cedula: e.target.value})} required />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Celular *</label>
+                      <input type="text" className="form-control" value={form.Celular} 
+                        onChange={(e) => setForm({...form, Celular: e.target.value})} required />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Tipo Documento *</label>
+                      <select className="form-select" value={form.Tipo_Doc} 
+                        onChange={(e) => setForm({...form, Tipo_Doc: e.target.value})} required>
+                        <option value="">Seleccionar</option>
+                        <option value="CC">Cédula</option>
+                        <option value="TI">Tarjeta Identidad</option>
+                        <option value="CE">Cédula Extranjería</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Rol *</label>
+                      <select className="form-select" value={form.id_rol} 
+                        onChange={(e) => setForm({...form, id_rol: e.target.value})} required>
+                        <option value="">Seleccionar rol</option>
+                        {roles.map(rol => (
+                          <option key={rol.id_rol} value={rol.id_rol}>{rol.nombre}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">
+                        Contraseña {editando ? '(dejar vacío para no cambiar)' : '*'}
+                      </label>
+                      <input type="password" className="form-control" value={form.Contrasena} 
+                        onChange={(e) => setForm({...form, Contrasena: e.target.value})} 
+                        required={!editando} />
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    {editando ? 'Actualizar' : 'Crear'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
-}
+};
+
+export default Empleados;
