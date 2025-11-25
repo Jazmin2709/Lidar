@@ -199,7 +199,7 @@ export default function Dashboard() {
     // RENDER DEL COMPONENTE
     // -------------------------
     return (
-        <div style={{ padding: '30px' }}>
+        <div style={{ padding: '0  50px' }}>
             <h1 style={{ textAlign: 'center' }}>Dashboard</h1>
 
 

@@ -100,7 +100,7 @@ export default function Reportes() {
         if (activeFilters.Fecha && activeFilters.Fecha.length > 0)
             queryParams.append("Fecha", activeFilters.Fecha[0]);
 
-        const url = `http://localhost:3000/api/buddy/BuddyPartner/export-pdf?${queryParams.toString()}`;
+        const url = `http://localhost:3000/api/buddy/BuddyPartner/export-pdf?${queryParams.toString()}`; 
         window.open(url, "_blank");
     };
 
@@ -241,9 +241,9 @@ export default function Reportes() {
     const [renderTrigger, setRenderTrigger] = useState(false);
 
     return (
-        <div style={{ padding: '0 40px' }}>
+        <div style={{ padding: '0 50px 50px' }}>
 
-            <h1 style={{ textAlign: 'center', marginBottom: '24px' }}>Reportes</h1>
+            <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Reportes</h1>
 
             {/* ================================================== */}
             {/* 🔔 ALERTA DE BUDDY PARTNERS PENDIENTES */}
