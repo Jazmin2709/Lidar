@@ -8,7 +8,7 @@ const groq = new Groq({
 });
 
 // -------------------------------------------------------------------
-// 🔥 CONTEXTO FIJO DEL PROYECTO (MUY IMPORTANTE PARA QUE RESPONDA BIEN)
+// 🔥 CONTEXTO FIJO DEL PROYECTO
 // -------------------------------------------------------------------
 const CONTEXTO = `
 Eres "Help Oca", el asistente oficial del sistema OCA Global / LIDAR.
@@ -22,7 +22,7 @@ Tu objetivo es ayudar al usuario a navegar la página web y usar sus formularios
 - INICIAR SESIÓN
 - Dashboard de empleados
 - Formularios Buddy (Buddy 1, Buddy 2, Buddy 3)
-- Formulario de Registro (nombres, apellidos, correo, tipo documento, celular, contraseña)
+- Formulario de Registro
 - Formularios diarios para empleados
 
 📌 Reglas obligatorias:
@@ -30,20 +30,14 @@ Tu objetivo es ayudar al usuario a navegar la página web y usar sus formularios
 2. Responde SIEMPRE basado en lo que un usuario ve en la página.
 3. Si el usuario pregunta "¿Cómo me registro?" → respóndele:
    "Haz clic en *Registrar* arriba a la derecha y llena tus datos."
-4. Si pregunta sobre un formulario Buddy → guíalo según lo que normalmente se ve:
-   (número de cuadrilla, fecha, estado, observaciones…)
-5. NO des información del mundo real, solo del sistema LIDAR/OCA.
-6. Responde de forma breve, clara y útil.
-7. Adáptate a la ruta actual del usuario (te la enviaré como 'rutaActual').
-
-📌 Ejemplos de respuestas correctas:
-- “Para registrarte, haz clic en *Registrar* en la parte superior.”
-- “En Buddy 2 debes seleccionar el estado del vehículo y agregar observaciones.”
-- “Si estás en la página de login, escribe tu correo y contraseña y presiona Ingresar.”
+4. Si pregunta sobre un formulario Buddy → guíalo según lo normal.
+5. NO des información del mundo real.
+6. Sé breve y clara.
+7. Adáptate a la ruta actual del usuario.
 `;
 
 // -------------------------------------------------------------------
-// 🔵 RUTA DEL CHATBOT
+// 🔵 ÚNICA RUTA DEL CHATBOT
 // -------------------------------------------------------------------
 router.post("/chat", async (req, res) => {
     try {
@@ -53,15 +47,13 @@ router.post("/chat", async (req, res) => {
             return res.status(400).json({ error: "Falta el mensaje" });
         }
 
-        // Mensaje del sistema dinámico según dónde está el usuario
         const CONTEXTO_RUTA = ruta
             ? `El usuario está actualmente en la ruta: ${ruta}. Guíalo específicamente sobre esa sección.`
             : "El usuario no especificó la ruta actual.";
 
-        // 🧠 Llamada a Groq con contexto + ruta
         const respuestaIA = await groq.chat.completions.create({
             model: "llama-3.1-8b-instant",
-            temperature: 0.2, // Respuestas más precisas y controladas
+            temperature: 0.2,
             messages: [
                 { role: "system", content: CONTEXTO },
                 { role: "system", content: CONTEXTO_RUTA },

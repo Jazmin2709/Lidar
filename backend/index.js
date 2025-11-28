@@ -1,18 +1,23 @@
 require("dotenv").config();   // ← OBLIGATORIO
+console.log("CARGANDO .ENV DESDE:", __dirname);
+console.log("GROQ_API_KEY =", process.env.GROQ_API_KEY);
+console.log("ENV FILE KEYS:", Object.keys(process.env));
+
 
 const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
 
-// Importamos rutas
-const authRoutes = require('./routes/auth');
-const buddyRoutes = require('./routes/BuddyPartners');
-const empleadosRoutes = require('./routes/empleados');
-const imagenesRoutes = require('./routes/imagenes');
-const chatbotRoutes = require('./routes/chatbotRoutes');
+    // Importamos rutas
+    const authRoutes = require('./routes/auth');
+    const buddyRoutes = require('./routes/BuddyPartners');
+    const empleadosRoutes = require('./routes/empleados');
+    const imagenesRoutes = require('./routes/imagenes');
+    const chatbotRoutes = require('./routes/chatbotRoutes');
+    
 
-const PORT = process.env.PORT || 3000;
-const app = express();
+    const PORT = process.env.PORT || 3000;
+    const app = express();
 
 // Middlewares
 app.use(cors({
