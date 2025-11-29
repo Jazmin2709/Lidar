@@ -223,14 +223,16 @@ export default function Reportes() {
             onFilter: (value, record) => record.Est_vehi.includes(value),
         },
         {
-            title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet',
-            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
-                ? (<img src={url} alt="Carnet" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
-                : '—')
-        },
-        {
-            title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida',
-            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
+            title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet',
+            width: 120, // Ancho fijo para columna de imagen
+            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
+                ? (<img src={url} alt="Carnet" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
+                : '—')
+        },
+        {
+            title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida',
+            width: 120, // Ancho fijo para columna de imagen
+            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
                 ? (<img src={url} alt="Tarjeta Vida" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
                 : '—')
         },
@@ -262,18 +264,42 @@ export default function Reportes() {
             onFilter: (value, record) => record.Est_her.includes(value),
         },
         // Columnas de Motivos
-        { title: 'Motivo Emp', dataIndex: 'MotivoEmp', key: 'MotivoEmp' },
-        { title: 'Motivo Veh', dataIndex: 'MotivoVeh', key: 'MotivoVeh' },
-        { title: 'Motivo Her', dataIndex: 'MotivoHer', key: 'MotivoHer' },
+        { 
+        title: 'Motivo Emp', 
+        dataIndex: 'MotivoEmp', 
+        key: 'MotivoEmp',
+        // Usar un ancho fijo/mínimo para el scroll funcione bien
+        width: 150, 
+        // Habilitar truncamiento con puntos suspensivos
+        ellipsis: true, 
+        // Opcional: Centrar el texto si no es demasiado largo (no recomendado para texto largo)
+        // align: 'center' 
+    },
+    { 
+        title: 'Motivo Veh', 
+        dataIndex: 'MotivoVeh', 
+        key: 'MotivoVeh',
+        width: 150,
+        ellipsis: true
+    },
+    { 
+        title: 'Motivo Her', 
+        dataIndex: 'MotivoHer', 
+        key: 'MotivoHer',
+        width: 150,
+        ellipsis: true
+    },
         // Columnas de Imágenes Tablero y Calentamiento
         {
-            title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero',
-            render: (url) => url ? (<img src={url} alt="tablero" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
-        },
-        {
-            title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento',
-            render: (url) => url ? (<img src={url} alt="calentamiento" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
-        },
+            title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero',
+            width: 120, // Ancho fijo para columna de imagen
+            render: (url) => url ? (<img src={url} alt="tablero" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
+        },
+        {
+            title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento',
+            width: 140, // Un poco más de ancho si el título es largo
+            render: (url) => url ? (<img src={url} alt="calentamiento" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
+        },
         // Columnas de metadatos
         { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado' },
         { title: 'Tipo', dataIndex: 'Tipo', key: 'Tipo' },
@@ -374,6 +400,14 @@ export default function Reportes() {
                 rowKey="id_buddy1"
                 pagination={{ pageSize: 10 }}
                 onChange={(pagination, filters, sorter, extra) => setActiveFilters(filters)}
+                // 💡 CLAVE DE RESPONSIVIDAD: Añadir propiedad scroll
+                scroll={{ 
+                    // Establece el ancho total para habilitar el scroll horizontal
+                    // 2000px es un valor seguro para tantas columnas
+                    x: 2000, 
+                    // Si quieres scroll vertical, define la altura. Por ejemplo:
+                    // y: 500
+                }} 
                 rowClassName={(record) => {
                     if (record.isPending) return "row-pendiente";
 
