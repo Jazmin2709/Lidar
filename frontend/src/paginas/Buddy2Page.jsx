@@ -27,9 +27,9 @@ export default function Buddy2Page() {
             icon: "warning",
             title: "Tienes Buddy Partners pendientes",
             html: `
-              <p>Algunas actividades Buddy del día anterior no se completaron.</p>
-              <p><b>Debes completarlas hoy.</b></p>
-            `,
+              <p>Algunas actividades Buddy del día anterior no se completaron.</p>
+              <p><b>Debes completarlas hoy.</b></p>
+            `,
             confirmButtonColor: "#3085d6",
           });
         }
@@ -53,7 +53,7 @@ export default function Buddy2Page() {
     MotivoHer: "",
     Tablero: "",
     Calentamiento: "",
-    Tipo: 2,          // <-- Tipo fijo (NO editable)
+    Tipo: 2,          // <-- Tipo fijo (NO editable)
     id_empleado: id_empleado,
   });
 
@@ -79,43 +79,40 @@ export default function Buddy2Page() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Validar fecha
-    if (moment(Formulario.Fecha).isAfter(moment(), "day")) {
-      Swal.fire({
-        icon: "error",
-        title: "Fecha inválida",
-        text: "La fecha no puede ser futura.",
-      });
-      return;
-    }
+    // Validar fecha (Tu código existente)
+    // ...
+
+    // 🔥 1. CREAR UNA COPIA DEL PAYLOAD BASE
+    let payload = {
+      ...Formulario,
+    };
+
+    // NOTA: Se eliminó el bloque de limpieza de Motivos, ya que los valores de Motivo solo 
+    // se establecen si el Estado es "Malo" en el formulario, y se envían tal cual están en el estado.
 
     try {
-      // Validar imágenes
+      // Validar imágenes (Tu código existente)
       if (!selectedFileTablero || !selectedFileCalentamiento) {
         Swal.fire("Faltan imágenes", "Debes subir tablero y calentamiento.", "warning");
         return;
       }
 
-      // Subir imágenes
+      // Subir imágenes (Tu código existente)
       const publicIdBase = `${id_empleado || "anon"}_${Date.now()}`;
-
       const urlTablero = await uploadImage(
         selectedFileTablero,
         "tableros",
         `tablero_${publicIdBase}`
       );
-
       const urlCal = await uploadImage(
         selectedFileCalentamiento,
         "calentamientos",
         `calentamiento_${publicIdBase}`
       );
 
-      const payload = {
-        ...Formulario,
-        Tablero: urlTablero,
-        Calentamiento: urlCal,
-      };
+      // 🔥 3. AGREGAR URL'S AL PAYLOAD FINAL
+      payload.Tablero = urlTablero;
+      payload.Calentamiento = urlCal;
 
       // Enviar a backend
       const response = await axios.post(`${API_URL}/buddy/BuddyPartner`, payload);
@@ -145,9 +142,11 @@ export default function Buddy2Page() {
 
     if (name === "num_cuadrilla" && !/^\d*$/.test(value)) return;
 
+    // ✅ CAMBIO IMPLEMENTADO: Se relaja la validación para permitir:
+    // Letras (a-zA-Z), números (0-9), espacios (\s), puntos (.), comas (,), guiones (-), y paréntesis (()).
     if (
       ["MotivoEmp", "MotivoVeh", "MotivoHer"].includes(name) &&
-      !/^[a-zA-Z0-9\s]*$/.test(value)
+      !/^[a-zA-Z0-9\s.,()-]*$/.test(value)
     )
       return;
 

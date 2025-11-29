@@ -39,7 +39,9 @@ exports.GetBuddyPartner = (req, res) => {
 exports.BuddyPartner = (req, res) => {
     const {
         num_cuadrilla, Hora_buddy, Est_empl, Est_vehi, Carnet, TarjetaVida,
-        Fecha, Est_etapa, Est_her, Tablero, Calentamiento, Tipo, id_empleado
+        Fecha, Est_etapa, Est_her, Tablero, Calentamiento, Tipo, id_empleado,
+        // ✅ CAMPOS FALTANTES AGREGADOS
+        MotivoEmp, MotivoVeh, MotivoHer
     } = req.body;
 
     if (!num_cuadrilla || !Hora_buddy || !Est_empl || !Est_vehi ||
@@ -61,6 +63,10 @@ exports.BuddyPartner = (req, res) => {
         Fecha,
         Est_etapa,
         Est_her,
+        // ✅ MOTIVOS AGREGADOS AL OBJETO DE INSERCIÓN
+        MotivoEmp,
+        MotivoVeh,
+        MotivoHer,
         Tablero: Tablero || null,
         Calentamiento: Calentamiento || null,
         Tipo,
@@ -197,13 +203,13 @@ exports.ExportPDF = (req, res) => {
         // ========================
         const tableTop = 100;
         const tableLeft = 30;
-        const tableWidth = 785;   // Ajustado al ancho total aproximado de columnas
+        const tableWidth = 785;   // Ajustado al ancho total aproximado de columnas
         const headerHeight = 25;
 
         // Crear degradado azul
         const gradient = doc.linearGradient(tableLeft, tableTop, tableLeft + tableWidth, tableTop);
-        gradient.stop(0, "#004aad");  // Azul oscuro
-        gradient.stop(1, "#1e88e5");  // Azul claro
+        gradient.stop(0, "#004aad");  // Azul oscuro
+        gradient.stop(1, "#1e88e5");  // Azul claro
 
         // Dibujar rectángulo del fondo del encabezado
         doc.rect(tableLeft, tableTop, tableWidth, headerHeight).fill(gradient);
@@ -330,16 +336,16 @@ exports.GetPendingByUser = (req, res) => {
     const hoy = new Date().toISOString().split("T")[0];
 
     const sql = `
-        SELECT 
-            Tipo AS tipo, 
-            Est_etapa AS estado, 
-            DATE(Fecha) AS fecha
-        FROM buddy
-        WHERE id_empleado = ?
-        AND (Est_etapa = 'Inicio' OR Est_etapa = 'En proceso')
-        AND DATE(Fecha) < ?
-        ORDER BY Tipo ASC
-    `;
+        SELECT 
+            Tipo AS tipo, 
+            Est_etapa AS estado, 
+            DATE(Fecha) AS fecha
+        FROM buddy
+        WHERE id_empleado = ?
+        AND (Est_etapa = 'Inicio' OR Est_etapa = 'En proceso')
+        AND DATE(Fecha) < ?
+        ORDER BY Tipo ASC
+    `;
 
     db.query(sql, [id, hoy], (error, results) => {
         if (error) {
