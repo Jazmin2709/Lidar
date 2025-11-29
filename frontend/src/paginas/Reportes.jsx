@@ -1,23 +1,21 @@
 import Swal from 'sweetalert2';
-// Importación de React y hooks
 import React, { useEffect, useState } from 'react';
-// Importación de axios para peticiones HTTP
 import axios from 'axios';
-// Importación de componentes de Ant Design para la UI
-import { Table, Button, Input, Modal, Form, message, Alert, Upload } from 'antd';
-// Icono de búsqueda
+import { Table, Button, Input, Modal, Form, Alert, Upload, Select } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-// Importación de estilos personalizados
 import '../css/styles.css';
-// Importación de moment para manejo de fechas
 import moment from 'moment';
-// Importación de Select de Ant Design
-import { Select } from 'antd';
+
 const { Option } = Select;
+const API_BASE_URL = 'http://localhost:3000/api/buddy/BuddyPartner';
+const API_IMAGE_UPLOAD = 'http://localhost:3000/api/imagenes/subir';
 
-// Componente principal de Reportes
+/**
+ * Componente principal para la gestión y visualización de Reportes (Buddy Partners).
+ * @returns {JSX.Element} El componente Reportes
+ */
 export default function Reportes() {
-
+    // 1. Estados principales para la data y UI
     const [buddyPartners, setBuddyPartners] = useState([]);
     const [pendingBuddies, setPendingBuddies] = useState([]);
     const [editingRecord, setEditingRecord] = useState(null);
@@ -25,10 +23,11 @@ export default function Reportes() {
     const [form] = Form.useForm();
     const [activeFilters, setActiveFilters] = useState({});
 
-    // 🔥 NUEVOS ESTADOS PARA MANEJAR ARCHIVOS EN EDICIÓN
+    // 2. ESTADOS para manejar los nuevos archivos a subir durante la edición
     const [newFileTablero, setNewFileTablero] = useState(null);
     const [newFileCalentamiento, setNewFileCalentamiento] = useState(null);
-    // ----------------------------------------------------
+    const [newFileCarnet, setNewFileCarnet] = useState(null);
+    const [newFileTarjetaVida, setNewFileTarjetaVida] = useState(null);
 
     useEffect(() => {
         fetchBuddyPartners();
@@ -36,91 +35,70 @@ export default function Reportes() {
 
     const fetchBuddyPartners = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/buddy/BuddyPartner/');
-
-            // Formatear fechas
-            response.data.forEach(item => {
-                item.Fecha = moment(item.Fecha).format('YYYY-MM-DD');
-            });
-
-            setBuddyPartners(response.data);
-
-            // ==========================
-            // 🔍 DETECTAR BUDDIES PENDIENTES
-            // ==========================
+            const response = await axios.get(API_BASE_URL);
             const hoy = moment().format("YYYY-MM-DD");
 
-            const pendientes = response.data.filter(b =>
-                (b.Est_etapa === "Inicio" || b.Est_etapa === "En proceso") &&
-                b.Fecha < hoy
-            );
+            const data = response.data.map(item => {
+                const Fecha = moment(item.Fecha).format('YYYY-MM-DD');
+                const isPending = (item.Est_etapa === "Inicio" || item.Est_etapa === "En proceso") && Fecha < hoy;
 
+                return {
+                    ...item,
+                    Fecha,
+                    isPending
+                };
+            });
+
+            setBuddyPartners(data);
+
+            const pendientes = data.filter(b => b.isPending);
             setPendingBuddies(pendientes);
 
         } catch (error) {
-            console.error(error);
+            console.error("Error al cargar los reportes:", error);
         }
     };
 
-    // ... después de fetchBuddyPartners, antes de handleDelete
-
-    // 🔥 FUNCIÓN PARA SUBIR IMÁGENES AL BACKEND (ASUMIMOS EL MISMO ENDPOINT)
     const uploadImage = async (file, preset, publicId) => {
         const formData = new FormData();
-        // NOTA: Asegúrate que tu backend espere 'foto'
         formData.append("foto", file);
         formData.append("upload_preset", preset);
         formData.append("public_id", publicId);
 
-        // Asumo que tienes acceso a la API_URL o la defines aquí:
-        const API_URL = "http://localhost:3000/api";
-
-        const response = await axios.post(`${API_URL}/imagenes/subir`, formData, {
+        const response = await axios.post(API_IMAGE_UPLOAD, formData, {
             headers: { "Content-Type": "multipart/form-data" },
         });
 
         return response.data.url;
     };
 
-    // ...
-
     const handleDelete = async (recordId) => {
-        // 1. Mostrar alerta de confirmación
         const result = await Swal.fire({
             title: "¿Estás seguro?",
             text: "¡No podrás revertir esta acción!",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#d33", // Rojo para eliminar
+            confirmButtonColor: "#d33",
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar"
         });
 
-        // 2. Si el usuario confirma
         if (result.isConfirmed) {
             try {
-                // 🔥 CORRECCIÓN CLAVE: Cambiamos 'id' por 'recordId'
-                const response = await axios.delete(`http://localhost:3000/api/buddy/BuddyPartner/${recordId}`);
-
-                // 3. Mostrar alerta de éxito
+                const response = await axios.delete(`${API_BASE_URL}/${recordId}`);
                 Swal.fire({
                     title: "¡Eliminado!",
                     text: response.data.message || "El reporte ha sido eliminado correctamente.",
                     icon: "success",
                     confirmButtonColor: "#1677ff",
                 });
-
-                // 4. Recargar los datos de la tabla
                 fetchBuddyPartners();
-
             } catch (error) {
                 console.error("Error al eliminar el reporte:", error);
-
-                // 5. Mostrar alerta de error (Mantenemos la lógica de error)
                 Swal.fire({
                     title: "Error al eliminar",
-                    text: error.response?.data?.message || "Ocurrió un error desconocido al intentar eliminar el reporte.",
+                    text: error.response?.data?.message || "Ocurrió un error desconocido.",
                     icon: "error",
                     confirmButtonColor: "#1677ff",
                 });
@@ -130,69 +108,60 @@ export default function Reportes() {
 
     const handleEdit = (record) => {
         setEditingRecord(record);
-        // Esta línea asegura que el Form de Ant Design tenga los valores, incluyendo los motivos.
         form.setFieldsValue(record);
         setIsModalOpen(true);
-        // Resetear los archivos seleccionados
+        // Resetear estados de archivos al abrir el modal para evitar confusiones
         setNewFileTablero(null);
         setNewFileCalentamiento(null);
+        setNewFileCarnet(null);
+        setNewFileTarjetaVida(null);
     };
 
     const handleUpdate = async () => {
         try {
-            // Obtenemos los valores del formulario
             const values = await form.validateFields();
-            // Creamos un payload mutable (usando let)
-            let payload = { ...values }; // Cambiado a 'let' para permitir la modificación
+            let payload = { ...values };
 
-            // 🚨 INICIO DE LA LÓGICA DE LIMPIEZA DE MOTIVOS 🚨
+            // 1. Limpieza de motivos si el estado no es 'Malo'
+            if (payload.Est_empl !== "Malo") payload.MotivoEmp = null;
+            if (payload.Est_vehi !== "Malo") payload.MotivoVeh = null;
+            if (payload.Est_her !== "Malo") payload.MotivoHer = null;
 
-            // 1. Limpiar Motivo Empleado si el estado NO es Malo
-            if (payload.Est_empl !== "Malo") {
-                // Se usa null para que se guarde NULL en la base de datos, limpiando el valor anterior
-                payload.MotivoEmp = null;
+            // 2. Función genérica para subir un archivo si existe uno nuevo
+            const updateFile = async (newFileState, preset, fieldName) => {
+                if (newFileState) {
+                    const publicIdBase = `${payload.id_empleado || "anon"}_${Date.now()}`;
+                    const url = await uploadImage(
+                        newFileState,
+                        preset,
+                        `${fieldName.toLowerCase()}_edit_${publicIdBase}`
+                    );
+                    payload[fieldName] = url;
+                }
+            };
+
+            // 3. Manejar subida de imágenes - CONDICIONAL para Carnet/Tarjeta Vida (Tipo 1)
+            // Si el registro es de Tipo 1, permite subir las imágenes, si no, mantiene el valor existente o ""
+            if (editingRecord.Tipo === 1) {
+                await updateFile(newFileCarnet, "Carnet", "Carnet");
+                await updateFile(newFileTarjetaVida, "TarjetaVida", "TarjetaVida");
+            } else {
+                // Si no es Tipo 1, nos aseguramos de no enviar los archivos nuevos
+                // y mantenemos el valor actual de Carnet/TarjetaVida que ya está en 'payload'
             }
 
-            // 2. Limpiar Motivo Vehículo si el estado NO es Malo
-            if (payload.Est_vehi !== "Malo") {
-                payload.MotivoVeh = null;
+            // Manejar subida de imágenes - CONDICIONAL para Tablero/Calentamiento (Tipo 2)
+            if (editingRecord.Tipo === 2) {
+                await updateFile(newFileTablero, "tableros", "Tablero");
+                await updateFile(newFileCalentamiento, "calentamientos", "Calentamiento");
+            } else {
+                // Si no es Tipo 2, mantenemos el valor actual de Tablero/Calentamiento que ya está en 'payload'
             }
 
-            // 3. Limpiar Motivo Herramienta si el estado NO es Malo
-            // (Asumiendo que este campo existe en tu formulario/modal de edición)
-            if (payload.Est_her !== "Malo") {
-                payload.MotivoHer = null;
-            }
 
-            // 🚨 FIN DE LA LÓGICA DE LIMPIEZA DE MOTIVOS 🚨
+            // 4. Enviar la actualización al backend
+            const response = await axios.put(`${API_BASE_URL}/${editingRecord.id_buddy1}`, payload);
 
-
-            // 1. Manejar subida de Tablero si se seleccionó un archivo
-            if (newFileTablero) {
-                const publicIdBase = `${payload.id_empleado || "anon"}_${Date.now()}`;
-                const urlTablero = await uploadImage(
-                    newFileTablero,
-                    "tableros",
-                    `tablero_edit_${publicIdBase}`
-                );
-                payload.Tablero = urlTablero;
-            }
-
-            // 2. Manejar subida de Calentamiento si se seleccionó un archivo
-            if (newFileCalentamiento) {
-                const publicIdBase = `${payload.id_empleado || "anon"}_${Date.now()}`;
-                const urlCal = await uploadImage(
-                    newFileCalentamiento,
-                    "calentamientos",
-                    `calentamiento_edit_${publicIdBase}`
-                );
-                payload.Calentamiento = urlCal;
-            }
-
-            // 3. Enviar la actualización con el payload modificado
-            const response = await axios.put(`http://localhost:3000/api/buddy/BuddyPartner/${editingRecord.id_buddy1}`, payload);
-
-            // ... (Tu código de manejo de respuesta y errores)
             Swal.fire({
                 icon: "success",
                 title: "¡Actualización Exitosa!",
@@ -204,7 +173,7 @@ export default function Reportes() {
             fetchBuddyPartners();
 
         } catch (error) {
-            console.error(error);
+            console.error("Error en la actualización:", error);
             Swal.fire({
                 icon: "error",
                 title: "Error al actualizar",
@@ -213,67 +182,60 @@ export default function Reportes() {
         }
     };
 
-    // Exportar PDF
     const exportPDF = () => {
         const queryParams = new URLSearchParams();
-        if (activeFilters.Est_empl && activeFilters.Est_empl.length > 0)
-            queryParams.append("Est_empl", activeFilters.Est_empl[0]);
-        if (activeFilters.Est_vehi && activeFilters.Est_vehi.length > 0)
-            queryParams.append("Est_vehi", activeFilters.Est_vehi[0]);
-        if (activeFilters.Est_etapa && activeFilters.Est_etapa.length > 0)
-            queryParams.append("Est_etapa", activeFilters.Est_etapa[0]);
-        if (activeFilters.Fecha && activeFilters.Fecha.length > 0)
-            queryParams.append("Fecha", activeFilters.Fecha[0]);
+        Object.entries(activeFilters).forEach(([key, values]) => {
+            if (values && values.length > 0) {
+                queryParams.append(key, values[0]);
+            }
+        });
 
-        const url = `http://localhost:3000/api/buddy/BuddyPartner/export-pdf?${queryParams.toString()}`;
+        const url = `${API_BASE_URL}/export-pdf?${queryParams.toString()}`;
         window.open(url, "_blank");
     };
 
     const exportExcel = () => {
         const queryParams = new URLSearchParams();
-        if (activeFilters.Est_empl && activeFilters.Est_empl.length > 0)
-            queryParams.append("Est_empl", activeFilters.Est_empl[0]);
-        if (activeFilters.Est_vehi && activeFilters.Est_vehi.length > 0)
-            queryParams.append("Est_vehi", activeFilters.Est_vehi[0]);
-        if (activeFilters.Est_etapa && activeFilters.Est_etapa.length > 0)
-            queryParams.append("Est_etapa", activeFilters.Est_etapa[0]);
-        if (activeFilters.Fecha && activeFilters.Fecha.length > 0)
-            queryParams.append("Fecha", activeFilters.Fecha[0]);
+        Object.entries(activeFilters).forEach(([key, values]) => {
+            if (values && values.length > 0) {
+                queryParams.append(key, values[0]);
+            }
+        });
 
-        const url = `http://localhost:3000/api/buddy/BuddyPartner/export-excel?${queryParams.toString()}`;
+        const url = `${API_BASE_URL}/export-excel?${queryParams.toString()}`;
         window.open(url, "_blank");
     };
 
+
+    // Configuración de las columnas de la tabla de Ant Design (Sin cambios aquí)
     const columns = [
         { title: 'Id', dataIndex: 'id_buddy1', key: 'id_buddy1', sorter: (a, b) => a.id_buddy1 - b.id_buddy1 },
         { title: 'Numero Cuadrilla', dataIndex: 'num_cuadrilla', key: 'num_cuadrilla' },
         { title: 'Hora', dataIndex: 'Hora_buddy', key: 'Hora_buddy' },
-
         {
             title: 'Estado Empleado', dataIndex: 'Est_empl', key: 'Est_empl',
-            filters: [
-                { text: 'Excelente', value: 'Excelente' },
-                { text: 'Malo', value: 'Malo' },
-            ],
+            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
             onFilter: (value, record) => record.Est_empl.includes(value),
         },
-
         {
             title: 'Estado Vehiculo', dataIndex: 'Est_vehi', key: 'Est_vehi',
-            filters: [
-                { text: 'Excelente', value: 'Excelente' },
-                { text: 'Malo', value: 'Malo' },
-            ],
+            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
             onFilter: (value, record) => record.Est_vehi.includes(value),
         },
-
-        { title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet' },
-        { title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida' },
-
         {
-            title: 'Fecha',
-            dataIndex: 'Fecha',
-            key: 'Fecha',
+            title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet',
+            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
+                ? (<img src={url} alt="Carnet" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
+                : '—')
+        },
+        {
+            title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida',
+            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
+                ? (<img src={url} alt="Tarjeta Vida" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
+                : '—')
+        },
+        {
+            title: 'Fecha', dataIndex: 'Fecha', key: 'Fecha',
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
                     <Input
@@ -289,67 +251,33 @@ export default function Reportes() {
             filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
             onFilter: (value, record) => record.Fecha.includes(value),
         },
-
         {
-            title: 'Estado Etapa',
-            dataIndex: 'Est_etapa',
-            key: 'Est_etapa',
-            filters: [
-                { text: 'Inicio', value: 'Inicio' },
-                { text: 'En proceso', value: 'En proceso' },
-                { text: 'Finalizó', value: 'Finalizó' },
-            ],
+            title: 'Estado Etapa', dataIndex: 'Est_etapa', key: 'Est_etapa',
+            filters: [{ text: 'Inicio', value: 'Inicio' }, { text: 'En proceso', value: 'En proceso' }, { text: 'Finalizó', value: 'Finalizó' }],
             onFilter: (value, record) => record.Est_etapa.includes(value),
         },
-
         {
-            title: 'Estado Herramienta',
-            dataIndex: 'Est_her',
-            key: 'Est_her',
-            filters: [
-                { text: 'Excelente', value: 'Excelente' },
-                { text: 'Malo', value: 'Malo' },
-            ],
+            title: 'Estado Herramienta', dataIndex: 'Est_her', key: 'Est_her',
+            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
             onFilter: (value, record) => record.Est_her.includes(value),
         },
-
-        // --------------------------------------------------------------------
-        // 🔥 CAMPOS FALTANTES (según tu tabla)
-        // --------------------------------------------------------------------
+        // Columnas de Motivos
         { title: 'Motivo Emp', dataIndex: 'MotivoEmp', key: 'MotivoEmp' },
         { title: 'Motivo Veh', dataIndex: 'MotivoVeh', key: 'MotivoVeh' },
         { title: 'Motivo Her', dataIndex: 'MotivoHer', key: 'MotivoHer' },
+        // Columnas de Imágenes Tablero y Calentamiento
         {
-            title: 'Tablero',
-            dataIndex: 'Tablero',
-            key: 'Tablero',
-            render: (url) =>
-                url ? (
-                    <img
-                        src={url}
-                        alt="tablero"
-                        style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
-                    />
-                ) : '—'
+            title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero',
+            render: (url) => url ? (<img src={url} alt="tablero" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
         },
         {
-            title: 'Calentamiento',
-            dataIndex: 'Calentamiento',
-            key: 'Calentamiento',
-            render: (url) =>
-                url ? (
-                    <img
-                        src={url}
-                        alt="calentamiento"
-                        style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
-                    />
-                ) : '—'
+            title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento',
+            render: (url) => url ? (<img src={url} alt="calentamiento" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
         },
-        // --------------------------------------------------------------------
-
+        // Columnas de metadatos
         { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado' },
         { title: 'Tipo', dataIndex: 'Tipo', key: 'Tipo' },
-
+        // Columna de Acciones (Editar/Eliminar)
         {
             title: 'Acciones',
             key: 'acciones',
@@ -362,17 +290,56 @@ export default function Reportes() {
         },
     ];
 
+    const getBeforeUploadHandler = (setNewFile) => (file) => {
+        setNewFile(file);
+        return false;
+    };
 
-    const [renderTrigger, setRenderTrigger] = useState(false);
+    /**
+     * Componente de visualización y subida de archivo reutilizable para el Modal.
+     */
+    const FileUploadDisplay = ({ label, fieldName, newFileState, setNewFileState }) => {
+        const currentUrl = editingRecord ? editingRecord[fieldName] : null;
+
+        const previewUrl = newFileState ? URL.createObjectURL(newFileState) :
+            (typeof currentUrl === 'string' && currentUrl.length > 5 && (currentUrl.startsWith('http') || currentUrl.startsWith('https')) ? currentUrl : null);
+
+        const buttonText = newFileState ? `Cambiar ${label}: ${newFileState.name}` : `Seleccionar Nuevo ${label}`;
+
+        return (
+            <Form.Item label={`Imagen ${label}`}>
+                {/* 1. Vista previa de la imagen */}
+                {previewUrl ? (
+                    <img
+                        src={previewUrl}
+                        alt={`Previsualización ${label}`}
+                        style={{ width: "100%", maxHeight: "350px", objectFit: "contain", borderRadius: "10px", border: "1px solid #ddd", marginBottom: "10px" }}
+                    />
+                ) : (
+                    <p style={{ color: "#888", marginBottom: 10 }}>No hay imagen de {label} actual.</p>
+                )}
+
+                {/* 2. Componente de subida de archivo */}
+                <Upload
+                    beforeUpload={getBeforeUploadHandler(setNewFileState)}
+                    showUploadList={false}
+                    accept="image/*"
+                >
+                    <Button type="default">{buttonText}</Button>
+                </Upload>
+                {/* Mensaje de archivo listo para subir */}
+                {newFileState && (
+                    <p style={{ marginTop: 8, color: '#1677ff' }}>Archivo listo para subir: **{newFileState.name}**</p>
+                )}
+            </Form.Item>
+        );
+    };
 
     return (
         <div style={{ padding: '0 50px 50px' }}>
-
             <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Reportes</h1>
 
-            {/* ================================================== */}
             {/* 🔔 ALERTA DE BUDDY PARTNERS PENDIENTES */}
-            {/* ================================================== */}
             {pendingBuddies.length > 0 && (
                 <Alert
                     message="Hay Buddy Partners pendientes de completar"
@@ -380,7 +347,7 @@ export default function Reportes() {
                         <ul>
                             {pendingBuddies.map(b => (
                                 <li key={b.id_buddy1}>
-                                    Cuadrilla {b.num_cuadrilla} — Tipo {b.Tipo} — Fecha {b.Fecha}
+                                    Cuadrilla **{b.num_cuadrilla}** — Tipo **{b.Tipo}** — Fecha **{b.Fecha}**
                                 </li>
                             ))}
                         </ul>
@@ -395,31 +362,21 @@ export default function Reportes() {
             <Button type="primary" onClick={exportPDF} style={{ marginBottom: 16 }}>
                 Exportar PDF
             </Button>
-
             <Button type="default" onClick={exportExcel} style={{ marginLeft: 10, marginBottom: 16 }}>
                 Exportar Excel
             </Button>
 
-            {/* Tabla */}
+            {/* Tabla de Reportes */}
             <Table
                 className="shadow rounded-5 border-3"
                 columns={columns}
                 dataSource={buddyPartners}
                 rowKey="id_buddy1"
                 pagination={{ pageSize: 10 }}
-                onChange={(pagination, filters, sorter) => setActiveFilters(filters)}
+                onChange={(pagination, filters, sorter, extra) => setActiveFilters(filters)}
                 rowClassName={(record) => {
-                    const hoy = moment().format("YYYY-MM-DD");
+                    if (record.isPending) return "row-pendiente";
 
-                    // Pendientes (se mantienen)
-                    if (
-                        (record.Est_etapa === "Inicio" || record.Est_etapa === "En proceso") &&
-                        record.Fecha < hoy
-                    ) {
-                        return "row-pendiente";
-                    }
-
-                    // Colores por estado
                     if (record.Est_etapa === "Inicio") return "estado-inicio";
                     if (record.Est_etapa === "En proceso") return "estado-proceso";
                     if (record.Est_etapa === "Finalizó") return "estado-finalizo";
@@ -428,9 +385,7 @@ export default function Reportes() {
                 }}
             />
 
-
-
-            {/* Modal */}
+            {/* Modal de Edición */}
             <Modal
                 title="Editar Reporte"
                 open={isModalOpen}
@@ -442,66 +397,57 @@ export default function Reportes() {
                 <Form
                     form={form}
                     layout="vertical"
-                    // 🔥 Solución: Forzar el re-renderizado del Form al cambiar el registro
                     key={editingRecord ? editingRecord.id_buddy1 : 'new'}
                 >
+                    {/* Campos de texto y selección básicos */}
+                    <Form.Item label="Numero Cuadrilla" name="num_cuadrilla"><Input disabled /></Form.Item>
+                    <Form.Item label="Hora" name="Hora_buddy"><Input type="time" /></Form.Item>
 
-                    {/* NUM CUADRILLA */}
-                    <Form.Item label="Numero Cuadrilla" name="num_cuadrilla">
-                        <Input disabled />
-                    </Form.Item>
-
-                    {/* HORA */}
-                    <Form.Item label="Hora" name="Hora_buddy">
-                        <Input type="time" />
-                    </Form.Item>
-
-                    {/* ESTADO EMPLEADO */}
+                    {/* Estado Empleado y Motivo (condicional) */}
                     <Form.Item label="Estado Empleado" name="Est_empl">
-                        <Select>
+                        <Select onChange={() => form.setFieldsValue({ MotivoEmp: null })}>
                             <Option value="Excelente">Excelente</Option>
                             <Option value="Bueno">Bueno</Option>
                             <Option value="Malo">Malo</Option>
                         </Select>
                     </Form.Item>
-
-                    {form.getFieldValue("Est_empl") === "Malo" && (
-                        <Form.Item label="Motivo empleado" name="MotivoEmp">
-                            <Input.TextArea />
-                        </Form.Item>
+                    {Form.useWatch("Est_empl", form) === "Malo" && (
+                        <Form.Item label="Motivo empleado" name="MotivoEmp"><Input.TextArea /></Form.Item>
                     )}
 
-                    {/* ESTADO VEHICULO */}
+                    {/* Estado Vehículo y Motivo (condicional) */}
                     <Form.Item label="Estado Vehiculo" name="Est_vehi">
-                        <Select>
+                        <Select onChange={() => form.setFieldsValue({ MotivoVeh: null })}>
                             <Option value="Excelente">Excelente</Option>
                             <Option value="Bueno">Bueno</Option>
                             <Option value="Malo">Malo</Option>
                         </Select>
                     </Form.Item>
-
-                    {form.getFieldValue("Est_vehi") === "Malo" && (
-                        <Form.Item label="Motivo vehículo" name="MotivoVeh">
-                            <Input.TextArea />
-                        </Form.Item>
+                    {Form.useWatch("Est_vehi", form) === "Malo" && (
+                        <Form.Item label="Motivo vehículo" name="MotivoVeh"><Input.TextArea /></Form.Item>
                     )}
 
-                    {/* CARNET */}
-                    <Form.Item label="Carnet" name="Carnet">
-                        <Input />
-                    </Form.Item>
+                    {/* 🎯 SECCIÓN DE IMÁGENES (Tipo 1) para Carnet y Tarjeta Vida (CONDICIONAL) */}
+                    {Form.useWatch("Tipo", form) === 1 && (
+                        <>
+                            <FileUploadDisplay
+                                label="Carnet"
+                                fieldName="Carnet"
+                                newFileState={newFileCarnet}
+                                setNewFileState={setNewFileCarnet}
+                            />
 
-                    {/* TARJETA VIDA */}
-                    <Form.Item label="Tarjeta Vida" name="TarjetaVida">
-                        <Input />
-                    </Form.Item>
+                            <FileUploadDisplay
+                                label="Tarjeta Vida"
+                                fieldName="TarjetaVida"
+                                newFileState={newFileTarjetaVida}
+                                setNewFileState={setNewFileTarjetaVida}
+                            />
+                        </>
+                    )}
 
-                    {/* FECHA */}
-                    <Form.Item label="Fecha" name="Fecha">
-                        <Input type="date" />
-                    </Form.Item>
-
-                    {/* ESTADO ETAPA */}
+                    {/* Campos de fecha y estado de etapa/herramienta */}
+                    <Form.Item label="Fecha" name="Fecha"><Input type="date" /></Form.Item>
                     <Form.Item label="Estado Etapa" name="Est_etapa">
                         <Select>
                             <Option value="Inicio">Inicio</Option>
@@ -510,119 +456,40 @@ export default function Reportes() {
                         </Select>
                     </Form.Item>
 
-                    {/* ESTADO HERRAMIENTA */}
+                    {/* Estado Herramienta y Motivo (condicional) */}
                     <Form.Item label="Estado Herramienta" name="Est_her">
-                        <Select>
+                        <Select onChange={() => form.setFieldsValue({ MotivoHer: null })}>
                             <Option value="Excelente">Excelente</Option>
                             <Option value="Bueno">Bueno</Option>
                             <Option value="Malo">Malo</Option>
                         </Select>
                     </Form.Item>
-
-                    {form.getFieldValue("Est_her") === "Malo" && (
-                        <Form.Item label="Motivo herramienta" name="MotivoHer">
-                            <Input.TextArea />
-                        </Form.Item>
+                    {Form.useWatch("Est_her", form) === "Malo" && (
+                        <Form.Item label="Motivo herramienta" name="MotivoHer"><Input.TextArea /></Form.Item>
                     )}
 
-                    {/* TIPO */}
-                    <Form.Item label="Id Empleado" name="id_empleado">
-                        <Input disabled />
-                    </Form.Item>
+                    <Form.Item label="Id Empleado" name="id_empleado"><Input disabled /></Form.Item>
+                    <Form.Item label="Tipo" name="Tipo"><Input disabled /></Form.Item>
 
-                    {/* TIPO */}
-                    <Form.Item label="Tipo" name="Tipo">
-                        <Input disabled />
-                    </Form.Item>
-
-                    {/* 🎯 SECCIÓN DE IMÁGENES (Tipo 2) con Upload de Ant Design */}
-                    {form.getFieldValue("Tipo") === 2 && (
+                    {/* 🎯 SECCIÓN DE IMÁGENES (Tipo 2) para Tablero y Calentamiento (condicional) */}
+                    {Form.useWatch("Tipo", form) === 2 && (
                         <>
-                            {/* IMAGEN TABLERO */}
-                            <Form.Item label="Imagen Tablero">
-
-                                {/* Visualización de la imagen actual (URL) */}
-                                {editingRecord && editingRecord.Tablero ? (
-                                    <img
-                                        src={editingRecord.Tablero}
-                                        alt="Imagen del tablero actual"
-                                        style={{
-                                            width: "100%",
-                                            maxHeight: "350px",
-                                            objectFit: "contain",
-                                            borderRadius: "10px",
-                                            border: "1px solid #ddd",
-                                            marginBottom: "10px",
-                                        }}
-                                    />
-                                ) : (
-                                    <p style={{ color: "#888", marginBottom: 10 }}>No hay imagen actual.</p>
-                                )}
-
-                                {/* Componente Upload (botón bonito) */}
-                                <Upload
-                                    // Hacemos que la subida sea manual (no se envía automáticamente)
-                                    beforeUpload={(file) => {
-                                        setNewFileTablero(file);
-                                        return false; // Previene la subida automática
-                                    }}
-                                    showUploadList={false} // Oculta la lista de archivos seleccionados, si quieres ver el nombre del archivo, cámbialo a true
-                                    accept="image/*"
-                                >
-                                    <Button type="default">
-                                        {newFileTablero ? `Cambiar Archivo: ${newFileTablero.name}` : "Seleccionar Archivo"}
-                                    </Button>
-                                </Upload>
-                                {newFileTablero && (
-                                    <p style={{ marginTop: 8, color: '#1677ff' }}>Archivo listo para subir: **{newFileTablero.name}**</p>
-                                )}
-
-                            </Form.Item>
-
-                            {/* IMAGEN CALENTAMIENTO */}
-                            <Form.Item label="Imagen Calentamiento">
-
-                                {/* Visualización de la imagen actual (URL) */}
-                                {editingRecord && editingRecord.Calentamiento ? (
-                                    <img
-                                        src={editingRecord.Calentamiento}
-                                        alt="Imagen de calentamiento actual"
-                                        style={{
-                                            width: "100%",
-                                            maxHeight: "350px",
-                                            objectFit: "contain",
-                                            borderRadius: "10px",
-                                            border: "1px solid #ddd",
-                                            marginBottom: "10px",
-                                        }}
-                                    />
-                                ) : (
-                                    <p style={{ color: "#888", marginBottom: 10 }}>No hay imagen actual.</p>
-                                )}
-
-                                {/* Componente Upload (botón bonito) */}
-                                <Upload
-                                    beforeUpload={(file) => {
-                                        setNewFileCalentamiento(file);
-                                        return false; // Previene la subida automática
-                                    }}
-                                    showUploadList={false}
-                                    accept="image/*"
-                                >
-                                    <Button type="default">
-                                        {newFileCalentamiento ? `Cambiar Archivo: ${newFileCalentamiento.name}` : "Seleccionar Archivo"}
-                                    </Button>
-                                </Upload>
-                                {newFileCalentamiento && (
-                                    <p style={{ marginTop: 8, color: '#1677ff' }}>Archivo listo para subir: **{newFileCalentamiento.name}**</p>
-                                )}
-
-                            </Form.Item>
+                            <FileUploadDisplay
+                                label="Tablero"
+                                fieldName="Tablero"
+                                newFileState={newFileTablero}
+                                setNewFileState={setNewFileTablero}
+                            />
+                            <FileUploadDisplay
+                                label="Calentamiento"
+                                fieldName="Calentamiento"
+                                newFileState={newFileCalentamiento}
+                                setNewFileState={setNewFileCalentamiento}
+                            />
                         </>
                     )}
                 </Form>
             </Modal>
-
         </div>
     );
 }
