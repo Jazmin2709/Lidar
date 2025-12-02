@@ -2,7 +2,7 @@ import React from 'react';
 
 const EmpleadosTable = ({ empleados, onToggleActivo, onEditar }) => {
   return (
-    <div className="table-responsive">
+    <div className="table-responsive" style={{padding: '0 50px  50px' }}>
       <table className="table table-striped table-hover">
         <thead className="table-dark">
           <tr>

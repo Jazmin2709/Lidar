@@ -7,19 +7,24 @@ const Empleados = () => {
   const [roles, setRoles] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editando, setEditando] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+
   const [form, setForm] = useState({
-    Correo: '', Nombres: '', Apellidos: '', Cedula: '', 
+    Correo: '', Nombres: '', Apellidos: '', Cedula: '',
     Celular: '', Contrasena: '', Tipo_Doc: '', id_rol: ''
   });
 
   const API_URL = 'http://localhost:3000/api/empleados';
+
+  // 🔤 VALIDACIONES
+  const soloTexto = (valor) => valor.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, "");
+  const soloNumeros = (valor) => valor.replace(/[^0-9]/g, "");
 
   const cargarEmpleados = async () => {
     try {
       const response = await axios.get(API_URL);
       setEmpleados(response.data);
     } catch (error) {
-      console.error('Error cargando empleados:', error);
       alert('Error al cargar empleados');
     }
   };
@@ -40,20 +45,20 @@ const Empleados = () => {
 
     try {
       const nuevoEstado = empleado.activo === 1 ? 0 : 1;
-      await axios.put(`${API_URL}/${empleado.id_per}/activo`, { 
-        activo: nuevoEstado 
+      await axios.put(`${API_URL}/${empleado.id_per}/activo`, {
+        activo: nuevoEstado
       });
-      
+
       alert(`Empleado ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
       cargarEmpleados();
     } catch (error) {
-      console.error('Error cambiando estado:', error);
       alert('Error al cambiar estado del empleado');
     }
   };
 
   const handleEditar = (emp) => {
     setEditando(emp);
+    setShowPassword(false);
     setForm({
       Correo: emp.Correo,
       Nombres: emp.Nombres,
@@ -80,7 +85,6 @@ const Empleados = () => {
       setShowModal(false);
       cargarEmpleados();
     } catch (error) {
-      console.error('Error guardando empleado:', error);
       alert(error.response?.data?.message || 'Error al guardar empleado');
     }
   };
@@ -91,15 +95,16 @@ const Empleados = () => {
   }, []);
 
   return (
-    <div className="container-fluid">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+    <div className="container-fluid" style={{ padding: '100px 50px' }}>
+      <div className="d-flex justify-content-between align-items-center mb-4" style={{ padding: '0 50px' }}>
         <h2>Gestión de Empleados</h2>
-        <button 
+        <button
           className="btn btn-primary"
           onClick={() => {
             setEditando(null);
+            setShowPassword(false);
             setForm({
-              Correo: '', Nombres: '', Apellidos: '', Cedula: '', 
+              Correo: '', Nombres: '', Apellidos: '', Cedula: '',
               Celular: '', Contrasena: '', Tipo_Doc: '', id_rol: ''
             });
             setShowModal(true);
@@ -109,80 +114,138 @@ const Empleados = () => {
         </button>
       </div>
 
-      <EmpleadosTable 
-        empleados={empleados}
-        onToggleActivo={handleToggleActivo}
-        onEditar={handleEditar}
-      />
+      <EmpleadosTable empleados={empleados} onToggleActivo={handleToggleActivo} onEditar={handleEditar} />
 
       {showModal && (
-        <div className="modal show d-block" style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog">
             <div className="modal-content">
+
               <div className="modal-header">
-                <h5 className="modal-title">
-                  {editando ? 'Editar Empleado' : 'Nuevo Empleado'}
-                </h5>
+                <h5 className="modal-title">{editando ? 'Editar Empleado' : 'Nuevo Empleado'}</h5>
                 <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
               </div>
+
               <form onSubmit={handleSubmit}>
                 <div className="modal-body">
                   <div className="row g-3">
+
                     <div className="col-md-6">
                       <label className="form-label">Nombres *</label>
-                      <input type="text" className="form-control" value={form.Nombres} 
-                        onChange={(e) => setForm({...form, Nombres: e.target.value})} required />
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={form.Nombres}
+                        onChange={(e) => setForm({ ...form, Nombres: soloTexto(e.target.value) })}
+                        required
+                        placeholder='Escribir nombre'
+                      />
                     </div>
+
                     <div className="col-md-6">
                       <label className="form-label">Apellidos *</label>
-                      <input type="text" className="form-control" value={form.Apellidos} 
-                        onChange={(e) => setForm({...form, Apellidos: e.target.value})} required />
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={form.Apellidos}
+                        onChange={(e) => setForm({ ...form, Apellidos: soloTexto(e.target.value) })}
+                        required
+                        placeholder='Escribir apellidos'
+                      />
                     </div>
+
                     <div className="col-md-6">
                       <label className="form-label">Email *</label>
-                      <input type="email" className="form-control" value={form.Correo} 
-                        onChange={(e) => setForm({...form, Correo: e.target.value})} required />
+                      <input
+                        type="email"
+                        className="form-control"
+                        value={form.Correo}
+                        onChange={(e) => setForm({ ...form, Correo: e.target.value })}
+                        required
+                        placeholder='Escribir email'
+                      />
                     </div>
+
                     <div className="col-md-6">
                       <label className="form-label">Cédula *</label>
-                      <input type="text" className="form-control" value={form.Cedula} 
-                        onChange={(e) => setForm({...form, Cedula: e.target.value})} required />
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={form.Cedula}
+                        onChange={(e) => setForm({ ...form, Cedula: soloNumeros(e.target.value) })}
+                        required
+                        placeholder='Solo números'
+                      />
                     </div>
+
                     <div className="col-md-6">
                       <label className="form-label">Celular *</label>
-                      <input type="text" className="form-control" value={form.Celular} 
-                        onChange={(e) => setForm({...form, Celular: e.target.value})} required />
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={form.Celular}
+                        onChange={(e) => setForm({ ...form, Celular: soloNumeros(e.target.value) })}
+                        required
+                        placeholder='Solo números'
+                      />
                     </div>
+
                     <div className="col-md-6">
                       <label className="form-label">Tipo Documento *</label>
-                      <select className="form-select" value={form.Tipo_Doc} 
-                        onChange={(e) => setForm({...form, Tipo_Doc: e.target.value})} required>
+                      <select className="form-select" value={form.Tipo_Doc}
+                        onChange={(e) => setForm({ ...form, Tipo_Doc: e.target.value })} required>
                         <option value="">Seleccionar</option>
                         <option value="CC">Cédula</option>
                         <option value="TI">Tarjeta Identidad</option>
                         <option value="CE">Cédula Extranjería</option>
                       </select>
                     </div>
+
                     <div className="col-md-6">
                       <label className="form-label">Rol *</label>
-                      <select className="form-select" value={form.id_rol} 
-                        onChange={(e) => setForm({...form, id_rol: e.target.value})} required>
+                      <select className="form-select" value={form.id_rol}
+                        onChange={(e) => setForm({ ...form, id_rol: e.target.value })} required>
                         <option value="">Seleccionar rol</option>
                         {roles.map(rol => (
                           <option key={rol.id_rol} value={rol.id_rol}>{rol.nombre}</option>
                         ))}
                       </select>
                     </div>
+
+                    {/* CONTRASEÑA */}
                     <div className="col-md-6">
                       <label className="form-label">
-                        Contraseña {editando ? '(dejar vacío para no cambiar)' : '*'}
+                        Contraseña {editando ? '(dejar vacío si no cambia)' : '*'}
                       </label>
-                      <input type="password" className="form-control" value={form.Contrasena} 
-                        onChange={(e) => setForm({...form, Contrasena: e.target.value})} 
-                        required={!editando} />
+
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          className="form-control"
+                          value={form.Contrasena}
+                          onChange={(e) => setForm({ ...form, Contrasena: e.target.value })}
+                          required={!editando}
+                        />
+
+                        <span
+                          onClick={() => setShowPassword(!showPassword)}
+                          style={{
+                            position: "absolute",
+                            right: "12px",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            cursor: "pointer",
+                            fontSize: "22px"
+                          }}
+                        >
+                          {showPassword ? "👀" : "🙈"}
+                        </span>
+                      </div>
                     </div>
+
                   </div>
                 </div>
+
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
                     Cancelar
@@ -192,6 +255,7 @@ const Empleados = () => {
                   </button>
                 </div>
               </form>
+
             </div>
           </div>
         </div>
