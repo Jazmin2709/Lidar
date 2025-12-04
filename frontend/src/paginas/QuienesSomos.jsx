@@ -10,97 +10,81 @@ import comunicacionesImagen from '../assets/img/comunicaciones.jpg';
 // Componente funcional que representa la página "¿Quiénes Somos?"
 export default function QuienesSomos() {
     return (
-        <div className='container'>
-            {/* Título principal */}
-            <h1 className='text-dark text-center col p-5 fw-bold fw-lighter'>¿Quienes Somos?</h1>
+        <div className='container mx-auto p-4'>
+            <h1 className='text-dark text-center fw-bold p-4'>¿Quiénes Somos?</h1>
 
-            {/* Contenedor de columnas responsivas */}
-            <div className='row row-cols-1 row-cols-md-2 align-items-center'>
+            <div className='row row-cols-1 row-cols-md-2 g-4 align-items-center'>
 
-                {/* Sección de descripción sobre la empresa */}
+                {/* Descripción */}
                 <div className='col'>
-                    <h2 className='text-center fw-lighter fw-bold'>¿Qué es Oca Global Solutions & Dynamics?</h2>
+                    <h2 className='text-center fw-bold'>¿Qué es Oca Global Solutions & Dynamics?</h2>
                     <div className='border border-secondary rounded-4 p-3'>
-                        <p className='text-dark fw-lighter'>
+                        <p className='text-dark fw-light'>
                             OCA Global es una empresa multinacional que ofrece una amplia gama de servicios en los ámbitos de inspección,
-                            certificación, ensayos, formación y consultoría. Su objetivo principal es aumentar el valor económico de los activos, proyectos,
-                            productos y sistemas de sus clientes, reduciendo riesgos y garantizando el cumplimiento de los estándares de calidad y seguridad.
+                            certificación, ensayos, formación y consultoría. Su objetivo principal es aumentar el valor económico de los activos,
+                            proyectos, productos y sistemas de sus clientes, reduciendo riesgos y garantizando el cumplimiento de los estándares
+                            de calidad y seguridad.
                         </p>
                     </div>
                 </div>
 
-                {/* Imagen representativa de la empresa (a la derecha) */}
-                <div className="col" style={{ display: 'flex', justifyContent: 'center' }}>
-                    <img src={imagesImagen} alt="OCA" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
+                {/* Imagen principal */}
+                <div className='col d-flex justify-content-center'>
+                    <img src={imagesImagen} alt='OCA' className='img-fluid rounded' style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover' }} />
                 </div>
 
-                {/* Sección con imágenes de inspección y certificación */}
-                <div className="col" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <img src={inspeccionImagen} alt="inspeccion" className="img-fluid rounded" style={{ width: '300px', height: '200px', marginBottom: '10px' }} />
-                    <img src={certificacionImagen} alt="certificacion" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
+                {/* Imágenes de inspección y certificación */}
+                <div className='col d-flex flex-column align-items-center'>
+                    <img src={inspeccionImagen} alt='inspeccion' className='img-fluid rounded mb-2' style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover' }} />
+                    <img src={certificacionImagen} alt='certificacion' className='img-fluid rounded' style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover' }} />
                 </div>
 
-                {/* Sección de servicios que ofrece la empresa */}
-                <div className="col" style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div style={{ flex: 1, paddingRight: '20px' }}>
-                        <h2 className="text-center fw-lighter fw-bold">Servicios que ofrece Oca</h2>
-                        <div className="border border-secondary rounded-4 p-3">
-                            {/* Servicios de inspección */}
-                            <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
-                                Servicios de inspección:
-                                <li>Inspección reglamentaria: Verificación del cumplimiento de normativas y regulaciones.</li>
-                                <li>Control de calidad y asistencia técnica: Supervisión de procesos y productos para asegurar la calidad.</li>
-                                <li>Inspecciones marítimas y de materias primas: Control de calidad en el transporte marítimo y en la manipulación de materias primas</li>
-                            </p>
+                {/* Servicios */}
+                <div className='col'>
+                    <h2 className='text-center fw-bold'>Servicios que ofrece OCA</h2>
+                    <div className='border border-secondary rounded-4 p-3'>
+                        <ul className='text-dark fw-light'>
+                            <p className='fw-bold'>Servicios de inspección:</p>
+                            <li>Inspección reglamentaria.</li>
+                            <li>Control de calidad y asistencia técnica.</li>
+                            <li>Inspecciones marítimas y de materias primas.</li>
 
-                            {/* Servicios de certificación */}
-                            <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
-                                Certificación:
-                                <li>Certificación de sistemas de gestión (ISO).</li>
-                                <li>Certificación de productos.</li>
-                            </p>
+                            <p className='fw-bold mt-3'>Certificación:</p>
+                            <li>Certificación de sistemas de gestión (ISO).</li>
+                            <li>Certificación de productos.</li>
 
-                            {/* Servicios de ensayos */}
-                            <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
-                                Ensayos:
-                                <li>Ensayos de materiales.</li>
-                                <li>Ensayos ambientales.</li>
-                            </p>
+                            <p className='fw-bold mt-3'>Ensayos:</p>
+                            <li>Ensayos de materiales.</li>
+                            <li>Ensayos ambientales.</li>
 
-                            {/* Servicios de formación */}
-                            <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
-                                Formación:
-                                <li>Programas de formación en diversas áreas técnicas y de gestión.</li>
-                            </p>
+                            <p className='fw-bold mt-3'>Formación:</p>
+                            <li>Programas de formación en áreas técnicas y de gestión.</li>
 
-                            {/* Servicios de consultoría */}
-                            <p className="text-dark fw-lighter" style={{ marginBottom: '15px' }}>
-                                Consultoría y asesoría técnica:
-                                <li>Asesoramiento en proyectos de ingeniería y construcción.</li>
-                                <li>Consultoría en gestión de riesgos.</li>
-                            </p>
-                        </div>
+                            <p className='fw-bold mt-3'>Consultoría:</p>
+                            <li>Asesoramiento en ingeniería y construcción.</li>
+                            <li>Gestión de riesgos.</li>
+                        </ul>
                     </div>
                 </div>
 
-                {/* Sección de sectores de actividad */}
-                <div className="col" style={{ marginBottom: '50px' }}>
-                    <h2 className="text-center fw-lighter fw-bold">Sectores de Actividad</h2>
-                    <div className="border border-secondary rounded-4 p-3">
-                        <p className="text-dark fw-lighter">
-                            <li>Infraestructuras.</li>
-                            <li>Telecomunicaciones.</li>
-                            <li>Energía.</li>
-                            <li>Industria.</li>
-                            <li>Medio ambiente.</li>
-                            <li>Servicios Públicos.</li>
-                        </p>
+                {/* Sectores */}
+                <div className='col mb-4'>
+                    <h2 className='text-center fw-bold'>Sectores de Actividad</h2>
+                    <div className='border border-secondary rounded-4 p-3'>
+                        <ul className='text-dark fw-light'>
+                            <li>Infraestructuras</li>
+                            <li>Telecomunicaciones</li>
+                            <li>Energía</li>
+                            <li>Industria</li>
+                            <li>Medio ambiente</li>
+                            <li>Servicios Públicos</li>
+                        </ul>
                     </div>
                 </div>
 
-                {/* Imagen adicional de comunicaciones */}
-                <div className="col" style={{ display: 'flex', justifyContent: 'center' }}>
-                    <img src={comunicacionesImagen} alt="OCA" className="img-fluid rounded" style={{ width: '300px', height: '200px' }} />
+                {/* Imagen adicional */}
+                <div className='col d-flex justify-content-center'>
+                    <img src={comunicacionesImagen} alt='comunicaciones' className='img-fluid rounded' style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover' }} />
                 </div>
             </div>
         </div>

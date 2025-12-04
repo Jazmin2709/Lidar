@@ -27,23 +27,23 @@ function BarraNavInicio() {
         <div className="d-flex align-items-center ms-auto">
           {/* Botón que redirige a la sección LIDAR */}
           <Link to="/lidar" className="btn btn-light mx-2">
-            LIDAR
+            Lidar
           </Link>
 
           {/* Botón que redirige a la sección de información de la empresa */}
           <Link to="/quienessomos" className="btn btn-light mx-2">
-            QUIENES SOMOS
+            Quienes Somos
           </Link>
 
           {/* Botón que redirige a registro */}
           <Link to="/registrar" className="btn btn-light mx-2">
-            REGISTRAR
+            Registrar
           </Link>
 
           
           {/* Botón que redirige al login */}
           <Link to="/login" className="btn btn-light mx-2">
-            INICIAR SESIÓN
+            Iniciar Sesión
           </Link>
         </div>
       </div>

@@ -2,146 +2,176 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+// URL base del backend
 const API_URL = 'http://localhost:3000/api';
 
 export default function Login() {
-    const [Usuario, setUsuario] = useState({
-        Documento: '',
-        Contrasena: '',
-    });
 
+    // Estado para guardar los datos del usuario (Documento y Contraseña)
+    const [Usuario, setUsuario] = useState({ Documento: '', Contrasena: '' });
+
+    // Estado para mostrar/ocultar la contraseña
     const [showPassword, setShowPassword] = useState(false);
 
+    // ------------------------------------
+    // 🔹 FUNCIÓN: Enviar formulario de login
+    // ------------------------------------
     const handleSubmit = async (event) => {
-        event.preventDefault();
+        event.preventDefault(); // Evita que el formulario recargue la página
+
         try {
+            // Envía los datos al backend para validar
             const response = await axios.post(`${API_URL}/auth/ingresar`, Usuario);
 
+            // Si la petición fue exitosa (status 200)
             if (response.status === 200) {
+
+                // Guarda el token en LocalStorage
                 localStorage.setItem('token', response.data.token);
+
+                // Obtiene el rol enviado desde el backend
                 const rol = response.data.rol;
 
+                // Muestra alerta de éxito
                 Swal.fire({
                     icon: 'success',
-                    title: response.data.message,
+                    title: response.data.message
                 }).then(() => {
+
+                    // Redirecciona según el rol
                     switch (rol) {
-                        case 1: window.location.href = '/supervisor/dashboard'; break;
-                        case 2: window.location.href = '/IndexEmpleado'; break;
-                        case 3: window.location.href = '/admin/dashboard'; break;
-                        default: window.location.href = '/Login'; break;
+                        case 1:
+                            window.location.href = '/supervisor/dashboard';
+                            break;
+                        case 2:
+                            window.location.href = '/IndexEmpleado';
+                            break;
+                        case 3:
+                            window.location.href = '/admin/dashboard';
+                            break;
+                        default:
+                            window.location.href = '/Login';
+                            break;
                     }
                 });
             }
+
         } catch (error) {
             console.error('Error al ingresar:', error);
+
+            // Alerta en caso de error o credenciales incorrectas
             Swal.fire({
                 icon: 'error',
                 title: 'Error al ingresar',
-                text: error.response?.data?.message || "Credenciales inválidas",
+                text: error.response?.data?.message || 'Credenciales inválidas',
             });
         }
     };
 
+    // ------------------------------------
+    // 🔹 FUNCIÓN: Manejo de inputs
+    // ------------------------------------
     const handleInputChange = (event) => {
         const { name, value } = event.target;
         let newValue = value;
 
-        // 🚫 Filtrar solo números en Documento
-        if (name === "Documento") {
-            newValue = newValue.replace(/\D/g, ''); // quita letras y símbolos
-        }
+        // Restringe el Documento a solo números
+        if (name === 'Documento') newValue = newValue.replace(/\D/g, '');
 
-        setUsuario((prevState) => ({
-            ...prevState,
-            [name]: newValue,
-        }));
+        setUsuario((prev) => ({ ...prev, [name]: newValue }));
     };
 
     return (
-        <div className='container-fluid'>
-            <div className='justify-content-center align-items-center h-100'>
-                <div className='container mt-5 p-5 shadow rounded-5 border-3'
-                    style={{
-                        marginBottom: '50px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        maxWidth: '400px',
-                        backgroundColor: '#ffffff'
-                    }}>
+        // Contenedor centrado vertical y horizontalmente
+        <div
+            className="container d-flex justify-content-center align-items-center"
+            style={{ minHeight: '100vh' }}
+        >
+            {/* Card del formulario */}
+            <div
+                className="w-100 p-5 pt-5 pb-5 shadow rounded-4 border bg-white"
+                style={{ maxWidth: '520px' }}
+            >
+                <h1 className="text-center mb-4">Iniciar Sesión</h1>
 
-                    <h1 className='text-center p-5'>Iniciar Sesión</h1>
+                {/* Formulario */}
+                <form className="w-100" noValidate onSubmit={handleSubmit}>
 
-                    <form className='d-flex flex-column align-items-center' noValidate onSubmit={handleSubmit}>
+                    {/* ----------------------
+                        Campo: Documento
+                    ------------------------ */}
+                    <div className="mb-3">
+                        <label htmlFor="Cedula" className="form-label">Nº de Cédula</label>
 
-                        {/* Documento */}
-                        <div className="mb-3" style={{ width: '300px' }}>
-                            <label htmlFor="Cedula" className="form-label">Nº de Cédula</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                id="Cedula"
-                                name="Documento"
-                                value={Usuario.Documento}
-                                onChange={handleInputChange}
-                                minLength={6}
-                                maxLength={10}
-                                pattern="^[0-9]{6,10}$"
-                                title="La cédula debe contener solo números (6 a 10 dígitos)."
-                                required
-                            />
-                        </div>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="Cedula"
+                            name="Documento"
+                            value={Usuario.Documento}
+                            onChange={handleInputChange}
 
-                        {/* Contraseña */}
-                        <div className="mb-3 position-relative" style={{ width: '300px' }}>
-                            <label htmlFor="Contrasena" className="form-label">Contraseña</label>
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                className="form-control"
-                                id="Contrasena"
-                                name="Contrasena"
-                                value={Usuario.Contrasena}
-                                onChange={handleInputChange}
-                                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,}$"
-                                title="Mínimo 8 caracteres, incluir mayúscula, minúscula, número y caracter especial."
-                                required
-                            />
+                            // Validaciones de longitud y números
+                            minLength={6}
+                            maxLength={10}
+                            pattern="^[0-9]{6,10}$"
+                            title="La cédula debe contener solo números (6 a 10 dígitos)."
+                            required
+                        />
+                    </div>
 
-                            {/* 👁️ Ojitos toggle */}
-                            <span
-                                onClick={() => setShowPassword(!showPassword)}
-                                style={{
-                                    position: 'absolute',
-                                    right: '12px',
-                                    top: '30px',
-                                    cursor: 'pointer',
-                                    fontSize: '1.5rem',
-                                    color: showPassword ? 'green' : 'red'
-                                }}
-                            >
-                                {showPassword ? "👀" : "🙈"}
-                            </span>
-                        </div>
+                    {/* ----------------------
+                        Campo: Contraseña
+                    ------------------------ */}
+                    <div className="mb-3 position-relative">
+                        <label htmlFor="Contrasena" className="form-label">Contraseña</label>
 
-                        <div className="text-center">
-                            <button className="btn btn-primary" type="submit">Ingresar</button>
-                        </div>
+                        <input
+                            type={showPassword ? 'text' : 'password'} // alterna entre visible y oculto
+                            className="form-control"
+                            id="Contrasena"
+                            name="Contrasena"
+                            value={Usuario.Contrasena}
+                            onChange={handleInputChange}
 
-                        <style jsx>{`
-                            button.btn.btn-primary:hover {
-                                background-color: rgb(73, 1, 141);
-                            }
-                        `}</style>
-                    </form>
+                            // Validación fuerte de contraseña
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&._-])[A-Za-z\d@$!%*?&._-]{8,}$"
+                            title="Mínimo 8 caracteres, incluir mayúscula, minúscula, número y caracter especial."
+                            required
+                        />
 
-                    <p className="mt-3 text-center">
-                        ¿No tiene una cuenta? <a href="/Registrar">Regístrese aquí</a>
-                    </p>
-                    <p className="mt-3 text-center">
-                        ¿Olvidó su contraseña? <a href="/EnviarCorreo">Recuperar Contraseña</a>
-                    </p>
-                </div>
+                        {/* Ícono para mostrar/ocultar contraseña */}
+                        <span
+                            onClick={() => setShowPassword(!showPassword)}
+                            style={{
+                                position: 'absolute',
+                                right: '5px',
+                                top: '30px',
+                                cursor: 'pointer',
+                                fontSize: '1.5rem',
+                                userSelect: 'none'
+                            }}
+                        >
+                            {showPassword ? '👀' : '🙈'}
+                        </span>
+                    </div>
+
+                    {/* Botón de enviar */}
+                    <div className="text-center mb-3">
+                        <button className="btn btn-primary w-100" type="submit">
+                            Ingresar
+                        </button>
+                    </div>
+                </form>
+
+                {/* Links de registro y recuperación */}
+                <p className="mt-3 text-center">
+                    ¿No tiene una cuenta? <a href="/Registrar">Regístrese aquí</a>
+                </p>
+
+                <p className="text-center">
+                    ¿Olvidó su contraseña? <a href="/EnviarCorreo">Recuperar Contraseña</a>
+                </p>
             </div>
         </div>
     );
