@@ -3,7 +3,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 // URL base del backend
-const API_URL = 'http://localhost:3000/api';
+const API_URL = process.env.API_URL || "http://localhost:3000/api";
 
 export default function Login() {
 

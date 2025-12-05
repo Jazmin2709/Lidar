@@ -6,7 +6,7 @@ import moment from "moment";
 import { jwtDecode } from "jwt-decode";
 
 // 🚧 Configuración centralizada de la URL de la API
-const API_URL = "http://localhost:3000/api";
+const API_URL = process.env.API_URL || "http://localhost:3000/api";
 const BUDDY_API_URL = `${API_URL}/buddy`;
 
 // Componente principal de la página Buddy 2

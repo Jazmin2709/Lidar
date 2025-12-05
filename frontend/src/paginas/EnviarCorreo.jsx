@@ -3,7 +3,7 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom'; // ✅ Importa el hook para navegación
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = process.env.API_URL || "http://localhost:3000/api";
 
 export default function EnviarCorreo() {
     const [Usuario, setUsuario] = useState({ Correo: '' });
