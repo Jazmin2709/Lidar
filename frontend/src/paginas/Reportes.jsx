@@ -2,13 +2,54 @@ import Swal from 'sweetalert2';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Button, Input, Modal, Form, Alert, Upload, Select, Tag, Popover } from 'antd';
-import { SearchOutlined } from '@ant-design/icons'; 
+import { SearchOutlined } from '@ant-design/icons';
 import '../css/styles.css';
 import moment from 'moment';
 
 const { Option } = Select;
 const API_BASE_URL = 'http://localhost:3000/api/buddy/BuddyPartner';
 const API_IMAGE_UPLOAD = 'http://localhost:3000/api/imagenes/subir';
+
+/**
+ * Función para obtener color y mensaje del estado de etapa.
+ * Aplica lógica de color ROJO si está sin finalizar Y lleva más de 2 días de atraso.
+ * * @param {string} text - El valor del Est_etapa (Inicio, En proceso, Finalizó)
+ * @param {string} recordDate - La fecha del registro ('YYYY-MM-DD')
+ */
+const getStageInfo = (text, recordDate) => {
+    let color = 'default';
+    let message = 'Estado desconocido.';
+
+    // 1. Base colors and messages
+    if (text === 'Inicio') {
+        color = 'gold'; // Amarillo
+        message = 'El Buddy Partner acaba de iniciar el proceso.';
+    } else if (text === 'En proceso') {
+        color = 'blue'; // Azul
+        message = 'El Buddy Partner se encuentra en alguna fase de proceso.';
+    } else if (text === 'Finalizó') {
+        color = 'green'; // Verde
+        message = 'El Buddy Partner ha completado todas las etapas de verificación.';
+    }
+
+    // 2. LÓGICA DE ALERTA DE ATRASO CRÍTICO (Override a ROJO)
+    if (text !== 'Finalizó') {
+        // Obtenemos los objetos moment para calcular la diferencia
+        const fechaReporte = moment(recordDate);
+        const hoy = moment();
+
+        // Diferencia en días (si es positiva, el reporte es pasado)
+        const diasDeAntiguedad = hoy.diff(fechaReporte, 'days');
+
+        // Si han pasado MÁS de 2 días y no ha finalizado:
+        if (diasDeAntiguedad > 2) {
+            color = 'red'; // ¡CAMBIAR EL TAG A ROJO!
+            message = `¡ATRASO CRÍTICO! Este reporte lleva ${diasDeAntiguedad} días sin finalizar.`;
+        }
+    }
+
+    return { color, message };
+};
 
 /**
  * Componente principal para la gestión y visualización de Reportes (Buddy Partners).
@@ -40,7 +81,8 @@ export default function Reportes() {
 
             const data = response.data.map(item => {
                 const Fecha = moment(item.Fecha).format('YYYY-MM-DD');
-                // La lógica de pendiente: Etapa en "Inicio" o "En proceso" Y fecha pasada
+
+                // Lógica de isPending (Solo se usa para la Alerta general superior)
                 const isPending = (item.Est_etapa === "Inicio" || item.Est_etapa === "En proceso") && Fecha < hoy;
 
                 return {
@@ -52,6 +94,7 @@ export default function Reportes() {
 
             setBuddyPartners(data);
 
+            // Se mantiene el cálculo de pendientes para mostrar la Alerta
             const pendientes = data.filter(b => b.isPending);
             setPendingBuddies(pendientes);
 
@@ -111,7 +154,6 @@ export default function Reportes() {
         setEditingRecord(record);
         form.setFieldsValue(record);
         setIsModalOpen(true);
-        // Resetear estados de archivos al abrir el modal para evitar confusiones
         setNewFileTablero(null);
         setNewFileCalentamiento(null);
         setNewFileCarnet(null);
@@ -145,7 +187,7 @@ export default function Reportes() {
             if (editingRecord.Tipo === 1) {
                 await updateFile(newFileCarnet, "Carnet", "Carnet");
                 await updateFile(newFileTarjetaVida, "TarjetaVida", "TarjetaVida");
-            } 
+            }
             // Manejar subida de imágenes - CONDICIONAL para Tablero/Calentamiento (Tipo 2)
             if (editingRecord.Tipo === 2) {
                 await updateFile(newFileTablero, "tableros", "Tablero");
@@ -200,13 +242,12 @@ export default function Reportes() {
         window.open(url, "_blank");
     };
 
-    // Configuración de las columnas de la tabla con mejoras visuales
+    // Configuración de las columnas de la tabla
     const columns = [
         { title: 'Id', dataIndex: 'id_buddy1', key: 'id_buddy1', sorter: (a, b) => a.id_buddy1 - b.id_buddy1, width: 70 },
         { title: 'Cuadrilla', dataIndex: 'num_cuadrilla', key: 'num_cuadrilla', width: 100 },
         { title: 'Hora', dataIndex: 'Hora_buddy', key: 'Hora_buddy', width: 90 },
         {
-            // Columna Estado Empleado (usa Tag de color)
             title: 'Estado Empleado', dataIndex: 'Est_empl', key: 'Est_empl',
             width: 120,
             render: (text) => (
@@ -218,7 +259,6 @@ export default function Reportes() {
             onFilter: (value, record) => record.Est_empl.includes(value),
         },
         {
-            // Columna Estado Vehiculo (usa Tag de color)
             title: 'Estado Vehiculo', dataIndex: 'Est_vehi', key: 'Est_vehi',
             width: 120,
             render: (text) => (
@@ -229,10 +269,21 @@ export default function Reportes() {
             filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
             onFilter: (value, record) => record.Est_vehi.includes(value),
         },
+        {
+            title: 'Estado Herramienta', dataIndex: 'Est_her', key: 'Est_her',
+            width: 120,
+            render: (text) => (
+                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
+                    {text.toUpperCase()}
+                </Tag>
+            ),
+            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
+            onFilter: (value, record) => record.Est_her.includes(value),
+        },
         // Columna Carnet con vista previa
         {
             title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet',
-            width: 120, 
+            width: 120,
             render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
                 ? (<img src={url} alt="Carnet" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
                 : '—')
@@ -240,7 +291,7 @@ export default function Reportes() {
         // Columna Tarjeta Vida con vista previa
         {
             title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida',
-            width: 120, 
+            width: 120,
             render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
                 ? (<img src={url} alt="Tarjeta Vida" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
                 : '—')
@@ -248,6 +299,9 @@ export default function Reportes() {
         {
             title: 'Fecha', dataIndex: 'Fecha', key: 'Fecha',
             width: 120,
+            // ✅ Modificación para ordenamiento por defecto
+            sorter: (a, b) => a.Fecha.localeCompare(b.Fecha),
+            defaultSortOrder: 'ascend', // Reportes más antiguos (atrasados) primero
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
                     <Input
@@ -263,54 +317,45 @@ export default function Reportes() {
             filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
             onFilter: (value, record) => record.Fecha.includes(value),
         },
-        // ✅ Columna ESTADO ETAPA: VUELVE A USAR EL TAG DE COLOR
+        // Columna ESTADO ETAPA: Usa Tag de color, Popover, y lógica de ROJO por atraso
         {
-            title: 'Estado Etapa', 
-            dataIndex: 'Est_etapa', 
+            title: 'Estado Etapa',
+            dataIndex: 'Est_etapa',
             key: 'Est_etapa',
             width: 120,
-            render: (text) => {
-                let color = 'default';
-                // Asignamos colores según el estado
-                if (text === 'Inicio') color = 'blue';
-                else if (text === 'En proceso') color = 'gold';
-                else if (text === 'Finalizó') color = 'green';
-                
+            render: (text, record) => {
+                // Pasamos el texto del estado Y la fecha del registro para la lógica de color
+                const { color, message } = getStageInfo(text, record.Fecha);
+
                 return (
-                    <Tag color={color} key={text} style={{ minWidth: 90, textAlign: 'center' }}>
-                        {text.toUpperCase()}
-                    </Tag>
+                    <Popover
+                        title={`Estado: ${text}`}
+                        content={<p style={{ maxWidth: 200 }}>{message}</p>}
+                        trigger="hover"
+                        placement="topLeft"
+                    >
+                        <Tag color={color} key={text} style={{ minWidth: 90, textAlign: 'center', cursor: 'pointer' }}>
+                            {text.toUpperCase()}
+                        </Tag>
+                    </Popover>
                 );
             },
-            // IMPORTANTE: Eliminamos la propiedad 'onCell' que pintaba el fondo de la celda.
-            
             filters: [{ text: 'Inicio', value: 'Inicio' }, { text: 'En proceso', value: 'En proceso' }, { text: 'Finalizó', value: 'Finalizó' }],
             onFilter: (value, record) => record.Est_etapa.includes(value),
         },
-        {
-            title: 'Estado Herramienta', dataIndex: 'Est_her', key: 'Est_her',
-            width: 120,
-            render: (text) => (
-                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
-                    {text.toUpperCase()}
-                </Tag>
-            ),
-            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
-            onFilter: (value, record) => record.Est_her.includes(value),
-        },
         // Columnas de Motivos (con botón VER y Popover sin color)
-        { 
-            title: 'Motivo Emp', 
-            dataIndex: 'MotivoEmp', 
+        {
+            title: 'Motivo Emp',
+            dataIndex: 'MotivoEmp',
             key: 'MotivoEmp',
             width: 100,
             render: (text) => {
                 if (!text) return '—';
                 return (
-                    <Popover 
-                        title="Motivo del Empleado (Malo)" 
+                    <Popover
+                        title="Motivo del Empleado (Malo)"
                         content={<p style={{ maxWidth: 300, color: '#333' }}>{text}</p>}
-                        trigger="hover" 
+                        trigger="hover"
                         placement="topLeft"
                     >
                         <Button type="primary" size="small" style={{ borderRadius: 15 }}>
@@ -320,18 +365,18 @@ export default function Reportes() {
                 );
             }
         },
-        { 
-            title: 'Motivo Veh', 
-            dataIndex: 'MotivoVeh', 
+        {
+            title: 'Motivo Veh',
+            dataIndex: 'MotivoVeh',
             key: 'MotivoVeh',
             width: 100,
             render: (text) => {
                 if (!text) return '—';
                 return (
-                    <Popover 
-                        title="Motivo del Vehículo (Malo)" 
+                    <Popover
+                        title="Motivo del Vehículo (Malo)"
                         content={<p style={{ maxWidth: 300, color: '#333' }}>{text}</p>}
-                        trigger="hover" 
+                        trigger="hover"
                         placement="topLeft"
                     >
                         <Button type="primary" size="small" style={{ borderRadius: 15 }}>
@@ -341,18 +386,18 @@ export default function Reportes() {
                 );
             }
         },
-        { 
-            title: 'Motivo Her', 
-            dataIndex: 'MotivoHer', 
+        {
+            title: 'Motivo Her',
+            dataIndex: 'MotivoHer',
             key: 'MotivoHer',
             width: 100,
             render: (text) => {
                 if (!text) return '—';
                 return (
-                    <Popover 
-                        title="Motivo de la Herramienta (Mala)" 
+                    <Popover
+                        title="Motivo de la Herramienta (Mala)"
                         content={<p style={{ maxWidth: 300, color: '#333' }}>{text}</p>}
-                        trigger="hover" 
+                        trigger="hover"
                         placement="topLeft"
                     >
                         <Button type="primary" size="small" style={{ borderRadius: 15 }}>
@@ -365,12 +410,12 @@ export default function Reportes() {
         // Columnas de Imágenes Tablero y Calentamiento
         {
             title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero',
-            width: 120, 
+            width: 120,
             render: (url) => url ? (<img src={url} alt="tablero" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
         },
         {
             title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento',
-            width: 140, 
+            width: 140,
             render: (url) => url ? (<img src={url} alt="calentamiento" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
         },
         // Columnas de metadatos
@@ -381,7 +426,7 @@ export default function Reportes() {
             title: 'Acciones',
             key: 'acciones',
             width: 150,
-            fixed: 'right', 
+            fixed: 'right',
             render: (_, record) => (
                 <>
                     <Button type="link" onClick={() => handleEdit(record)}>Editar</Button>
@@ -440,7 +485,7 @@ export default function Reportes() {
         <div style={{ padding: '0 50px 50px' }}>
             <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Reportes de Buddy Partners</h1>
 
-            {/* 🔔 ALERTA DE BUDDY PARTNERS PENDIENTES */}
+            {/* 🔔 ALERTA DE BUDDY PARTNERS PENDIENTES (Se mantiene para la UI) */}
             {pendingBuddies.length > 0 && (
                 <Alert
                     message={`¡Alerta! Hay ${pendingBuddies.length} Buddy Partners pendientes de completar o con fechas pasadas.`}
@@ -475,14 +520,11 @@ export default function Reportes() {
                 rowKey="id_buddy1"
                 pagination={{ pageSize: 10 }}
                 onChange={(pagination, filters, sorter, extra) => setActiveFilters(filters)}
-                scroll={{ 
-                    x: 2000, 
-                }} 
-                // ✅ Aplica la clase de fila completa solo si está pendiente
-                rowClassName={(record) => {
-                    if (record.isPending) return "row-pendiente";
-                    return "";
+                scroll={{
+                    x: 2000,
                 }}
+                // La fila ya no se pinta de rojo suave
+                rowClassName={() => ""}
             />
 
             {/* Modal de Edición (sin cambios mayores) */}

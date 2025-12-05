@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import EmpleadosTable from '../componentes/EmpleadosTable';
+import Swal from 'sweetalert2';
 
 const Empleados = () => {
   const [empleados, setEmpleados] = useState([]);
@@ -25,7 +26,11 @@ const Empleados = () => {
       const response = await axios.get(API_URL);
       setEmpleados(response.data);
     } catch (error) {
-      alert('Error al cargar empleados');
+      Swal.fire( // ✅ Usamos SweetAlert
+        'Error de Carga',
+        'Hubo un error al intentar cargar la lista de empleados.',
+        'error'
+      );
     }
   };
 
@@ -39,9 +44,8 @@ const Empleados = () => {
   };
 
   const handleToggleActivo = async (empleado) => {
-    if (!window.confirm(`¿Estás seguro de ${empleado.activo === 1 ? 'desactivar' : 'activar'} a ${empleado.Nombres}?`)) {
-      return;
-    }
+    // 🛑 ATENCIÓN: Esta función ahora asume que la CONFIRMACIÓN ya fue hecha
+    // por la SweetAlert del componente hijo.
 
     try {
       const nuevoEstado = empleado.activo === 1 ? 0 : 1;
@@ -49,10 +53,21 @@ const Empleados = () => {
         activo: nuevoEstado
       });
 
-      alert(`Empleado ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
+      // Alerta SweetAlert de ÉXITO
+      Swal.fire(
+        '¡Actualizado!',
+        `El empleado ha sido ${nuevoEstado ? 'activado' : 'desactivado'} correctamente.`,
+        'success'
+      );
+
       cargarEmpleados();
     } catch (error) {
-      alert('Error al cambiar estado del empleado');
+      // Alerta SweetAlert de ERROR
+      Swal.fire(
+        'Error',
+        error.response?.data?.message || 'Error al cambiar estado del empleado',
+        'error'
+      );
     }
   };
 
@@ -76,16 +91,38 @@ const Empleados = () => {
     e.preventDefault();
     try {
       if (editando) {
+        // Lógica de actualización (PUT)
         await axios.put(`${API_URL}/${editando.id_per}`, form);
-        alert('Empleado actualizado correctamente');
+
+        // 🌟 REEMPLAZAR LA ALERTA NATIVA con SweetAlert de éxito
+        Swal.fire(
+          '¡Actualizado!',
+          'Empleado actualizado correctamente',
+          'success'
+        );
+
       } else {
+        // Lógica de creación (POST)
         await axios.post(API_URL, form);
-        alert('Empleado creado correctamente');
+
+        // 🌟 REEMPLAZAR LA ALERTA NATIVA con SweetAlert de éxito
+        Swal.fire(
+          '¡Creado!',
+          'Empleado creado correctamente',
+          'success'
+        );
       }
+
       setShowModal(false);
       cargarEmpleados();
+
     } catch (error) {
-      alert(error.response?.data?.message || 'Error al guardar empleado');
+      // Asegúrate que el manejo de errores también use SweetAlert si quieres que sea consistente
+      Swal.fire(
+        'Error',
+        error.response?.data?.message || 'Error al guardar empleado',
+        'error'
+      );
     }
   };
 

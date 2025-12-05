@@ -3,22 +3,15 @@ import Swal from 'sweetalert2'; // 👈 Swal está importado y listo para usarse
 
 const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
     // -------------------------------
-    // 🔍 FILTROS (Segmentados por Columna)
+    // 🔍 ESTADOS DE FILTROS Y BÚSQUEDA
     // -------------------------------
-    const [filtroNombre, setFiltroNombre] = useState("");
-    const [filtroCedula, setFiltroCedula] = useState("");
     const [filtroEstado, setFiltroEstado] = useState("todos");
     const [filtroRol, setFiltroRol] = useState("todos");
-
-    // NUEVOS ESTADOS para manejar la VISIBILIDAD del dropdown de cada filtro
     const [showFiltroEstado, setShowFiltroEstado] = useState(false);
     const [showFiltroRol, setShowFiltroRol] = useState(false);
-
-    // El filtro de búsqueda general se mantiene para buscar por Nombre, Apellido, Cédula
     const [busqueda, setBusqueda] = useState("");
 
-
-    // Lista de Roles actualizada para coincidir con tu DB (IDs 1, 2, 3)
+    // Lista de Roles actualizada
     const roles = [
         { id: 1, nombre: "supervisor" },
         { id: 2, nombre: "empleado" },
@@ -33,6 +26,7 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
 
 
     const empleadosFiltrados = useMemo(() => {
+        // ... (Tu lógica de filtrado se mantiene igual)
         return empleados
             .filter((emp) => {
                 // 1. Filtrado por Búsqueda General (Texto/Número)
@@ -60,11 +54,8 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                 return true;
             })
             .filter((emp) => {
-                // **✅ MODIFICACIÓN CLAVE PARA FILTRAR EL ROL**
+                // 3. Filtrado por Rol
                 if (filtroRol === "todos") return true;
-
-                // Aseguramos que emp.id_rol (que puede ser number o string) se compara
-                // con filtroRol (que viene como string y lo convertimos a number)
                 return Number(emp.id_rol) === parseInt(filtroRol, 10);
             });
     }, [empleados, busqueda, filtroEstado, filtroRol]);
@@ -100,7 +91,7 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
     };
 
     // ----------------------------------------------------
-    // 🚨 FUNCIÓN DE ALERTA 1: ACTIVAR/DESACTIVAR
+    // 🚨 FUNCIÓN DE ALERTA 1: ACTIVAR/DESACTIVAR (SweetAlert)
     // ----------------------------------------------------
     const handleToggleActivo = (empleado) => {
         const accion = empleado.activo === 1 ? "Desactivar" : "Activar";
@@ -111,33 +102,31 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
             text: `Esta acción cambiará el estado de ${empleado.Nombres} a ${estado}.`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: accion === 'Desactivar' ? '#dc3545' : '#198754', // Rojo para Desactivar, Verde para Activar
+            confirmButtonColor: accion === 'Desactivar' ? '#dc3545' : '#198754',
             cancelButtonColor: '#6c757d',
             confirmButtonText: `Sí, ${accion}!`
         }).then((result) => {
             if (result.isConfirmed) {
-                // Si el usuario confirma, llama a la función prop que manejará la lógica de negocio (API call)
+                // Llama a la función del padre (la API call) SOLO si se confirma
                 onToggleActivo(empleado);
-                // NOTA IMPORTANTE: La ALERTA DE ÉXITO debe ir en la función API (onToggleActivo)
-                // del componente padre, después de recibir la respuesta 200 OK del backend.
             }
         });
     };
     // ----------------------------------------------------
-    // 🚨 FUNCIÓN DE ALERTA 2: EDITAR (Confirmación previa)
+    // 🚨 FUNCIÓN DE ALERTA 2: EDITAR (SweetAlert)
     // ----------------------------------------------------
     const handleEditarConfirm = (empleado) => {
         Swal.fire({
-            title: '¿Deseas editar este empleado?',
+            title: '¿Deseas editar este empleado? 📝',
             text: `Estás a punto de modificar la información de ${empleado.Nombres}.`,
             icon: 'info',
             showCancelButton: true,
-            confirmButtonColor: '#3b82f6', // Color azul para Editar
+            confirmButtonColor: '#3b82f6',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'Sí, Editar'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Si el usuario confirma, llama a la función prop que abrirá el modal de edición
+                // Llama a la función prop que abrirá el modal de edición
                 onEditar(empleado);
             }
         });
@@ -149,7 +138,7 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
         <div className="container-fluid bg-light p-4" style={{ minHeight: "100vh" }}>
             {/* Estilos CSS adaptados para filtros DESPLEGABLES */}
             <style>{`
-                /* ... Estilos custom-card, custom-table, etc. se mantienen ... */
+                /* Estilos existentes se mantienen para la presentación */
                 .custom-card {
                     background: white;
                     border-radius: 12px;
@@ -165,7 +154,6 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                     font-size: 0.85rem;
                 }
                 
-                /* Contenedor de la cabecera */
                 .custom-table thead th {
                     background-color: #f8f9fa;
                     color: #6c757d;
@@ -175,10 +163,9 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                     padding: 16px;
                     border-bottom: 2px solid #e9ecef;
                     text-align: left;
-                    position: relative; /* Clave para posicionar el dropdown */
+                    position: relative;
                 }
                 
-                /* Estilo para el icono de filtro */
                 .filter-header-content {
                     display: flex;
                     align-items: center;
@@ -190,16 +177,14 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                     font-size: 0.8rem;
                     color: #6c757d;
                 }
-                /* Color del icono cuando el filtro está activo */
                 .filter-icon.active {
                     color: #3b82f6; 
                     font-weight: bold;
                 }
                 
-                /* Estilo del Dropdown de filtro (replicando la imagen) */
                 .filter-dropdown {
                     position: absolute;
-                    top: 100%; /* Justo debajo del header */
+                    top: 100%;
                     left: 0;
                     z-index: 1000;
                     background: white;
@@ -232,28 +217,28 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                 }
 
                 .custom-table tbody tr {
-                  background-color: white;
-                  border-bottom: 1px solid #f1f3f5;
-                  transition: background-color 0.2s;
+                    background-color: white;
+                    border-bottom: 1px solid #f1f3f5;
+                    transition: background-color 0.2s;
                 }
 
                 .custom-table tbody tr:hover {
-                  background-color: #f8f9fa;
+                    background-color: #f8f9fa;
                 }
 
                 .custom-table td {
-                  padding: 14px 16px;
-                  color: #374151;
-                  vertical-align: middle;
+                    padding: 14px 16px;
+                    color: #374151;
+                    vertical-align: middle;
                 }
                 
                 .action-link {
-                  cursor: pointer;
-                  font-weight: 500;
-                  text-decoration: none;
-                  margin-right: 15px;
-                  font-size: 0.8rem;
-                  transition: color 0.2s;
+                    cursor: pointer;
+                    font-weight: 500;
+                    text-decoration: none;
+                    margin-right: 15px;
+                    font-size: 0.8rem;
+                    transition: color 0.2s;
                 }
                 .action-link:hover { text-decoration: underline; }
                 .text-blue { color: #3b82f6; }
@@ -261,23 +246,21 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                 .text-red { color: #ef4444; }
                 .text-red:hover { color: #dc2626; }
                 
-                /* Inputs modernos (mantengo el estilo de búsqueda general si lo quieres reincorporar) */
                 .modern-input {
-                  border: 1px solid #e2e8f0;
-                  border-radius: 8px;
-                  padding: 10px 15px;
-                  width: 100%;
-                  outline: none;
-                  transition: border-color 0.2s, box-shadow 0.2s;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    padding: 10px 15px;
+                    width: 100%;
+                    outline: none;
+                    transition: border-color 0.2s, box-shadow 0.2s;
                 }
                 .modern-input:focus { 
-                  border-color: #3b82f6; 
-                  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                    border-color: #3b82f6; 
+                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
                 }
-                
             `}</style>
-            
-            {/* Barra de Búsqueda General (Mantengo por utilidad, si no la quieres, puedes borrar este div) */}
+
+            {/* Barra de Búsqueda General */}
             <div className="row mb-4">
                 <div className="col-md-12">
                     <input
@@ -293,7 +276,7 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                 </div>
             </div>
 
-            <div className="custom-card p-0"> 
+            <div className="custom-card p-0">
                 {/* ------------------------------ */}
                 {/* 📋 TABLA ESTILIZADA CON FILTROS DESPLEGABLES */}
                 {/* ------------------------------ */}
@@ -302,39 +285,36 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                         <thead>
                             {/* FILA ÚNICA: Encabezados de Columna con Iconos de Filtro */}
                             <tr>
-                                {/* Nombre Completo: Opción de añadir búsqueda textual aquí si se requiere */}
                                 <th>Nombre Completo</th>
                                 <th>Email</th>
                                 <th>Cédula</th>
                                 <th>Celular</th>
-                                
+
                                 {/* Columna Rol con Filtro Desplegable */}
                                 <th>
                                     <div className="filter-header-content">
                                         Rol
-                                        <span 
+                                        <span
                                             className={`filter-icon ${filtroRol !== 'todos' ? 'active' : ''}`}
                                             onClick={(e) => {
-                                                e.stopPropagation(); // Evitar cualquier acción de ordenamiento
+                                                e.stopPropagation();
                                                 setShowFiltroRol(!showFiltroRol);
-                                                setShowFiltroEstado(false); // Cierra el otro filtro
+                                                setShowFiltroEstado(false);
                                             }}
                                         >
                                             {filtroRol !== 'todos' ? '▼' : '▼'}
                                         </span>
                                     </div>
-                                    
+
                                     {/* Dropdown del Filtro Rol */}
                                     {showFiltroRol && (
                                         <div className="filter-dropdown" onClick={e => e.stopPropagation()}>
                                             <div className="mb-2">
-                                                {/* El mapeo de roles usa la lista actualizada (1, 2, 3) */}
                                                 {roles.map((rol) => (
                                                     <label key={rol.id}>
-                                                        <input 
-                                                            type="checkbox" 
+                                                        <input
+                                                            type="checkbox"
                                                             value={String(rol.id)}
-                                                            // Se mantiene la lógica de selección única/toggle para este checkbox
                                                             checked={filtroRol === String(rol.id)}
                                                             onChange={() => handleApplyFiltroRol(filtroRol === String(rol.id) ? 'todos' : String(rol.id))}
                                                         />
@@ -342,7 +322,6 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                                                     </label>
                                                 ))}
                                             </div>
-                                            {/* Botones de acción, como en tu imagen */}
                                             <button onClick={() => handleApplyFiltroRol(filtroRol)}>OK</button>
                                             <button className="reset" onClick={() => handleApplyFiltroRol('todos')}>Reset</button>
                                         </div>
@@ -353,46 +332,45 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                                 <th>
                                     <div className="filter-header-content">
                                         Estado
-                                        <span 
+                                        <span
                                             className={`filter-icon ${filtroEstado !== 'todos' ? 'active' : ''}`}
                                             onClick={(e) => {
-                                                e.stopPropagation(); // Evitar cualquier acción de ordenamiento
+                                                e.stopPropagation();
                                                 setShowFiltroEstado(!showFiltroEstado);
-                                                setShowFiltroRol(false); // Cierra el otro filtro
+                                                setShowFiltroRol(false);
                                             }}
                                         >
                                             {filtroEstado !== 'todos' ? '▼' : '▼'}
                                         </span>
                                     </div>
-                                    
-                                    {/* Dropdown del Filtro Estado (replicando la imagen) */}
+
+                                    {/* Dropdown del Filtro Estado */}
                                     {showFiltroEstado && (
                                         <div className="filter-dropdown" onClick={e => e.stopPropagation()}>
                                             <div className="mb-2">
                                                 <label>
-                                                    <input 
-                                                        type="checkbox" 
+                                                    <input
+                                                        type="checkbox"
                                                         checked={filtroEstado === 'activos'}
                                                         onChange={() => handleApplyFiltroEstado(filtroEstado === 'activos' ? 'todos' : 'activos')}
                                                     />
                                                     {' '} Activo
                                                 </label>
                                                 <label>
-                                                    <input 
-                                                        type="checkbox" 
+                                                    <input
+                                                        type="checkbox"
                                                         checked={filtroEstado === 'inactivos'}
                                                         onChange={() => handleApplyFiltroEstado(filtroEstado === 'inactivos' ? 'todos' : 'inactivos')}
                                                     />
                                                     {' '} Inactivo
                                                 </label>
                                             </div>
-                                            {/* Botones de acción, como en tu imagen */}
                                             <button onClick={() => handleApplyFiltroEstado(filtroEstado)}>OK</button>
                                             <button className="reset" onClick={() => handleApplyFiltroEstado('todos')}>Reset</button>
                                         </div>
                                     )}
                                 </th>
-                                
+
                                 <th style={{ textAlign: 'right' }}>Acciones</th>
                             </tr>
                         </thead>
@@ -400,6 +378,7 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                         <tbody>
                             {empleadosPaginados.length === 0 ? (
                                 <tr>
+                                    {/* 🛑 Asegúrate que colSpan coincida con el número de tus TH (encabezados) */}
                                     <td colSpan="7" className="text-center p-5 text-muted">
                                         No se encontraron resultados
                                     </td>
@@ -407,19 +386,29 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                             ) : (
                                 empleadosPaginados.map((emp) => (
                                     <tr key={emp.id_per}>
+                                        {/* 1. NOMBRE COMPLETO */}
                                         <td>
                                             <div className="fw-bold">{emp.Nombres}</div>
                                             <div className="small text-muted">{emp.Apellidos}</div>
                                         </td>
+
+                                        {/* 2. EMAIL */}
                                         <td>{emp.Correo}</td>
+
+                                        {/* 3. CÉDULA */}
                                         <td>{emp.Cedula}</td>
+
+                                        {/* 4. CELULAR */}
                                         <td>{emp.Celular}</td>
+
+                                        {/* 5. ROL */}
                                         <td>
-                                            {/* Usar la función getNombreRol para mostrar el nombre correcto */}
                                             <span className="badge bg-light text-dark border shadow-sm fw-normal">
                                                 {getNombreRol(emp.id_rol)}
                                             </span>
                                         </td>
+
+                                        {/* 6. ESTADO */}
                                         <td>
                                             {emp.activo === 1 ? (
                                                 <div className="d-flex align-items-center">
@@ -433,10 +422,11 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                                                 </div>
                                             )}
                                         </td>
+
+                                        {/* 7. ACCIONES (¡ESTA ES LA COLUMNA FALTANTE!) */}
                                         <td style={{ textAlign: 'right' }}>
                                             <span
-                                                className="action-link text-blue"
-                                                // 🚨 CAMBIO: Llama a la nueva función de confirmación de edición
+                                                className="action-link text-blue me-3" // Agregué me-3 para separar los links
                                                 onClick={() => handleEditarConfirm(emp)}
                                             >
                                                 Editar
@@ -444,7 +434,6 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
 
                                             <span
                                                 className="action-link text-red"
-                                                // Llama a la función de confirmación de activar/desactivar
                                                 onClick={() => handleToggleActivo(emp)}
                                             >
                                                 {emp.activo === 1 ? "Desactivar" : "Activar"}
@@ -476,9 +465,8 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                                 {Array.from({ length: totalPaginas }).map((_, index) => (
                                     <li
                                         key={index}
-                                        className={`page-item ${
-                                            paginaActual === index + 1 ? "active" : ""
-                                        }`}
+                                        className={`page-item ${paginaActual === index + 1 ? "active" : ""
+                                            }`}
                                     >
                                         <button
                                             className={`page-link border-0 ${paginaActual === index + 1 ? "bg-dark text-white rounded-circle mx-1" : "text-dark"}`}
@@ -490,9 +478,8 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
                                 ))}
 
                                 <li
-                                    className={`page-item ${
-                                        paginaActual === totalPaginas ? "disabled" : ""
-                                    }`}
+                                    className={`page-item ${paginaActual === totalPaginas ? "disabled" : ""
+                                        }`}
                                 >
                                     <button
                                         className="page-link border-0 text-dark"
@@ -510,4 +497,4 @@ const EmpleadosTable = ({ empleados = [], onToggleActivo, onEditar }) => {
     );
 };
 
-export default EmpleadosTable;  
+export default EmpleadosTable;
