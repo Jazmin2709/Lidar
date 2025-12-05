@@ -1,8 +1,8 @@
 import Swal from 'sweetalert2';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Button, Input, Modal, Form, Alert, Upload, Select } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Table, Button, Input, Modal, Form, Alert, Upload, Select, Tag, Popover } from 'antd';
+import { SearchOutlined } from '@ant-design/icons'; 
 import '../css/styles.css';
 import moment from 'moment';
 
@@ -40,6 +40,7 @@ export default function Reportes() {
 
             const data = response.data.map(item => {
                 const Fecha = moment(item.Fecha).format('YYYY-MM-DD');
+                // La lógica de pendiente: Etapa en "Inicio" o "En proceso" Y fecha pasada
                 const isPending = (item.Est_etapa === "Inicio" || item.Est_etapa === "En proceso") && Fecha < hoy;
 
                 return {
@@ -141,21 +142,14 @@ export default function Reportes() {
             };
 
             // 3. Manejar subida de imágenes - CONDICIONAL para Carnet/Tarjeta Vida (Tipo 1)
-            // Si el registro es de Tipo 1, permite subir las imágenes, si no, mantiene el valor existente o ""
             if (editingRecord.Tipo === 1) {
                 await updateFile(newFileCarnet, "Carnet", "Carnet");
                 await updateFile(newFileTarjetaVida, "TarjetaVida", "TarjetaVida");
-            } else {
-                // Si no es Tipo 1, nos aseguramos de no enviar los archivos nuevos
-                // y mantenemos el valor actual de Carnet/TarjetaVida que ya está en 'payload'
-            }
-
+            } 
             // Manejar subida de imágenes - CONDICIONAL para Tablero/Calentamiento (Tipo 2)
             if (editingRecord.Tipo === 2) {
                 await updateFile(newFileTablero, "tableros", "Tablero");
                 await updateFile(newFileCalentamiento, "calentamientos", "Calentamiento");
-            } else {
-                // Si no es Tipo 2, mantenemos el valor actual de Tablero/Calentamiento que ya está en 'payload'
             }
 
 
@@ -206,38 +200,54 @@ export default function Reportes() {
         window.open(url, "_blank");
     };
 
-
-    // Configuración de las columnas de la tabla de Ant Design (Sin cambios aquí)
+    // Configuración de las columnas de la tabla con mejoras visuales
     const columns = [
-        { title: 'Id', dataIndex: 'id_buddy1', key: 'id_buddy1', sorter: (a, b) => a.id_buddy1 - b.id_buddy1 },
-        { title: 'Numero Cuadrilla', dataIndex: 'num_cuadrilla', key: 'num_cuadrilla' },
-        { title: 'Hora', dataIndex: 'Hora_buddy', key: 'Hora_buddy' },
+        { title: 'Id', dataIndex: 'id_buddy1', key: 'id_buddy1', sorter: (a, b) => a.id_buddy1 - b.id_buddy1, width: 70 },
+        { title: 'Cuadrilla', dataIndex: 'num_cuadrilla', key: 'num_cuadrilla', width: 100 },
+        { title: 'Hora', dataIndex: 'Hora_buddy', key: 'Hora_buddy', width: 90 },
         {
+            // Columna Estado Empleado (usa Tag de color)
             title: 'Estado Empleado', dataIndex: 'Est_empl', key: 'Est_empl',
+            width: 120,
+            render: (text) => (
+                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
+                    {text.toUpperCase()}
+                </Tag>
+            ),
             filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
             onFilter: (value, record) => record.Est_empl.includes(value),
         },
         {
+            // Columna Estado Vehiculo (usa Tag de color)
             title: 'Estado Vehiculo', dataIndex: 'Est_vehi', key: 'Est_vehi',
+            width: 120,
+            render: (text) => (
+                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
+                    {text.toUpperCase()}
+                </Tag>
+            ),
             filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
             onFilter: (value, record) => record.Est_vehi.includes(value),
         },
+        // Columna Carnet con vista previa
         {
-            title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet',
-            width: 120, // Ancho fijo para columna de imagen
-            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
-                ? (<img src={url} alt="Carnet" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
-                : '—')
-        },
-        {
-            title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida',
-            width: 120, // Ancho fijo para columna de imagen
-            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
+            title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet',
+            width: 120, 
+            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
+                ? (<img src={url} alt="Carnet" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
+                : '—')
+        },
+        // Columna Tarjeta Vida con vista previa
+        {
+            title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida',
+            width: 120, 
+            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
                 ? (<img src={url} alt="Tarjeta Vida" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
                 : '—')
         },
         {
             title: 'Fecha', dataIndex: 'Fecha', key: 'Fecha',
+            width: 120,
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
                     <Input
@@ -253,60 +263,125 @@ export default function Reportes() {
             filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
             onFilter: (value, record) => record.Fecha.includes(value),
         },
+        // ✅ Columna ESTADO ETAPA: VUELVE A USAR EL TAG DE COLOR
         {
-            title: 'Estado Etapa', dataIndex: 'Est_etapa', key: 'Est_etapa',
+            title: 'Estado Etapa', 
+            dataIndex: 'Est_etapa', 
+            key: 'Est_etapa',
+            width: 120,
+            render: (text) => {
+                let color = 'default';
+                // Asignamos colores según el estado
+                if (text === 'Inicio') color = 'blue';
+                else if (text === 'En proceso') color = 'gold';
+                else if (text === 'Finalizó') color = 'green';
+                
+                return (
+                    <Tag color={color} key={text} style={{ minWidth: 90, textAlign: 'center' }}>
+                        {text.toUpperCase()}
+                    </Tag>
+                );
+            },
+            // IMPORTANTE: Eliminamos la propiedad 'onCell' que pintaba el fondo de la celda.
+            
             filters: [{ text: 'Inicio', value: 'Inicio' }, { text: 'En proceso', value: 'En proceso' }, { text: 'Finalizó', value: 'Finalizó' }],
             onFilter: (value, record) => record.Est_etapa.includes(value),
         },
         {
             title: 'Estado Herramienta', dataIndex: 'Est_her', key: 'Est_her',
+            width: 120,
+            render: (text) => (
+                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
+                    {text.toUpperCase()}
+                </Tag>
+            ),
             filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
             onFilter: (value, record) => record.Est_her.includes(value),
         },
-        // Columnas de Motivos
+        // Columnas de Motivos (con botón VER y Popover sin color)
         { 
-        title: 'Motivo Emp', 
-        dataIndex: 'MotivoEmp', 
-        key: 'MotivoEmp',
-        // Usar un ancho fijo/mínimo para el scroll funcione bien
-        width: 150, 
-        // Habilitar truncamiento con puntos suspensivos
-        ellipsis: true, 
-        // Opcional: Centrar el texto si no es demasiado largo (no recomendado para texto largo)
-        // align: 'center' 
-    },
-    { 
-        title: 'Motivo Veh', 
-        dataIndex: 'MotivoVeh', 
-        key: 'MotivoVeh',
-        width: 150,
-        ellipsis: true
-    },
-    { 
-        title: 'Motivo Her', 
-        dataIndex: 'MotivoHer', 
-        key: 'MotivoHer',
-        width: 150,
-        ellipsis: true
-    },
+            title: 'Motivo Emp', 
+            dataIndex: 'MotivoEmp', 
+            key: 'MotivoEmp',
+            width: 100,
+            render: (text) => {
+                if (!text) return '—';
+                return (
+                    <Popover 
+                        title="Motivo del Empleado (Malo)" 
+                        content={<p style={{ maxWidth: 300, color: '#333' }}>{text}</p>}
+                        trigger="hover" 
+                        placement="topLeft"
+                    >
+                        <Button type="primary" size="small" style={{ borderRadius: 15 }}>
+                            VER
+                        </Button>
+                    </Popover>
+                );
+            }
+        },
+        { 
+            title: 'Motivo Veh', 
+            dataIndex: 'MotivoVeh', 
+            key: 'MotivoVeh',
+            width: 100,
+            render: (text) => {
+                if (!text) return '—';
+                return (
+                    <Popover 
+                        title="Motivo del Vehículo (Malo)" 
+                        content={<p style={{ maxWidth: 300, color: '#333' }}>{text}</p>}
+                        trigger="hover" 
+                        placement="topLeft"
+                    >
+                        <Button type="primary" size="small" style={{ borderRadius: 15 }}>
+                            VER
+                        </Button>
+                    </Popover>
+                );
+            }
+        },
+        { 
+            title: 'Motivo Her', 
+            dataIndex: 'MotivoHer', 
+            key: 'MotivoHer',
+            width: 100,
+            render: (text) => {
+                if (!text) return '—';
+                return (
+                    <Popover 
+                        title="Motivo de la Herramienta (Mala)" 
+                        content={<p style={{ maxWidth: 300, color: '#333' }}>{text}</p>}
+                        trigger="hover" 
+                        placement="topLeft"
+                    >
+                        <Button type="primary" size="small" style={{ borderRadius: 15 }}>
+                            VER
+                        </Button>
+                    </Popover>
+                );
+            }
+        },
         // Columnas de Imágenes Tablero y Calentamiento
         {
-            title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero',
-            width: 120, // Ancho fijo para columna de imagen
-            render: (url) => url ? (<img src={url} alt="tablero" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
-        },
-        {
-            title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento',
-            width: 140, // Un poco más de ancho si el título es largo
-            render: (url) => url ? (<img src={url} alt="calentamiento" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
-        },
+            title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero',
+            width: 120, 
+            render: (url) => url ? (<img src={url} alt="tablero" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
+        },
+        {
+            title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento',
+            width: 140, 
+            render: (url) => url ? (<img src={url} alt="calentamiento" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
+        },
         // Columnas de metadatos
-        { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado' },
-        { title: 'Tipo', dataIndex: 'Tipo', key: 'Tipo' },
+        { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado', width: 100 },
+        { title: 'Tipo', dataIndex: 'Tipo', key: 'Tipo', width: 80 },
         // Columna de Acciones (Editar/Eliminar)
         {
             title: 'Acciones',
             key: 'acciones',
+            width: 150,
+            fixed: 'right', 
             render: (_, record) => (
                 <>
                     <Button type="link" onClick={() => handleEdit(record)}>Editar</Button>
@@ -363,12 +438,12 @@ export default function Reportes() {
 
     return (
         <div style={{ padding: '0 50px 50px' }}>
-            <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Reportes</h1>
+            <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Reportes de Buddy Partners</h1>
 
             {/* 🔔 ALERTA DE BUDDY PARTNERS PENDIENTES */}
             {pendingBuddies.length > 0 && (
                 <Alert
-                    message="Hay Buddy Partners pendientes de completar"
+                    message={`¡Alerta! Hay ${pendingBuddies.length} Buddy Partners pendientes de completar o con fechas pasadas.`}
                     description={
                         <ul>
                             {pendingBuddies.map(b => (
@@ -392,7 +467,7 @@ export default function Reportes() {
                 Exportar Excel
             </Button>
 
-            {/* Tabla de Reportes */}
+            {/* Tabla de Reportes con estilos mejorados y scroll */}
             <Table
                 className="shadow rounded-5 border-3"
                 columns={columns}
@@ -400,26 +475,17 @@ export default function Reportes() {
                 rowKey="id_buddy1"
                 pagination={{ pageSize: 10 }}
                 onChange={(pagination, filters, sorter, extra) => setActiveFilters(filters)}
-                // 💡 CLAVE DE RESPONSIVIDAD: Añadir propiedad scroll
                 scroll={{ 
-                    // Establece el ancho total para habilitar el scroll horizontal
-                    // 2000px es un valor seguro para tantas columnas
                     x: 2000, 
-                    // Si quieres scroll vertical, define la altura. Por ejemplo:
-                    // y: 500
                 }} 
+                // ✅ Aplica la clase de fila completa solo si está pendiente
                 rowClassName={(record) => {
                     if (record.isPending) return "row-pendiente";
-
-                    if (record.Est_etapa === "Inicio") return "estado-inicio";
-                    if (record.Est_etapa === "En proceso") return "estado-proceso";
-                    if (record.Est_etapa === "Finalizó") return "estado-finalizo";
-
                     return "";
                 }}
             />
 
-            {/* Modal de Edición */}
+            {/* Modal de Edición (sin cambios mayores) */}
             <Modal
                 title="Editar Reporte"
                 open={isModalOpen}
@@ -427,6 +493,7 @@ export default function Reportes() {
                 onCancel={() => setIsModalOpen(false)}
                 okText="Guardar"
                 cancelText="Cancelar"
+                width={800}
             >
                 <Form
                     form={form}
@@ -464,6 +531,7 @@ export default function Reportes() {
                     {/* 🎯 SECCIÓN DE IMÁGENES (Tipo 1) para Carnet y Tarjeta Vida (CONDICIONAL) */}
                     {Form.useWatch("Tipo", form) === 1 && (
                         <>
+                            <h3 style={{ marginTop: 20 }}>Documentos (Tipo 1)</h3>
                             <FileUploadDisplay
                                 label="Carnet"
                                 fieldName="Carnet"
@@ -508,6 +576,7 @@ export default function Reportes() {
                     {/* 🎯 SECCIÓN DE IMÁGENES (Tipo 2) para Tablero y Calentamiento (condicional) */}
                     {Form.useWatch("Tipo", form) === 2 && (
                         <>
+                            <h3 style={{ marginTop: 20 }}>Evidencias (Tipo 2)</h3>
                             <FileUploadDisplay
                                 label="Tablero"
                                 fieldName="Tablero"
