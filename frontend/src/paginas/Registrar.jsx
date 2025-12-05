@@ -1,7 +1,7 @@
 // Versión responsiva del formulario de registro
 import { useState } from 'react';
 import axios from 'axios';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2'; 
 
 const API_URL = process.env.API_URL || "http://localhost:3000/api";
 
