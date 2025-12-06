@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.post('/subir', upload.single('foto'), validateImagen, imagenesController.subirImagen);
 
-router.post('/eliminar/:public_id', imagenesController.eliminarImagen);
+router.post('/eliminar/:public_id', ImagenesController.eliminarImagen);
 
 module.exports = router;
