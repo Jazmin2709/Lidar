@@ -34,7 +34,7 @@ export default function IndexEmpleado() {
 
         // Petición al backend para obtener las actividades pendientes del usuario.
         axios
-            .get(`http://localhost:3000/BuddyPartner/pending/${id_usuario}`)
+            .get(`https://lidar-cush.onrender.com/BuddyPartner/pending/${id_usuario}`)
             .then((res) => {
                 const pendientes = res.data;
 

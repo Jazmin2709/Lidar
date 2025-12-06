@@ -15,7 +15,7 @@ const Empleados = () => {
     Celular: '', Contrasena: '', Tipo_Doc: '', id_rol: ''
   });
 
-const API_URL = process.env.API_URL || "http://localhost:3000/api";
+const API_URL = process.env.API_URL || "https://lidar-cush.onrender.com/api";
 
   // 🔤 VALIDACIONES
   const soloTexto = (valor) => valor.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, "");

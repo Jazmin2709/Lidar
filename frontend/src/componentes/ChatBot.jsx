@@ -26,7 +26,7 @@ export default function ChatBotComponent() {
         setMessages(newMessages);
 
         try {
-            const res = await axios.post("http://localhost:3000/api/chatbot/chat", {
+            const res = await axios.post("https://lidar-cush.onrender.com/api/chatbot/chat", {
                 mensaje: input,
                 ruta: window.location.pathname   // 👈 SE AGREGA LA RUTA ACTUAL
             });

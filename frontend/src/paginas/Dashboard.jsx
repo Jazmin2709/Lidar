@@ -53,7 +53,7 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 // Llamada al backend
-                const res = await axios.get('http://localhost:3000/api/buddy/BuddyPartner');
+                const res = await axios.get('https://lidar-cush.onrender.com/api/buddy/BuddyPartner');
                 const records = res.data; // Lista de registros
 
 
