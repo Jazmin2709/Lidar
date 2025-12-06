@@ -7,8 +7,8 @@ import '../css/styles.css';
 import moment from 'moment';
 
 const { Option } = Select;
-const API_BASE_URL = 'http://localhost:3000/api/buddy/BuddyPartner';
-const API_IMAGE_UPLOAD = 'http://localhost:3000/api/imagenes/subir';
+const API_BASE_URL = 'https://lidar-cush.onrender.com/api/buddy/BuddyPartner';
+const API_IMAGE_UPLOAD = 'https://lidar-cush.onrender.com/api/imagenes/subir';
 
 /**
  * Función para obtener color y mensaje del estado de etapa.

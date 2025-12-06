@@ -5,7 +5,7 @@ import moment from "moment";
 import { jwtDecode } from "jwt-decode";
 
 // 🚧 Configuración centralizada de la URL de la API
-const API_URL = process.env.API_URL || "http://localhost:3000/api";
+const API_URL = process.env.API_URL || "https://lidar-cush.onrender.com/api";
 const BUDDY_API_URL = `${API_URL}/buddy`;
 
 export default function Buddy1Page() {

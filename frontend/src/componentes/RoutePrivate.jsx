@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-const RUTA_API = "http://localhost:3000/api";
+const RUTA_API = "https://lidar-cush.onrender.com/api";
 
 export default function RoutePrivate({ requiredRole }) {
     const [isAuth, setIsAuth] = useState(null);
