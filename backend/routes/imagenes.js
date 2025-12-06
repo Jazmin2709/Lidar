@@ -9,3 +9,4 @@ router.post('/subir', upload.single('foto'), validateImagen, imagenesController.
 router.post('/eliminar/:public_id', ImagenesController.eliminarImagen);
 
 module.exports = router;
+ 
