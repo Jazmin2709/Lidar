@@ -8,7 +8,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './paginas/Dashboard';
 import PagInicio from './paginas/PagInicio';
 import Registrar from './paginas/Registrar';
-import Empleados from './paginas/Empleados';
+import EmpleadosCompleto from './paginas/EmpleadosCompleto';
 import Buddy1Page from './paginas/Buddy1Page';
 import Buddy2Page from './paginas/Buddy2Page';
 import Buddy3Page from './paginas/Buddy3Page';
@@ -18,7 +18,6 @@ import Lidar from './paginas/Lidar';
 import QuienesSomos from './paginas/QuienesSomos';
 import EnviarCorreo from './paginas/EnviarCorreo';
 import RecuperarContraseña from './paginas/RecuperarContraseña';
-import IndexEmpleado from './paginas/IndexEmpleado';
 
 // Importamos componentes para controlar el acceso a rutas
 import RoutePrivate from "./componentes/RoutePrivate"; // Rutas privadas (requieren autenticación)
@@ -28,7 +27,7 @@ import RoutePublic from './componentes/RoutePublic';   // Rutas públicas (sin a
 import DefaultLayout from './componentes/DefaultLayout';       // Layout general para rutas públicas
 import AdminLayout from './componentes/AdminLayout';           // Layout para administrador
 import SupervisorLayout from './componentes/SupervisorLayout'; // Layout para supervisor
-import EmpleadoLayout from './componentes/EmpleadoLayout';     // Layout para empleado
+import EmpleadoLayoutUnificado from './componentes/EmpleadoLayoutUnificado';     // Layout para empleado
 
 // Importamos estilos CSS
 import './css/styles.css';
@@ -66,7 +65,7 @@ function App() {
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/Reportes" element={<Reportes />} />
-            <Route path="/admin/empleados/" element={<Empleados />} />
+            <Route path="/admin/empleados/" element={<EmpleadosCompleto />} />
           </Route>
         </Route>
 
@@ -80,8 +79,8 @@ function App() {
 
         {/* EMPLEADO */}
         <Route element={<RoutePrivate requiredRole={2} />}>
-          <Route element={<EmpleadoLayout />}>
-            <Route path="/IndexEmpleado/" element={<IndexEmpleado />} />
+          <Route element={<EmpleadoLayoutUnificado />}>
+            <Route path="/IndexEmpleado" element={null} />
             <Route path="/BuddyPartner1/" element={<Buddy1Page />} />
             <Route path="/BuddyPartner2/" element={<Buddy2Page />} />
             <Route path="/BuddyPartner3/" element={<Buddy3Page />} />
