@@ -77,7 +77,7 @@ function App() {
           </Route>
         </Route>
 
-        {/* EMPLEADO */}
+        {/* EMPLEADO  */}
         <Route element={<RoutePrivate requiredRole={2} />}>
           <Route element={<EmpleadoLayoutUnificado />}>
             <Route path="/IndexEmpleado" element={null} />
