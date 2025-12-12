@@ -1,4 +1,4 @@
-// Importa los hooks de React y librerías externas necesarias
+// Importa los hooks de React y librerías externas necesarias 
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
