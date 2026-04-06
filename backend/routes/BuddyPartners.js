@@ -2,22 +2,17 @@ const express = require('express');
 const router = express.Router();
 const BuddyPartnersController = require('../controllers/BuddyPartnersController');
 
-// Controladores de BuddyPartners
+// ==================== RUTAS CORRECTAS ====================
 
-// BuddyPartner1
 router.get('/BuddyPartner', BuddyPartnersController.GetBuddyPartner);
 router.post('/BuddyPartner', BuddyPartnersController.BuddyPartner);
 router.put('/BuddyPartner/:id', BuddyPartnersController.EditBuddyPartner);
 router.delete('/BuddyPartner/:id', BuddyPartnersController.DeleteBuddyPartner);
 router.get('/BuddyPartner/export-pdf', BuddyPartnersController.ExportPDF);
 router.get("/BuddyPartner/export-excel", BuddyPartnersController.ExportExcel);
+router.get('/check-duplicate', BuddyPartnersController.CheckDuplicate);
 
+// (las de BuddyPartner2 siguen comentadas)
 
-
-
-
-// BuddyPartner2
-// router.get ('/BuddyPartner2', BuddyPartnersController.GetBuddyPartner2);
-// router.post('/BuddyPartner2', BuddyPartnersController.BuddyPartner2);
-
+// ==================== FIN ====================
 module.exports = router;

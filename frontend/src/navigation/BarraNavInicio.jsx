@@ -1,55 +1,97 @@
-// Importamos React para poder usar JSX
-import React from "react";
+// src/navigation/BarraNavInicio.jsx (o src/components/BarraNavInicio.jsx)
+import React from 'react';
+import ocaImagen from '/src/assets/img/OCA.png'; // ← tu logo importado
 
-// Importamos Link desde react-router-dom para navegación interna sin recargar la página
-import { Link } from "react-router-dom";
 
-// Importamos el logo de OCA desde la carpeta de imágenes
-import ocaImagen from '/src/assets/img/OCA.png';
-
-// Componente funcional que representa la barra de navegación de la página de inicio
-function BarraNavInicio() {
+export default function BarraNavInicio({
+  scrollTo,
+  misionRef,
+  quienesRef,
+  visionRef,
+  lidarRef,
+  aplicacionesRef,
+  beneficiosRef,
+  tecnologiaRef,
+}) {
   return (
-    // Navbar con clases de Bootstrap y color de fondo personalizado
-    <nav className="navbar navbar-expand-lg px-5" style={{ backgroundColor: '#3483cd' }}>
+    <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
       <div className="container-fluid">
-        {/* Logo que sirve como enlace a la ruta raíz (/) */}
-        <Link to="/" className="navbar-brand fst-italic fw-bold">
-          <img
-            src={ocaImagen} // Imagen del logo importado
-            alt="OCA"        // Texto alternativo para accesibilidad
-            className="oca-logo"
-            style={{ width: '100px', height: 'auto' }} // Tamaño del logo
-          />
-        </Link>
+        {/* Logo */}
+        <a className="navbar-brand fst-italic fw-bold" href="/">
+          <img src={ocaImagen} alt="OCA" className="oca-logo" style={{ width: '100px', height: 'auto' }} />
+        </a>
 
-        {/* Contenedor alineado a la derecha con botones de navegación */}
-        <div className="d-flex align-items-center ms-auto">
-          {/* Botón que redirige a la sección LIDAR */}
-          <Link to="/lidar" className="btn btn-light mx-2">
-            Lidar
-          </Link>
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
 
-          {/* Botón que redirige a la sección de información de la empresa */}
-          <Link to="/quienessomos" className="btn btn-light mx-2">
-            Quienes Somos
-          </Link>
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+            <li className="nav-item">
+              <button className="nav-link btn btn-link text-white fw-bold" onClick={() => scrollTo(misionRef)}>
+                Misión
+              </button>
+            </li>
+            <li className="nav-item">
+              <button className="nav-link btn btn-link text-white fw-bold" onClick={() => scrollTo(quienesRef)}>
+                ¿Quiénes Somos?
+              </button>
+            </li>
+            <li className="nav-item">
+              <button className="nav-link btn btn-link text-white fw-bold" onClick={() => scrollTo(visionRef)}>
+                Visión
+              </button>
+            </li>
+            <li className="nav-item">
+              <button className="nav-link btn btn-link text-white fw-bold" onClick={() => scrollTo(lidarRef)}>
+                ¿Qué es LIDAR?
+              </button>
+            </li>
+            <li className="nav-item">
+              <button className="nav-link btn btn-link text-white fw-bold" onClick={() => scrollTo(aplicacionesRef)}>
+                Aplicaciones
+              </button>
+            </li>
+            <li className="nav-item">
+              <button className="nav-link btn btn-link text-white fw-bold" onClick={() => scrollTo(beneficiosRef)}>
+                Beneficios
+              </button>
+            </li>
+            <li className="nav-item">
+              <button className="nav-link btn btn-link text-white fw-bold" onClick={() => scrollTo(tecnologiaRef)}>
+                Tecnología
+              </button>
+            </li>
+          </ul>
 
-          {/* Botón que redirige a registro */}
-          <Link to="/registrar" className="btn btn-light mx-2">
-            Registrar
-          </Link>
-
-          
-          {/* Botón que redirige al login */}
-          <Link to="/login" className="btn btn-light mx-2">
-            Iniciar Sesión
-          </Link>
+          <div className="d-flex gap-2 ms-lg-3">
+            <button
+              type="button"
+              className="btn btn-outline-light fw-semibold px-4 py-2"
+              data-bs-toggle="modal"
+              data-bs-target="#loginModal"
+            >
+              Iniciar Sesión
+            </button>
+            <button
+              type="button"
+              className="btn btn-light fw-semibold px-4 py-2"
+              data-bs-toggle="modal"
+              data-bs-target="#registerModal"
+            >
+              Registrarse
+            </button>
+          </div>
         </div>
       </div>
     </nav>
   );
 }
-
-// Exportamos el componente para poder usarlo en otras partes de la aplicación
-export default BarraNavInicio;

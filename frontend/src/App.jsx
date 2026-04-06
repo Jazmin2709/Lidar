@@ -1,99 +1,103 @@
-// Importamos React
+// src/App.jsx
 import React from 'react';
+import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 
-// Importamos componentes de React Router para manejar rutas en la aplicación
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
-// Importamos las páginas públicas y privadas
-import Dashboard from './paginas/Dashboard';
+// Páginas
 import PagInicio from './paginas/PagInicio';
-import Registrar from './paginas/Registrar';
-import EmpleadosCompleto from './paginas/EmpleadosCompleto';
-import Buddy1Page from './paginas/Buddy1Page';
-import Buddy2Page from './paginas/Buddy2Page';
-import Buddy3Page from './paginas/Buddy3Page';
+import Dashboard from './paginas/Dashboard';
+import Empleados from './paginas/Empleados';
 import Reportes from './paginas/Reportes';
-import Login from './paginas/Login';
-import Lidar from './paginas/Lidar';
-import QuienesSomos from './paginas/QuienesSomos';
+import IndexEmpleado from './paginas/IndexEmpleado';
 import EnviarCorreo from './paginas/EnviarCorreo';
-import RecuperarContraseña from './paginas/RecuperarContraseña';
+import RecuperarContraseña from './paginas/RecuperarContraseña';
+import BuddyFormulario from './paginas/BuddyFormulario.jsx';
 
-// Importamos componentes para controlar el acceso a rutas
-import RoutePrivate from "./componentes/RoutePrivate"; // Rutas privadas (requieren autenticación)
-import RoutePublic from './componentes/RoutePublic';   // Rutas públicas (sin autenticación)
+// Componentes de rutas y layouts
+import RoutePrivate from './componentes/RoutePrivate';
+import RoutePublic from './componentes/RoutePublic';
+import DefaultLayout from './componentes/DefaultLayout';
+import AdminLayout from './componentes/AdminLayout';
+import SupervisorLayout from './componentes/SupervisorLayout';
+import EmpleadoLayout from './componentes/EmpleadoLayout';
 
-// Importamos layouts según el tipo de usuario
-import DefaultLayout from './componentes/DefaultLayout';       // Layout general para rutas públicas
-import AdminLayout from './componentes/AdminLayout';           // Layout para administrador
-import SupervisorLayout from './componentes/SupervisorLayout'; // Layout para supervisor
-import EmpleadoLayoutUnificado from './componentes/EmpleadoLayoutUnificado';     // Layout para empleado
+// Otros
+import Loader from './componentes/Loader';
+import ChatBotComponent from './componentes/ChatBot';
 
-// Importamos estilos CSS
+// Estilos
 import './css/styles.css';
 
-// Componente de carga para rutas no encontradas
-import Loader from './componentes/Loader';
+// Constantes para roles
+const ROLES = {
+  ADMIN: 3,
+  SUPERVISOR: 1,
+  EMPLEADO: 2,
+};
 
-// Importamos el chatbot (con ruta relativa correcta ✅)
-import ChatBotComponent from '././componentes/ChatBot';
+// Wrapper para la ruta dinámica /buddy/:number
+function BuddyPageWrapper() {
+  const { number } = useParams();
+  const partnerNum = Number(number);
 
-// Componente principal de la aplicación
+  if (isNaN(partnerNum) || ![1, 2, 3].includes(partnerNum)) {
+    return (
+      <div className="text-center mt-5 pt-5">
+        <h3>Buddy Partner no encontrado</h3>
+        <p>El número ingresado no es válido (debe ser 1, 2 o 3).</p>
+        <a href="/IndexEmpleado" className="btn btn-primary mt-3">Volver al menú de empleado</a>
+      </div>
+    );
+  }
+
+  return <BuddyFormulario partnerNumber={partnerNum} />;
+}
+
 function App() {
   return (
-    // Encapsulamos toda la app con BrowserRouter para habilitar el enrutamiento
     <BrowserRouter>
       <Routes>
-        {/* RUTAS PÚBLICAS */}
+        {/* Rutas públicas - solo la principal y recuperación */}
         <Route element={<RoutePublic />}>
           <Route element={<DefaultLayout />}>
             <Route path="/" element={<PagInicio />} />
-            <Route path="*" element={<Loader />} /> {/* Ruta por defecto si no se encuentra otra */}
-            <Route path="/Login" element={<Login />} />
-            <Route path="/Lidar" element={<Lidar />} />
-            <Route path="/QuienesSomos" element={<QuienesSomos />} />
-            <Route path="/EnviarCorreo" element={<EnviarCorreo />} />
-            <Route path="/Registrar" element={<Registrar />} />
-            <Route path='/RecuperarContraseña' element={<RecuperarContraseña />} />
+            
+            {/* 404 para rutas no encontradas */}
+            <Route path="*" element={<Loader />} />
           </Route>
         </Route>
 
-        {/* RUTAS PRIVADAS */}
-
-        {/* ADMINISTRADOR */}
-        <Route element={<RoutePrivate requiredRole={3} />}>
+        {/* Rutas privadas - ADMINISTRADOR */}
+        <Route element={<RoutePrivate requiredRole={ROLES.ADMIN} />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/Reportes" element={<Reportes />} />
-            <Route path="/admin/empleados/" element={<EmpleadosCompleto />} />
+            <Route path="/admin/empleados/" element={<Empleados />} />
           </Route>
         </Route>
 
-        {/* SUPERVISOR */}
-        <Route element={<RoutePrivate requiredRole={1} />}>
+        {/* Rutas privadas - SUPERVISOR */}
+        <Route element={<RoutePrivate requiredRole={ROLES.SUPERVISOR} />}>
           <Route element={<SupervisorLayout />}>
             <Route path="/supervisor/dashboard" element={<Dashboard />} />
             <Route path="/supervisor/Reportes" element={<Reportes />} />
           </Route>
         </Route>
 
-        {/* EMPLEADO  */}
-        <Route element={<RoutePrivate requiredRole={2} />}>
-          <Route element={<EmpleadoLayoutUnificado />}>
-            <Route path="/IndexEmpleado" element={null} />
-            <Route path="/BuddyPartner1/" element={<Buddy1Page />} />
-            <Route path="/BuddyPartner2/" element={<Buddy2Page />} />
-            <Route path="/BuddyPartner3/" element={<Buddy3Page />} />
-            <Route path="/Registrar" element={<Registrar />} />
+        {/* Rutas privadas - EMPLEADO */}
+        <Route element={<RoutePrivate requiredRole={ROLES.EMPLEADO} />}>
+          <Route element={<EmpleadoLayout />}>
+            <Route path="/IndexEmpleado/" element={<IndexEmpleado />} />
+
+            {/* Ruta dinámica para TODOS los Buddys */}
+            <Route path="/buddy/:number" element={<BuddyPageWrapper />} />
           </Route>
         </Route>
       </Routes>
 
-      {/* Chatbot siempre visible en la app */}
+      {/* Chatbot siempre visible */}
       <ChatBotComponent />
     </BrowserRouter>
   );
 }
 
-// Exportamos el componente App para que pueda ser usado por React
 export default App;

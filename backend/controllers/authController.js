@@ -9,8 +9,8 @@ const transporter = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: 'lidarnotificador@gmail.com',
-        pass: 'sheq slcr idya okrd'
+        user: 'lidarnotifier@gmail.com',
+        pass: 'biyd nddo uqdy zubm'
     }
 });
 
@@ -171,7 +171,7 @@ exports.enviarCorreo = async (req, res) => {
             const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
             const mailOptions = {
-                from: 'lidarnotificador@gmail.com',
+                from: 'lidarnotifier@gmail.com',
                 to: Correo,
                 subject: 'Código de verificación para restablecer contraseña || Lidar',
                 html: `

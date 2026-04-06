@@ -1,62 +1,40 @@
 import Swal from 'sweetalert2';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Button, Input, Modal, Form, Alert, Upload, Select, Tag, Popover } from 'antd';
+import { Table, Button, Input, Modal, Form, Alert, Upload, Select, Tag, Popover, Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import '../css/styles.css';
+import '../css/Reportes.css';  // ← Nuevo CSS específico
 import moment from 'moment';
 
 const { Option } = Select;
-const API_BASE_URL = 'https://lidar-cush.onrender.com/api/buddy/BuddyPartner';
-const API_IMAGE_UPLOAD = 'https://lidar-cush.onrender.com/api/imagenes/subir';
+const API_BASE_URL = 'http://localhost:3000/api/buddy/BuddyPartner';
+const API_IMAGE_UPLOAD = 'http://localhost:3000/api/imagenes/subir';
 
-/**
- * Función para obtener color y mensaje del estado de etapa.
- * Aplica lógica de color ROJO si está sin finalizar Y lleva más de 2 días de atraso.
- * * @param {string} text - El valor del Est_etapa (Inicio, En proceso, Finalizó)
- * @param {string} recordDate - La fecha del registro ('YYYY-MM-DD')
- */
 const getStageInfo = (text, recordDate) => {
     let color = 'default';
-    let message = 'Estado desconocido.';
+    let message = '';
 
-    // 1. Base colors and messages
-    if (text === 'Inicio') {
-        color = 'gold'; // Amarillo
-        message = 'El Buddy Partner acaba de iniciar el proceso.';
+    if (text === 'Completado') {
+        color = 'green';
+        message = 'Jornada completa (Buddy Partner 1, 2 y 3 finalizados).';
+    } else if (text === 'Inicio') {
+        color = 'gold';
+        message = 'Última etapa registrada: Buddy Partner 1 (Inicio).';
     } else if (text === 'En proceso') {
-        color = 'blue'; // Azul
-        message = 'El Buddy Partner se encuentra en alguna fase de proceso.';
-    } else if (text === 'Finalizó') {
-        color = 'green'; // Verde
-        message = 'El Buddy Partner ha completado todas las etapas de verificación.';
+        color = 'blue';
+        message = 'Última etapa registrada: Buddy Partner 2 (En proceso).';
     }
 
-    // 2. LÓGICA DE ALERTA DE ATRASO CRÍTICO (Override a ROJO)
-    if (text !== 'Finalizó') {
-        // Obtenemos los objetos moment para calcular la diferencia
-        const fechaReporte = moment(recordDate);
-        const hoy = moment();
-
-        // Diferencia en días (si es positiva, el reporte es pasado)
-        const diasDeAntiguedad = hoy.diff(fechaReporte, 'days');
-
-        // Si han pasado MÁS de 2 días y no ha finalizado:
-        if (diasDeAntiguedad > 2) {
-            color = 'red'; // ¡CAMBIAR EL TAG A ROJO!
-            message = `¡ATRASO CRÍTICO! Este reporte lleva ${diasDeAntiguedad} días sin finalizar.`;
-        }
+    const dias = moment().diff(moment(recordDate), 'days');
+    if (dias > 1 && text !== 'Completado') {
+        color = 'red';
+        message += ` ¡ATRASO! Lleva ${dias} días sin avanzar. Completar la(s) etapa(s) pendiente(s) lo antes posible.`;
     }
 
     return { color, message };
 };
 
-/**
- * Componente principal para la gestión y visualización de Reportes (Buddy Partners).
- * @returns {JSX.Element} El componente Reportes
- */
 export default function Reportes() {
-    // 1. Estados principales para la data y UI
     const [buddyPartners, setBuddyPartners] = useState([]);
     const [pendingBuddies, setPendingBuddies] = useState([]);
     const [editingRecord, setEditingRecord] = useState(null);
@@ -64,7 +42,6 @@ export default function Reportes() {
     const [form] = Form.useForm();
     const [activeFilters, setActiveFilters] = useState({});
 
-    // 2. ESTADOS para manejar los nuevos archivos a subir durante la edición
     const [newFileTablero, setNewFileTablero] = useState(null);
     const [newFileCalentamiento, setNewFileCalentamiento] = useState(null);
     const [newFileCarnet, setNewFileCarnet] = useState(null);
@@ -79,23 +56,68 @@ export default function Reportes() {
             const response = await axios.get(API_BASE_URL);
             const hoy = moment().format("YYYY-MM-DD");
 
-            const data = response.data.map(item => {
-                const Fecha = moment(item.Fecha).format('YYYY-MM-DD');
+            const groupedMap = {};
 
-                // Lógica de isPending (Solo se usa para la Alerta general superior)
-                const isPending = (item.Est_etapa === "Inicio" || item.Est_etapa === "En proceso") && Fecha < hoy;
+            response.data.forEach(item => {
+                const fecha = moment(item.Fecha).format('YYYY-MM-DD');
+                const key = `${item.num_cuadrilla}_${fecha}_${item.id_empleado}`;
+
+                if (!groupedMap[key]) {
+                    groupedMap[key] = {
+                        key,
+                        num_cuadrilla: item.num_cuadrilla,
+                        Fecha: fecha,
+                        id_empleado: item.id_empleado,
+                        etapas: [],
+                    };
+                }
+
+                groupedMap[key].etapas.push(item);
+            });
+
+            const groupedData = Object.values(groupedMap).map(group => {
+                const etapas = group.etapas;
+
+                const inicio = etapas.find(e => e.Tipo === 1) || {};
+                const proceso = etapas.find(e => e.Tipo === 2) || {};
+                const finalizo = etapas.find(e => e.Tipo === 3) || {};
+
+                let estadoGeneral = 'Inicio';
+
+                if (finalizo.id_buddy1) {
+                    estadoGeneral = 'Finalizó';
+                } else if (proceso.id_buddy1) {
+                    estadoGeneral = 'En proceso';
+                } else if (inicio.id_buddy1) {
+                    estadoGeneral = 'Inicio';
+                }
+
+                if (inicio.id_buddy1 && proceso.id_buddy1 && finalizo.id_buddy1) {
+                    estadoGeneral = 'Completado';
+                }
+
+                const ref = finalizo || proceso || inicio || {};
+
+                const dias = moment().diff(moment(group.Fecha), 'days');
+                const isPending = (estadoGeneral !== 'Completado' && dias > 1);
 
                 return {
-                    ...item,
-                    Fecha,
-                    isPending
+                    ...group,
+                    ...ref,
+                    Carnet: inicio.Carnet || '—',
+                    TarjetaVida: inicio.TarjetaVida || '—',
+                    Tablero: proceso.Tablero || '—',
+                    Calentamiento: proceso.Calentamiento || '—',
+                    Est_etapa: estadoGeneral,
+                    isPending,
+                    diasAtraso: dias > 1 ? dias : 0,
+                    etapas
                 };
             });
 
-            setBuddyPartners(data);
+            setBuddyPartners(groupedData);
 
-            // Se mantiene el cálculo de pendientes para mostrar la Alerta
-            const pendientes = data.filter(b => b.isPending);
+            const pendientes = groupedData.filter(g => g.isPending);
             setPendingBuddies(pendientes);
 
         } catch (error) {
@@ -165,12 +187,10 @@ export default function Reportes() {
             const values = await form.validateFields();
             let payload = { ...values };
 
-            // 1. Limpieza de motivos si el estado no es 'Malo'
             if (payload.Est_empl !== "Malo") payload.MotivoEmp = null;
             if (payload.Est_vehi !== "Malo") payload.MotivoVeh = null;
             if (payload.Est_her !== "Malo") payload.MotivoHer = null;
 
-            // 2. Función genérica para subir un archivo si existe uno nuevo
             const updateFile = async (newFileState, preset, fieldName) => {
                 if (newFileState) {
                     const publicIdBase = `${payload.id_empleado || "anon"}_${Date.now()}`;
@@ -183,19 +203,15 @@ export default function Reportes() {
                 }
             };
 
-            // 3. Manejar subida de imágenes - CONDICIONAL para Carnet/Tarjeta Vida (Tipo 1)
             if (editingRecord.Tipo === 1) {
                 await updateFile(newFileCarnet, "Carnet", "Carnet");
                 await updateFile(newFileTarjetaVida, "TarjetaVida", "TarjetaVida");
             }
-            // Manejar subida de imágenes - CONDICIONAL para Tablero/Calentamiento (Tipo 2)
             if (editingRecord.Tipo === 2) {
                 await updateFile(newFileTablero, "tableros", "Tablero");
                 await updateFile(newFileCalentamiento, "calentamientos", "Calentamiento");
             }
 
-
-            // 4. Enviar la actualización al backend
             const response = await axios.put(`${API_BASE_URL}/${editingRecord.id_buddy1}`, payload);
 
             Swal.fire({
@@ -242,66 +258,16 @@ export default function Reportes() {
         window.open(url, "_blank");
     };
 
-    // Configuración de las columnas de la tabla
     const columns = [
-        { title: 'Id', dataIndex: 'id_buddy1', key: 'id_buddy1', sorter: (a, b) => a.id_buddy1 - b.id_buddy1, width: 70 },
         { title: 'Cuadrilla', dataIndex: 'num_cuadrilla', key: 'num_cuadrilla', width: 100 },
-        { title: 'Hora', dataIndex: 'Hora_buddy', key: 'Hora_buddy', width: 90 },
         {
-            title: 'Estado Empleado', dataIndex: 'Est_empl', key: 'Est_empl',
+            title: 'Fecha',
+            dataIndex: 'Fecha',
+            key: 'Fecha',
             width: 120,
-            render: (text) => (
-                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
-                    {text.toUpperCase()}
-                </Tag>
-            ),
-            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
-            onFilter: (value, record) => record.Est_empl.includes(value),
-        },
-        {
-            title: 'Estado Vehiculo', dataIndex: 'Est_vehi', key: 'Est_vehi',
-            width: 120,
-            render: (text) => (
-                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
-                    {text.toUpperCase()}
-                </Tag>
-            ),
-            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
-            onFilter: (value, record) => record.Est_vehi.includes(value),
-        },
-        {
-            title: 'Estado Herramienta', dataIndex: 'Est_her', key: 'Est_her',
-            width: 120,
-            render: (text) => (
-                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
-                    {text.toUpperCase()}
-                </Tag>
-            ),
-            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
-            onFilter: (value, record) => record.Est_her.includes(value),
-        },
-        // Columna Carnet con vista previa
-        {
-            title: 'Carnet', dataIndex: 'Carnet', key: 'Carnet',
-            width: 120,
-            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
-                ? (<img src={url} alt="Carnet" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
-                : '—')
-        },
-        // Columna Tarjeta Vida con vista previa
-        {
-            title: 'Tarjeta Vida', dataIndex: 'TarjetaVida', key: 'TarjetaVida',
-            width: 120,
-            render: (url) => (typeof url === 'string' && url.length > 5 && (url.startsWith('http') || url.startsWith('https'))
-                ? (<img src={url} alt="Tarjeta Vida" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />)
-                : '—')
-        },
-        {
-            title: 'Fecha', dataIndex: 'Fecha', key: 'Fecha',
-            width: 120,
-            // ✅ Modificación para ordenamiento por defecto
-            sorter: (a, b) => a.Fecha.localeCompare(b.Fecha),
-            defaultSortOrder: 'ascend', // Reportes más antiguos (atrasados) primero
+            sorter: (a, b) => moment(b.Fecha).valueOf() - moment(a.Fecha).valueOf(),
+            defaultSortOrder: 'descend',
+            render: (text) => moment(text).format('YYYY-MM-DD'),
             filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
                 <div style={{ padding: 8 }}>
                     <Input
@@ -317,122 +283,178 @@ export default function Reportes() {
             filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />,
             onFilter: (value, record) => record.Fecha.includes(value),
         },
-        // Columna ESTADO ETAPA: Usa Tag de color, Popover, y lógica de ROJO por atraso
         {
-            title: 'Estado Etapa',
+            title: 'Hora (Buddy)',
+            dataIndex: 'Hora_buddy',
+            key: 'Hora_buddy',
+            width: 100,
+            render: (text) => text || '—'
+        },
+        {
+            title: 'Estado General',
             dataIndex: 'Est_etapa',
             key: 'Est_etapa',
-            width: 120,
+            width: 180,
+            filters: [
+                { text: 'Completado', value: 'Completado' },
+                { text: 'Inicio', value: 'Inicio' },
+                { text: 'En proceso', value: 'En proceso' },
+            ],
+            filterMultiple: false,
+            onFilter: (value, record) => record.Est_etapa === value,
             render: (text, record) => {
-                // Pasamos el texto del estado Y la fecha del registro para la lógica de color
                 const { color, message } = getStageInfo(text, record.Fecha);
-
                 return (
-                    <Popover
-                        title={`Estado: ${text}`}
-                        content={<p style={{ maxWidth: 200 }}>{message}</p>}
-                        trigger="hover"
-                        placement="topLeft"
-                    >
-                        <Tag color={color} key={text} style={{ minWidth: 90, textAlign: 'center', cursor: 'pointer' }}>
+                    <Popover title={`Estado: ${text}`} content={message}>
+                        <Tag color={color} className="reportes-status-tag">
                             {text.toUpperCase()}
                         </Tag>
                     </Popover>
                 );
             },
-            filters: [{ text: 'Inicio', value: 'Inicio' }, { text: 'En proceso', value: 'En proceso' }, { text: 'Finalizó', value: 'Finalizó' }],
-            onFilter: (value, record) => record.Est_etapa.includes(value),
-        },
-        // Columnas de Motivos (con botón VER y Popover sin color)
-        {
-            title: 'Motivo Emp',
-            dataIndex: 'MotivoEmp',
-            key: 'MotivoEmp',
-            width: 100,
-            render: (text) => {
-                if (!text) return '—';
-                return (
-                    <Popover
-                        title="Motivo del Empleado (Malo)"
-                        content={<p style={{ maxWidth: 300, color: '#333' }}>{text}</p>}
-                        trigger="hover"
-                        placement="topLeft"
-                    >
-                        <Button type="primary" size="small" style={{ borderRadius: 15 }}>
-                            VER
-                        </Button>
-                    </Popover>
-                );
-            }
         },
         {
-            title: 'Motivo Veh',
-            dataIndex: 'MotivoVeh',
-            key: 'MotivoVeh',
-            width: 100,
-            render: (text) => {
-                if (!text) return '—';
-                return (
-                    <Popover
-                        title="Motivo del Vehículo (Malo)"
-                        content={<p style={{ maxWidth: 300, color: '#333' }}>{text}</p>}
-                        trigger="hover"
-                        placement="topLeft"
-                    >
-                        <Button type="primary" size="small" style={{ borderRadius: 15 }}>
-                            VER
-                        </Button>
-                    </Popover>
-                );
-            }
-        },
-        {
-            title: 'Motivo Her',
-            dataIndex: 'MotivoHer',
-            key: 'MotivoHer',
-            width: 100,
-            render: (text) => {
-                if (!text) return '—';
-                return (
-                    <Popover
-                        title="Motivo de la Herramienta (Mala)"
-                        content={<p style={{ maxWidth: 300, color: '#333' }}>{text}</p>}
-                        trigger="hover"
-                        placement="topLeft"
-                    >
-                        <Button type="primary" size="small" style={{ borderRadius: 15 }}>
-                            VER
-                        </Button>
-                    </Popover>
-                );
-            }
-        },
-        // Columnas de Imágenes Tablero y Calentamiento
-        {
-            title: 'Tablero', dataIndex: 'Tablero', key: 'Tablero',
+            title: 'Estado Empleado',
+            dataIndex: 'Est_empl',
+            key: 'Est_empl',
             width: 120,
-            render: (url) => url ? (<img src={url} alt="tablero" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
+            render: (text) => text ? (
+                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
+                    {text.toUpperCase()}
+                </Tag>
+            ) : '—',
+            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
+            onFilter: (value, record) => record.Est_empl?.includes(value),
         },
         {
-            title: 'Calentamiento', dataIndex: 'Calentamiento', key: 'Calentamiento',
-            width: 140,
-            render: (url) => url ? (<img src={url} alt="calentamiento" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, cursor: 'pointer' }} onClick={() => window.open(url, '_blank')} />) : '—'
+            title: 'Estado Vehículo',
+            dataIndex: 'Est_vehi',
+            key: 'Est_vehi',
+            width: 120,
+            render: (text) => text ? (
+                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
+                    {text.toUpperCase()}
+                </Tag>
+            ) : '—',
+            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
+            onFilter: (value, record) => record.Est_vehi?.includes(value),
         },
-        // Columnas de metadatos
-        { title: 'Id Empleado', dataIndex: 'id_empleado', key: 'id_empleado', width: 100 },
-        { title: 'Tipo', dataIndex: 'Tipo', key: 'Tipo', width: 80 },
-        // Columna de Acciones (Editar/Eliminar)
+        {
+            title: 'Estado Herramienta',
+            dataIndex: 'Est_her',
+            key: 'Est_her',
+            width: 120,
+            render: (text) => text ? (
+                <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>
+                    {text.toUpperCase()}
+                </Tag>
+            ) : '—',
+            filters: [{ text: 'Excelente', value: 'Excelente' }, { text: 'Malo', value: 'Malo' }],
+            onFilter: (value, record) => record.Est_her?.includes(value),
+        },
+        {
+            title: 'Carnet (Inicio)',
+            dataIndex: 'Carnet',
+            key: 'Carnet',
+            width: 100,
+            render: (url) => url && url !== '—' ? (
+                <img 
+                    src={url} 
+                    alt="Carnet" 
+                    className="reportes-preview-image" 
+                    onClick={() => window.open(url, '_blank')} 
+                />
+            ) : '—'
+        },
+        {
+            title: 'Tarjeta Vida (Inicio)',
+            dataIndex: 'TarjetaVida',
+            key: 'TarjetaVida',
+            width: 100,
+            render: (url) => url && url !== '—' ? (
+                <img 
+                    src={url} 
+                    alt="Tarjeta Vida" 
+                    className="reportes-preview-image" 
+                    onClick={() => window.open(url, '_blank')} 
+                />
+            ) : '—'
+        },
+        {
+            title: 'Tablero (Proceso)',
+            dataIndex: 'Tablero',
+            key: 'Tablero',
+            width: 100,
+            render: (url) => url && url !== '—' ? (
+                <img 
+                    src={url} 
+                    alt="Tablero" 
+                    className="reportes-preview-image" 
+                    onClick={() => window.open(url, '_blank')} 
+                />
+            ) : '—'
+        },
+        {
+            title: 'Calentamiento (Proceso)',
+            dataIndex: 'Calentamiento',
+            key: 'Calentamiento',
+            width: 120,
+            render: (url) => url && url !== '—' ? (
+                <img 
+                    src={url} 
+                    alt="Calentamiento" 
+                    className="reportes-preview-image" 
+                    onClick={() => window.open(url, '_blank')} 
+                />
+            ) : '—'
+        },
         {
             title: 'Acciones',
             key: 'acciones',
-            width: 150,
+            width: 280,
             fixed: 'right',
-            render: (_, record) => (
-                <>
-                    <Button type="link" onClick={() => handleEdit(record)}>Editar</Button>
-                    <Button type="link" danger onClick={() => handleDelete(record.id_buddy1)}>Eliminar</Button>
-                </>
-            ),
+            render: (_, record) => {
+                const { etapas } = record;
+                const inicio = etapas.find(e => e.Tipo === 1);
+                const proceso = etapas.find(e => e.Tipo === 2);
+                const finalizo = etapas.find(e => e.Tipo === 3);
+
+                const handleDeleteJornada = async () => {
+                    const result = await Swal.fire({
+                        title: '¿Eliminar toda la jornada?',
+                        text: 'Se eliminarán las 3 etapas de esta cuadrilla y fecha.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, eliminar todo',
+                    });
+
+                    if (result.isConfirmed) {
+                        try {
+                            if (inicio?.id_buddy1) await axios.delete(`${API_BASE_URL}/${inicio.id_buddy1}`);
+                            if (proceso?.id_buddy1) await axios.delete(`${API_BASE_URL}/${proceso.id_buddy1}`);
+                            if (finalizo?.id_buddy1) await axios.delete(`${API_BASE_URL}/${finalizo.id_buddy1}`);
+
+                            Swal.fire('Eliminado', 'Jornada completa eliminada.', 'success');
+                            fetchBuddyPartners();
+                        } catch (err) {
+                            Swal.fire('Error', 'No se pudo eliminar toda la jornada.', 'error');
+                        }
+                    }
+                };
+
+                return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {inicio && <Button type="link" size="small" onClick={() => handleEdit(inicio)}>Editar Inicio</Button>}
+                        {proceso && <Button type="link" size="small" onClick={() => handleEdit(proceso)}>Editar En proceso</Button>}
+                        {finalizo && <Button type="link" size="small" onClick={() => handleEdit(finalizo)}>Editar Finalizó</Button>}
+                        <Button type="link" danger size="small" onClick={handleDeleteJornada}>
+                            Eliminar Jornada
+                        </Button>
+                    </div>
+                );
+            },
         },
     ];
 
@@ -441,9 +463,6 @@ export default function Reportes() {
         return false;
     };
 
-    /**
-     * Componente de visualización y subida de archivo reutilizable para el Modal.
-     */
     const FileUploadDisplay = ({ label, fieldName, newFileState, setNewFileState }) => {
         const currentUrl = editingRecord ? editingRecord[fieldName] : null;
 
@@ -454,18 +473,16 @@ export default function Reportes() {
 
         return (
             <Form.Item label={`Imagen ${label}`}>
-                {/* 1. Vista previa de la imagen */}
                 {previewUrl ? (
                     <img
                         src={previewUrl}
                         alt={`Previsualización ${label}`}
-                        style={{ width: "100%", maxHeight: "350px", objectFit: "contain", borderRadius: "10px", border: "1px solid #ddd", marginBottom: "10px" }}
+                        className="reportes-preview-image"
                     />
                 ) : (
-                    <p style={{ color: "#888", marginBottom: 10 }}>No hay imagen de {label} actual.</p>
+                    <p className="reportes-no-image">No hay imagen de {label} actual.</p>
                 )}
 
-                {/* 2. Componente de subida de archivo */}
                 <Upload
                     beforeUpload={getBeforeUploadHandler(setNewFileState)}
                     showUploadList={false}
@@ -473,7 +490,6 @@ export default function Reportes() {
                 >
                     <Button type="default">{buttonText}</Button>
                 </Upload>
-                {/* Mensaje de archivo listo para subir */}
                 {newFileState && (
                     <p style={{ marginTop: 8, color: '#1677ff' }}>Archivo listo para subir: **{newFileState.name}**</p>
                 )}
@@ -482,52 +498,136 @@ export default function Reportes() {
     };
 
     return (
-        <div style={{ padding: '0 50px 50px' }}>
-            <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Reportes de Buddy Partners</h1>
+        <div className="reportes-container">
+            <h1 className="reportes-title">Reportes de Buddy Partners</h1>
 
-            {/* 🔔 ALERTA DE BUDDY PARTNERS PENDIENTES (Se mantiene para la UI) */}
             {pendingBuddies.length > 0 && (
                 <Alert
-                    message={`¡Alerta! Hay ${pendingBuddies.length} Buddy Partners pendientes de completar o con fechas pasadas.`}
+                    className="reportes-alert"
+                    message={`¡Alerta! Hay ${pendingBuddies.length} Buddy Partners pendientes o atrasados.`}
                     description={
                         <ul>
                             {pendingBuddies.map(b => (
-                                <li key={b.id_buddy1}>
-                                    Cuadrilla **{b.num_cuadrilla}** — Tipo **{b.Tipo}** — Fecha **{b.Fecha}**
+                                <li key={b.key}>
+                                    Cuadrilla <strong>{b.num_cuadrilla}</strong> —
+                                    Fecha <strong>{moment(b.Fecha).format('YYYY-MM-DD')}</strong> —
+                                    Estado: <strong>{b.Est_etapa}</strong> —
+                                    <strong> ¡Buddy Partner(es) pendiente(s)! Completar las etapas faltantes lo antes posible.</strong>
+                                    {b.diasAtraso > 0 && ` (atraso de ${b.diasAtraso} días)`}
                                 </li>
                             ))}
                         </ul>
                     }
                     type="warning"
                     showIcon
-                    style={{ marginBottom: 20 }}
                 />
             )}
 
-            {/* Botones exportar */}
-            <Button type="primary" onClick={exportPDF} style={{ marginBottom: 16 }}>
-                Exportar PDF
-            </Button>
-            <Button type="default" onClick={exportExcel} style={{ marginLeft: 10, marginBottom: 16 }}>
-                Exportar Excel
-            </Button>
+            <Space className="reportes-export-buttons">
+                <Button type="primary" onClick={exportPDF}>
+                    Exportar PDF
+                </Button>
+                <Button type="default" onClick={exportExcel}>
+                    Exportar Excel
+                </Button>
+            </Space>
 
-            {/* Tabla de Reportes con estilos mejorados y scroll */}
             <Table
-                className="shadow rounded-5 border-3"
+                className="reportes-table shadow rounded-5 border-3"
                 columns={columns}
                 dataSource={buddyPartners}
-                rowKey="id_buddy1"
+                rowKey="key"
                 pagination={{ pageSize: 10 }}
                 onChange={(pagination, filters, sorter, extra) => setActiveFilters(filters)}
-                scroll={{
-                    x: 2000,
+                scroll={{ x: 2200 }}
+                expandable={{
+                    expandedRowRender: (record) => {
+                        if (record.Est_etapa !== 'Completado' || record.etapas.length !== 3) {
+                            return <p style={{ padding: '16px', color: '#888' }}>No hay detalles adicionales para mostrar.</p>;
+                        }
+
+                        const etapasData = record.etapas.map(etapa => {
+                            const motivos = [];
+                            if (etapa.MotivoEmp) motivos.push(`Empleado: ${etapa.MotivoEmp}`);
+                            if (etapa.MotivoVeh) motivos.push(`Vehículo: ${etapa.MotivoVeh}`);
+                            if (etapa.MotivoHer) motivos.push(`Herramienta: ${etapa.MotivoHer}`);
+
+                            return {
+                                key: etapa.id_buddy1,
+                                etapa: etapa.Tipo === 1 ? 'Inicio (Buddy Partner 1)' :
+                                    etapa.Tipo === 2 ? 'En proceso (Buddy Partner 2)' :
+                                        'Finalizó (Buddy Partner 3)',
+                                est_empl: etapa.Est_empl || '—',
+                                est_vehi: etapa.Est_vehi || '—',
+                                est_her: etapa.Est_her || '—',
+                                motivos: motivos.length > 0 ? motivos.join('\n') : '—',
+                                imagen: etapa.Tipo === 1 ? (etapa.Carnet || etapa.TarjetaVida || '—') :
+                                    etapa.Tipo === 2 ? (etapa.Tablero || etapa.Calentamiento || '—') : '—',
+                            };
+                        });
+
+                        return (
+                            <div className="reportes-expanded-content">
+                                <h4 className="reportes-expanded-title">Detalles de las 3 fases (Completado)</h4>
+                                <Table
+                                    columns={[
+                                        { title: 'Etapa', dataIndex: 'etapa', key: 'etapa', width: 180 },
+                                        {
+                                            title: 'Empleado', dataIndex: 'est_empl', key: 'est_empl', width: 120,
+                                            render: (text) => text !== '—' ? <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>{text}</Tag> : '—'
+                                        },
+                                        {
+                                            title: 'Vehículo', dataIndex: 'est_vehi', key: 'est_vehi', width: 120,
+                                            render: (text) => text !== '—' ? <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>{text}</Tag> : '—'
+                                        },
+                                        {
+                                            title: 'Herramienta', dataIndex: 'est_her', key: 'est_her', width: 120,
+                                            render: (text) => text !== '—' ? <Tag color={text === 'Malo' ? 'red' : text === 'Excelente' ? 'green' : 'blue'}>{text}</Tag> : '—'
+                                        },
+                                        {
+                                            title: 'Motivos',
+                                            dataIndex: 'motivos',
+                                            key: 'motivos',
+                                            width: 250,
+                                            render: (text) => text !== '—' ? (
+                                                <div style={{ whiteSpace: 'pre-line', lineHeight: '1.4' }}>{text}</div>
+                                            ) : '—'
+                                        },
+                                        {
+                                            title: 'Imagen', dataIndex: 'imagen', key: 'imagen', width: 100,
+                                            render: (url) => url && url !== '—' ? (
+                                                <img
+                                                    src={url}
+                                                    alt="Imagen de etapa"
+                                                    className="reportes-preview-image"
+                                                    onClick={() => window.open(url, '_blank')}
+                                                />
+                                            ) : '—'
+                                        },
+                                    ]}
+                                    dataSource={etapasData}
+                                    pagination={false}
+                                    size="small"
+                                    bordered
+                                />
+                            </div>
+                        );
+                    },
+                    rowExpandable: (record) => record.Est_etapa === 'Completado' && record.etapas.length === 3,
+                    expandIcon: ({ expanded, onExpand, record }) =>
+                        record.Est_etapa === 'Completado' && record.etapas.length === 3 ? (
+                            <Popover content={expanded ? 'Ocultar detalles de las 3 fases' : 'Ver detalles de las 3 fases'}>
+                                <span
+                                    className="reportes-expand-icon"
+                                    onClick={e => onExpand(record, e)}
+                                >
+                                    {expanded ? '▼' : '▶'}
+                                </span>
+                            </Popover>
+                        ) : null,
                 }}
-                // La fila ya no se pinta de rojo suave
-                rowClassName={() => ""}
             />
 
-            {/* Modal de Edición (sin cambios mayores) */}
             <Modal
                 title="Editar Reporte"
                 open={isModalOpen}
@@ -536,17 +636,16 @@ export default function Reportes() {
                 okText="Guardar"
                 cancelText="Cancelar"
                 width={800}
+                className="reportes-modal"
             >
                 <Form
                     form={form}
                     layout="vertical"
                     key={editingRecord ? editingRecord.id_buddy1 : 'new'}
                 >
-                    {/* Campos de texto y selección básicos */}
                     <Form.Item label="Numero Cuadrilla" name="num_cuadrilla"><Input disabled /></Form.Item>
                     <Form.Item label="Hora" name="Hora_buddy"><Input type="time" /></Form.Item>
 
-                    {/* Estado Empleado y Motivo (condicional) */}
                     <Form.Item label="Estado Empleado" name="Est_empl">
                         <Select onChange={() => form.setFieldsValue({ MotivoEmp: null })}>
                             <Option value="Excelente">Excelente</Option>
@@ -558,7 +657,6 @@ export default function Reportes() {
                         <Form.Item label="Motivo empleado" name="MotivoEmp"><Input.TextArea /></Form.Item>
                     )}
 
-                    {/* Estado Vehículo y Motivo (condicional) */}
                     <Form.Item label="Estado Vehiculo" name="Est_vehi">
                         <Select onChange={() => form.setFieldsValue({ MotivoVeh: null })}>
                             <Option value="Excelente">Excelente</Option>
@@ -570,27 +668,14 @@ export default function Reportes() {
                         <Form.Item label="Motivo vehículo" name="MotivoVeh"><Input.TextArea /></Form.Item>
                     )}
 
-                    {/* 🎯 SECCIÓN DE IMÁGENES (Tipo 1) para Carnet y Tarjeta Vida (CONDICIONAL) */}
                     {Form.useWatch("Tipo", form) === 1 && (
                         <>
-                            <h3 style={{ marginTop: 20 }}>Documentos (Tipo 1)</h3>
-                            <FileUploadDisplay
-                                label="Carnet"
-                                fieldName="Carnet"
-                                newFileState={newFileCarnet}
-                                setNewFileState={setNewFileCarnet}
-                            />
-
-                            <FileUploadDisplay
-                                label="Tarjeta Vida"
-                                fieldName="TarjetaVida"
-                                newFileState={newFileTarjetaVida}
-                                setNewFileState={setNewFileTarjetaVida}
-                            />
+                            <h3 style={{ marginTop: 20 }}>Documentos (Buddy Partner 1)</h3>
+                            <FileUploadDisplay label="Carnet" fieldName="Carnet" newFileState={newFileCarnet} setNewFileState={setNewFileCarnet} />
+                            <FileUploadDisplay label="Tarjeta Vida" fieldName="TarjetaVida" newFileState={newFileTarjetaVida} setNewFileState={setNewFileTarjetaVida} />
                         </>
                     )}
 
-                    {/* Campos de fecha y estado de etapa/herramienta */}
                     <Form.Item label="Fecha" name="Fecha"><Input type="date" /></Form.Item>
                     <Form.Item label="Estado Etapa" name="Est_etapa">
                         <Select>
@@ -600,7 +685,6 @@ export default function Reportes() {
                         </Select>
                     </Form.Item>
 
-                    {/* Estado Herramienta y Motivo (condicional) */}
                     <Form.Item label="Estado Herramienta" name="Est_her">
                         <Select onChange={() => form.setFieldsValue({ MotivoHer: null })}>
                             <Option value="Excelente">Excelente</Option>
@@ -615,22 +699,11 @@ export default function Reportes() {
                     <Form.Item label="Id Empleado" name="id_empleado"><Input disabled /></Form.Item>
                     <Form.Item label="Tipo" name="Tipo"><Input disabled /></Form.Item>
 
-                    {/* 🎯 SECCIÓN DE IMÁGENES (Tipo 2) para Tablero y Calentamiento (condicional) */}
                     {Form.useWatch("Tipo", form) === 2 && (
                         <>
-                            <h3 style={{ marginTop: 20 }}>Evidencias (Tipo 2)</h3>
-                            <FileUploadDisplay
-                                label="Tablero"
-                                fieldName="Tablero"
-                                newFileState={newFileTablero}
-                                setNewFileState={setNewFileTablero}
-                            />
-                            <FileUploadDisplay
-                                label="Calentamiento"
-                                fieldName="Calentamiento"
-                                newFileState={newFileCalentamiento}
-                                setNewFileState={setNewFileCalentamiento}
-                            />
+                            <h3 style={{ marginTop: 20 }}>Evidencias (Buddy Partner 2)</h3>
+                            <FileUploadDisplay label="Tablero" fieldName="Tablero" newFileState={newFileTablero} setNewFileState={setNewFileTablero} />
+                            <FileUploadDisplay label="Calentamiento" fieldName="Calentamiento" newFileState={newFileCalentamiento} setNewFileState={setNewFileCalentamiento} />
                         </>
                     )}
                 </Form>

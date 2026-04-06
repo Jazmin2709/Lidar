@@ -1,0 +1,104 @@
+/* src/css/Dashboard.css */
+
+/* Contenedor principal */
+.dashboard-container {
+    padding: 0 50px;
+}
+
+/* Título principal */
+.dashboard-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+/* Tarjetas de conteo (Buddy1, Buddy2, Buddy3, Total) */
+.dashboard-card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-card-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+}
+
+.dashboard-card-primary .dashboard-card-bar { background-color: #0d6efd; }
+.dashboard-card-success .dashboard-card-bar { background-color: #198754; }
+.dashboard-card-danger .dashboard-card-bar { background-color: #dc3545; }
+.dashboard-card-warning .dashboard-card-bar { background-color: #ffc107; }
+
+.dashboard-card-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-card-count {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-progress {
+    height: 10px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+}
+
+/* Gráficos (cards que contienen Recharts) */
+.dashboard-chart-card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    min-height: 500px;
+    background-color: white;
+}
+
+.dashboard-chart-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #343a40;
+    font-weight: 500;
+}
+
+/* Botones de selección (etapas y tipos de gráfico) */
+.dashboard-btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.dashboard-btn {
+    min-width: 120px;
+    font-weight: 500;
+}
+
+/* Overrides menores para Recharts si necesitas más control (opcional) */
+.recharts-wrapper {
+    margin: 0 auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-container {
+    padding: 0 20px;
+    }
+    
+    .dashboard-btn {
+    min-width: 100px;
+    font-size: 0.9rem;
+    }
+}

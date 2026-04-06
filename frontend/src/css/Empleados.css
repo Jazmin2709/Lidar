@@ -1,0 +1,180 @@
+/* src/css/Empleados.css */
+
+/* Contenedor principal de la página */
+.empleados-container {
+  padding: 100px 50px;
+}
+
+.empleados-header {
+  padding: 0 50px;
+}
+
+/* Tarjeta principal de la tabla */
+.empleados-custom-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  overflow: hidden;
+  padding-bottom: 20px;
+}
+
+/* Tabla custom */
+.empleados-custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.85rem;
+}
+
+.empleados-custom-table thead th {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 16px;
+  border-bottom: 2px solid #e9ecef;
+  text-align: left;
+  position: relative;
+}
+
+/* Filtros en encabezados */
+.empleados-filter-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.empleados-filter-icon {
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.empleados-filter-icon.active {
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.empleados-filter-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 10px;
+  min-width: 150px;
+}
+
+.empleados-filter-dropdown label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: normal;
+}
+
+.empleados-filter-dropdown button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  float: right;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.empleados-filter-dropdown button.reset {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  margin-right: 5px;
+}
+
+/* Filas y celdas de la tabla */
+.empleados-custom-table tbody tr {
+  background-color: white;
+  border-bottom: 1px solid #f1f3f5;
+  transition: background-color 0.2s;
+}
+
+.empleados-custom-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.empleados-custom-table td {
+  padding: 14px 16px;
+  color: #374151;
+  vertical-align: middle;
+}
+
+/* Links de acciones */
+.empleados-action-link {
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  margin-right: 15px;
+  font-size: 0.8rem;
+  transition: color 0.2s;
+}
+
+.empleados-action-link:hover {
+  text-decoration: underline;
+}
+
+.empleados-text-blue { color: #3b82f6; }
+.empleados-text-blue:hover { color: #2563eb; }
+
+.empleados-text-red { color: #ef4444; }
+.empleados-text-red:hover { color: #dc2626; }
+
+/* Input de búsqueda moderno */
+.empleados-modern-input {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 15px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.empleados-modern-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Indicadores de estado activo/inactivo */
+.empleados-status-dot {
+  height: 8px;
+  width: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* Badge de rol */
+.empleados-role-badge {
+  background: #f8f9fa;
+  color: #212529;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-weight: normal;
+}
+
+/* Paginación */
+.empleados-pagination {
+  border-top: 1px solid #dee2e6;
+  padding-top: 1rem;
+}
+
+/* Modal overrides (si necesitas más control) */
+.empleados-modal-backdrop {
+  z-index: 1040;
+}
+
+.empleados-modal {
+  z-index: 1050;
+}

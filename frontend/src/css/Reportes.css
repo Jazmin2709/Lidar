@@ -1,0 +1,113 @@
+/* src/css/Reportes.css */
+
+/* Contenedor principal de la página */
+.reportes-container {
+  padding: 0 50px 50px;
+}
+
+/* Título principal */
+.reportes-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #1a202c;
+  font-weight: 600;
+}
+
+/* Alerta de pendientes */
+.reportes-alert {
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+}
+
+/* Botones de exportación */
+.reportes-export-buttons {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+/* Tabla principal overrides */
+.reportes-table {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  background: white;
+}
+
+/* Encabezados de tabla más limpios */
+.ant-table-thead > tr > th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+/* Filas hover más suave */
+.ant-table-tbody > tr:hover > td {
+  background: #f1f5f9 !important;
+}
+
+/* Expanded row (detalles de etapas) */
+.reportes-expanded-content {
+  margin: 0;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.reportes-expanded-title {
+  margin-bottom: 1rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Imágenes de preview en modal y tabla */
+.reportes-preview-image {
+  width: 100%;
+  max-height: 350px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.reportes-no-image {
+  color: #6b7280;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+/* Icono de expandir fila personalizado */
+.reportes-expand-icon {
+  cursor: pointer;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #64748b;
+  transition: color 0.2s;
+}
+
+.reportes-expand-icon:hover {
+  color: #3b82f6;
+}
+
+/* Badge de estado en tabla */
+.reportes-status-tag {
+  min-width: 140px;
+  text-align: center;
+  font-weight: bold;
+  padding: 6px 12px !important;
+}
+
+/* Responsive para scroll horizontal */
+.ant-table {
+  min-width: 1000px; /* fuerza scroll en pantallas pequeñas */
+}
+
+/* Modal overrides */
+.reportes-modal .ant-modal-body {
+  padding: 24px;
+}

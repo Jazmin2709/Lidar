@@ -1,3 +1,5 @@
+//Valida las imagenes y los tokens
+
 const multer = require('multer');
 const path = require('path');
 

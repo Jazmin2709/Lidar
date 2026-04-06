@@ -1,0 +1,77 @@
+/* src/css/EnviarCorreo.css */
+
+/* Contenedor principal de la página */
+.enviar-correo-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Card centrada del formulario */
+.enviar-correo-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: #ffffff;
+  border: 3px solid #dee2e6;
+  border-radius: 1.25rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+  padding: 2.5rem 1.5rem;
+  margin-bottom: 50px;
+}
+
+/* Título */
+.enviar-correo-title {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: #343a40;
+  font-weight: 600;
+}
+
+/* Formulario y sus elementos */
+.enviar-correo-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.enviar-correo-input-group {
+  width: 300px;
+}
+
+/* Input con label */
+.enviar-correo-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Botón principal */
+.enviar-correo-btn {
+  min-width: 180px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.enviar-correo-btn:hover {
+  background-color: rgb(73, 1, 141) !important;
+}
+
+/* Estado disabled / bloqueado */
+.enviar-correo-disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .enviar-correo-card {
+    padding: 2rem 1rem;
+  }
+  
+  .enviar-correo-input-group {
+    width: 100%;
+  }
+}
