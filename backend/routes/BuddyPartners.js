@@ -11,6 +11,7 @@ router.delete('/BuddyPartner/:id', BuddyPartnersController.DeleteBuddyPartner);
 router.get('/BuddyPartner/export-pdf', BuddyPartnersController.ExportPDF);
 router.get("/BuddyPartner/export-excel", BuddyPartnersController.ExportExcel);
 router.get('/check-duplicate', BuddyPartnersController.CheckDuplicate);
+router.get('/pending/:id', BuddyPartnersController.GetPendingByUser);
 
 // (las de BuddyPartner2 siguen comentadas)
 

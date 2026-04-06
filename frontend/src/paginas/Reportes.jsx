@@ -7,8 +7,9 @@ import '../css/Reportes.css';  // ← Nuevo CSS específico
 import moment from 'moment';
 
 const { Option } = Select;
-const API_BASE_URL = 'http://localhost:3000/api/buddy/BuddyPartner';
-const API_IMAGE_UPLOAD = 'http://localhost:3000/api/imagenes/subir';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const API_BASE_URL = `${API_URL}/buddy/BuddyPartner`;
+const API_IMAGE_UPLOAD = `${API_URL}/imagenes/subir`;
 
 const getStageInfo = (text, recordDate) => {
     let color = 'default';

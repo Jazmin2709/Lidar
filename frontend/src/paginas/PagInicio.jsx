@@ -28,7 +28,7 @@ import Footer from '../componentes/Footer';
 // URL base donde está corriendo el backend (en desarrollo)
 // En producción esto debería venir de una variable de entorno:
 // process.env.REACT_APP_API_URL || 'https://api.tudominio.com'
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 // ────────────────────────────────────────────────
 //              IMPORTACIÓN DE IMÁGENES

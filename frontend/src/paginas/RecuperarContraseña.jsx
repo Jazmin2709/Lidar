@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 
 import '../css/RecuperarContrasena.css';  // ← Importamos el CSS
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 export default function RecuperarContrasena() {
     const correo = localStorage.getItem('correo');

@@ -28,7 +28,8 @@ export default function Dashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get('http://localhost:3000/api/buddy/BuddyPartner');
+                const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+                const res = await axios.get(`${API_URL}/buddy/BuddyPartner`);
                 const records = res.data;
 
                 let count1 = 0, count2 = 0, count3 = 0;

@@ -22,7 +22,8 @@ const Empleados = () => {
     id_rol: 2,
   });
 
-  const API_URL = 'http://localhost:3000/api/empleados';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  const API_URL = `${API_BASE_URL}/empleados`;
 
   const soloTexto = (valor) => valor.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, "");
   const soloNumeros = (valor) => valor.replace(/[^0-9]/g, "");

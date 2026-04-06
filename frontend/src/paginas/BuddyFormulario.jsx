@@ -7,7 +7,7 @@ import { jwtDecode } from "jwt-decode";
 
 import '../css/BuddyFormulario.css';
 
-const API_URL = "http://localhost:3000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 const BUDDY_API_URL = `${API_URL}/buddy`;
 
 export default function BuddyFormulario({ partnerNumber = 1 }) {

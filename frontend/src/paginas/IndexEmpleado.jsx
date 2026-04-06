@@ -23,8 +23,9 @@ export default function IndexEmpleado() {
 
         const id_usuario = decoded.id;
 
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
         axios
-            .get(`http://localhost:3000/BuddyPartner/pending/${id_usuario}`)
+            .get(`${API_URL}/buddy/pending/${id_usuario}`)
             .then((res) => {
                 const pendientes = res.data;
                 if (pendientes.length === 0) return;
