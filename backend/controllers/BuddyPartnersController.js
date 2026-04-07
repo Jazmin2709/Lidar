@@ -141,26 +141,34 @@ exports.DeleteBuddyPartner = async (req, res) => {
 };
 
 // ========================
-// 📄 Exportar PDF MEJORADO
+// 📄 Exportar PDF filtrado (GET /buddypartner/export/pdf)
 // ========================
-exports.ExportPDF = async (req, res) => {
-    try {
-        const filters = req.query;
-        let sql = "SELECT * FROM buddy WHERE 1=1";
-        const params = [];
+exports.ExportPDF = (req, res) => {
+    const filters = req.query;
 
-        if (filters.Est_empl) { sql += " AND Est_empl = ?"; params.push(filters.Est_empl); }
-        if (filters.Est_vehi) { sql += " AND Est_vehi = ?"; params.push(filters.Est_vehi); }
-        if (filters.Fecha) { sql += " AND DATE(Fecha) = ?"; params.push(filters.Fecha); }
-        if (filters.num_cuadrilla) { sql += " AND num_cuadrilla = ?"; params.push(filters.num_cuadrilla); }
+    console.log("🔍 Filtros recibidos para PDF:", filters);
 
-        const [results] = await promisePool.query(sql, params);
+    let sql = "SELECT * FROM buddy WHERE 1=1";
+    const params = [];
+
+    if (filters.Est_empl) { sql += " AND Est_empl = ?"; params.push(filters.Est_empl); }
+    if (filters.Est_vehi) { sql += " AND Est_vehi = ?"; params.push(filters.Est_vehi); }
+    if (filters.Fecha) { sql += " AND DATE(Fecha) = ?"; params.push(filters.Fecha); }
+    if (filters.num_cuadrilla) { sql += " AND num_cuadrilla = ?"; params.push(filters.num_cuadrilla); }
+
+    db.query(sql, params, (err, results) => {
+        if (err) {
+            console.error("❌ Error SQL:", err);
+            return res.status(500).json({ message: "Error al consultar datos" });
+        }
+
+        console.log(`✅ ${results.length} registros crudos obtenidos`);
 
         if (results.length === 0) {
             return res.status(404).json({ message: "No hay datos para los filtros aplicados" });
         }
 
-        // Agrupar por jornada
+        // Agrupar y calcular estado
         const grouped = {};
         results.forEach(r => {
             const key = `${r.num_cuadrilla}_${moment(r.Fecha).format('YYYY-MM-DD')}_${r.id_empleado}`;
@@ -193,57 +201,103 @@ exports.ExportPDF = async (req, res) => {
             jornadas = jornadas.filter(j => j.estadoGeneral === filters.Est_etapa);
         }
 
+        console.log(`   → PDF final con ${jornadas.length} jornadas`);
+
         if (jornadas.length === 0) {
             return res.status(404).json({ message: "No hay jornadas que coincidan con el filtro" });
         }
 
-        const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'portrait' });
+        const doc = new PDFDocument({ margin: 60, size: 'A4', layout: 'portrait' });
         res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename=Reporte_Lidar_${moment().format("YYYYMMDD")}.pdf`);
+        res.setHeader("Content-Disposition", `attachment; filename=Reporte_BuddyPartners_${moment().format("YYYYMMDD_HHmm")}.pdf`);
 
         doc.pipe(res);
 
-        // Header decorativo
-        doc.rect(0, 0, doc.page.width, 80).fill('#1a3c6d');
-        doc.fontSize(22).fillColor('#ffffff').font('Helvetica-Bold').text('REPORTE DE BUDDY PARTNERS', 40, 30, { align: 'center' });
+        // Título
+        doc.fontSize(26).fillColor('#1a3c6d').font('Helvetica-Bold').text('Reporte de Buddy Partners', { align: 'center' });
+        doc.moveDown(0.5);
+        doc.fontSize(12).fillColor('#555').text(`Generado el ${moment().format('DD/MM/YYYY')} a las ${moment().format('HH:mm')} • ${jornadas.length} jornadas`, { align: 'center' });
         doc.moveDown(2);
 
-        doc.fillColor('#333333').fontSize(10).font('Helvetica').text(`Fecha de generación: ${moment().format('DD/MM/YYYY HH:mm')}`, { align: 'right' });
-        doc.moveDown(1);
-
         jornadas.forEach((jornada, index) => {
-            if (index > 0 && doc.y > 600) doc.addPage();
+            if (index > 0) doc.addPage();
 
-            doc.rect(40, doc.y, 515, 25).fill('#f0f4f8');
-            doc.fillColor('#1a3c6d').fontSize(12).font('Helvetica-Bold').text(`Jornada: Cuadrilla ${jornada.num_cuadrilla} | Fecha: ${jornada.Fecha}`, 50, doc.y - 18);
+            doc.fontSize(18).fillColor('#004080').font('Helvetica-Bold')
+                .text(`Jornada: Cuadrilla ${jornada.num_cuadrilla} - ${jornada.Fecha} - Empleado ${jornada.id_empleado}`);
+
             doc.moveDown(0.5);
+            doc.fontSize(12).fillColor('#444').text(`Hora: ${jornada.Hora_buddy || '—'}`);
+            doc.moveDown(0.8);
 
-            const table = {
-                title: "",
-                headers: ["Etapa", "Empleado", "Vehículo", "Herramienta", "Motivos"],
-                rows: jornada.etapas.map(e => [
-                    e.Tipo === 1 ? "BP1: Inicio" : e.Tipo === 2 ? "BP2: Proceso" : "BP3: Fin",
-                    e.Est_empl,
-                    e.Est_vehi,
-                    e.Est_her,
-                    [e.MotivoEmp, e.MotivoVeh, e.MotivoHer].filter(Boolean).join(", ") || "N/A"
-                ])
-            };
+            doc.fontSize(14)
+                .fillColor(jornada.estadoGeneral === 'Completado' ? '#2e7d32' : '#c62828')
+                .text(`Estado General: ${jornada.estadoGeneral}`);
 
-            doc.table(table, {
-                prepareHeader: () => doc.font('Helvetica-Bold').fontSize(10).fillColor('#1a3c6d'),
-                prepareRow: (row, indexColumn, indexRow, rectRow) => doc.font('Helvetica').fontSize(9).fillColor('#333333'),
+            doc.moveDown(1.2);
+            doc.moveTo(60, doc.y).lineTo(540, doc.y).lineWidth(1).stroke('#cccccc');
+            doc.moveDown(1);
+
+            // Siempre mostrar detalles de fases presentes
+            doc.fontSize(15).fillColor('#004080').font('Helvetica-Bold').text('Detalles de las fases registradas');
+            doc.moveDown(1);
+
+            const fases = [
+                { nombre: 'Inicio (Buddy Partner 1)', tipo: 1, color: '#1976d2' },
+                { nombre: 'En proceso (Buddy Partner 2)', tipo: 2, color: '#0288d1' },
+                { nombre: 'Finalizó (Buddy Partner 3)', tipo: 3, color: '#01579b' }
+            ];
+
+            fases.forEach(fase => {
+                const etapa = jornada.etapas.find(e => e.Tipo === fase.tipo);
+                if (!etapa) return; // Saltar si la fase no existe
+
+                doc.fontSize(13).fillColor(fase.color).font('Helvetica-Bold').text(fase.nombre);
+                doc.moveDown(0.4);
+
+                doc.fontSize(11).fillColor('#333').font('Helvetica')
+                    .text(`   Empleado:     ${etapa.Est_empl || '—'}`);
+                doc.text(`   Vehículo:     ${etapa.Est_vehi || '—'}`);
+                doc.text(`   Herramienta:  ${etapa.Est_her || '—'}`);
+
+                doc.moveDown(0.3);
+                doc.text('   Motivos:');
+                const motivos = [];
+                if (etapa.MotivoEmp) motivos.push(`Empleado: ${etapa.MotivoEmp}`);
+                if (etapa.MotivoVeh) motivos.push(`Vehículo: ${etapa.MotivoVeh}`);
+                if (etapa.MotivoHer) motivos.push(`Herramienta: ${etapa.MotivoHer}`);
+
+                if (motivos.length > 0) {
+                    motivos.forEach(m => doc.text(`      • ${m}`));
+                } else {
+                    doc.text('      —');
+                }
+
+                doc.moveDown(0.5);
+                doc.fontSize(11).fillColor('#0066cc');
+                if (fase.tipo === 1) {
+                    if (etapa.Carnet) doc.text('   Carnet: ', { continued: true }).text('ver imagen', { link: etapa.Carnet, underline: true });
+                    if (etapa.TarjetaVida) doc.text('   Tarjeta Vida: ', { continued: true }).text('ver imagen', { link: etapa.TarjetaVida, underline: true });
+                } else if (fase.tipo === 2) {
+                    if (etapa.Tablero) doc.text('   Tablero: ', { continued: true }).text('ver imagen', { link: etapa.Tablero, underline: true });
+                    if (etapa.Calentamiento) doc.text('   Calentamiento: ', { continued: true }).text('ver imagen', { link: etapa.Calentamiento, underline: true });
+                }
+
+                doc.moveDown(1.5);
             });
 
-            doc.moveDown(1);
+            if (index < jornadas.length - 1) {
+                doc.moveDown(0.5);
+                doc.moveTo(60, doc.y).lineTo(540, doc.y).lineWidth(1).stroke('#dddddd');
+                doc.moveDown(1);
+            }
         });
 
-        doc.end();
+        // Pie de página final
+        doc.fontSize(10).fillColor('#777777')
+            .text(`Página ${doc.bufferedPageRange().count} • Generado por Buddy Partners`, 60, doc.page.height - 50, { align: 'center' });
 
-    } catch (error) {
-        console.error("Error en ExportPDF:", error);
-        return res.status(500).json({ message: "Error al generar PDF" });
-    }
+        doc.end();
+    });
 };
 
 // ========================
