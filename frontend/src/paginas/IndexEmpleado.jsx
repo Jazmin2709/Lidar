@@ -6,7 +6,7 @@ import moment from "moment";
 import { jwtDecode } from "jwt-decode";
 import { Link } from 'react-router-dom';
 
-import '../css/indexE.css';  // Ya lo tenías, ahora lo optimizamos
+import '../css/IndexE.css';  // Ya lo tenías, ahora lo optimizamos
 
 export default function IndexEmpleado() {
     useEffect(() => {
