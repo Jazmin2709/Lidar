@@ -1,10 +1,10 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 /* Conectar a la base de datos */
 const db = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '',
+    password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'lidar3',
     connectTimeout: 10000,
     ssl: process.env.DB_SSL ? true : false
