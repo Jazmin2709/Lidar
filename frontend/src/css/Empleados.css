@@ -2,11 +2,23 @@
 
 /* Contenedor principal de la página */
 .empleados-container {
-  padding: 100px 50px;
+  padding: 80px 20px;
+}
+
+@media (min-width: 768px) {
+  .empleados-container {
+    padding: 100px 50px;
+  }
 }
 
 .empleados-header {
-  padding: 0 50px;
+  padding: 0 20px;
+}
+
+@media (min-width: 768px) {
+  .empleados-header {
+    padding: 0 50px;
+  }
 }
 
 /* Tarjeta principal de la tabla */
@@ -14,13 +26,14 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-  overflow: hidden;
+  overflow-x: auto; /* Permite scroll horizontal en la tarjeta si la tabla es grande */
   padding-bottom: 20px;
 }
 
 /* Tabla custom */
 .empleados-custom-table {
   width: 100%;
+  min-width: 800px; /* Asegura un ancho mínimo para que no se amontone en móvil */
   border-collapse: collapse;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 0.85rem;

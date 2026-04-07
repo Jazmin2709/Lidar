@@ -72,10 +72,10 @@ export default function BarraNavInicio({
             </li>
           </ul>
 
-          <div className="d-flex gap-2 ms-lg-3">
+          <div className="d-flex flex-column flex-lg-row gap-2 ms-lg-3 mt-3 mt-lg-0">
             <button
               type="button"
-              className="btn btn-outline-light fw-semibold px-4 py-2"
+              className="btn btn-outline-light fw-semibold px-4 py-2 w-100 w-lg-auto"
               data-bs-toggle="modal"
               data-bs-target="#loginModal"
             >
@@ -83,7 +83,7 @@ export default function BarraNavInicio({
             </button>
             <button
               type="button"
-              className="btn btn-light fw-semibold px-4 py-2"
+              className="btn btn-light fw-semibold px-4 py-2 w-100 w-lg-auto"
               data-bs-toggle="modal"
               data-bs-target="#registerModal"
             >

@@ -13,6 +13,16 @@
     overflow: hidden;
     z-index: 1000;
     font-family: Arial, sans-serif;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 576px) {
+    .chatbot-container {
+        width: 90%;
+        right: 5%;
+        bottom: 90px;
+        height: 70vh;
+    }
 }
 
 /* Encabezado */
@@ -115,10 +125,21 @@
     justify-content: center;
     align-items: center;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    transition: background 0.3s;
+    transition: all 0.3s ease;
     z-index: 1001;
 }
 
 .chatbot-toggle:hover {
     background: #0244a7;
+    transform: scale(1.1);
+}
+
+@media (max-width: 576px) {
+    .chatbot-toggle {
+        width: 48px;
+        height: 48px;
+        bottom: 15px;
+        right: 15px;
+        font-size: 18px;
+    }
 }

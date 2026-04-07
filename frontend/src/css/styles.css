@@ -25,3 +25,9 @@ body {
 .row-pendiente {
      background-color: #f8d7da !important; /* Rojo suave */
 }
+
+@media (max-width: 576px) {
+    footer {
+        padding-bottom: 80px !important;
+    }
+}

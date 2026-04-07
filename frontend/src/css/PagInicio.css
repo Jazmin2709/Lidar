@@ -232,6 +232,23 @@ body.modal-open {
     .modal-backdrop {
         backdrop-filter: blur(16px) !important;
     }
+    
+    /* Evitar solapamiento con chatbot en la base */
+    section {
+        padding-bottom: 100px !important;
+    }
+
+    .display-4 {
+        font-size: 2.2rem;
+    }
+
+    .lead {
+        font-size: 1rem;
+    }
+
+    .service-img {
+        height: 250px;
+    }
 }
 
 /* ── Modal Recuperar Contraseña ───────────────────────────────────── */

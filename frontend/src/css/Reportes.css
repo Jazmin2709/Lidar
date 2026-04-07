@@ -2,7 +2,13 @@
 
 /* Contenedor principal de la página */
 .reportes-container {
-  padding: 0 50px 50px;
+  padding: 0 20px 20px;
+}
+
+@media (min-width: 768px) {
+  .reportes-container {
+    padding: 0 50px 50px;
+  }
 }
 
 /* Título principal */
@@ -21,9 +27,16 @@
 
 /* Botones de exportación */
 .reportes-export-buttons {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   display: flex;
+  flex-wrap: wrap; /* Permite que los botones bajen si no caben */
   gap: 1rem;
+}
+
+@media (max-width: 576px) {
+    .reportes-export-buttons > button {
+        width: 100%; /* Botones de ancho completo en móvil */
+    }
 }
 
 /* Tabla principal overrides */
@@ -104,7 +117,13 @@
 
 /* Responsive para scroll horizontal */
 .ant-table {
-  min-width: 1000px; /* fuerza scroll en pantallas pequeñas */
+  min-width: 800px; /* Reduje el min-width para ser más amigable */
+}
+
+@media (max-width: 768px) {
+    .ant-table-wrapper {
+        overflow-x: auto;
+    }
 }
 
 /* Modal overrides */
