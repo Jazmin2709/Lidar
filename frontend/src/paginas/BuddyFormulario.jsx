@@ -69,31 +69,38 @@ export default function BuddyFormulario({ partnerNumber = 1 }) {
         }
     }, [idEmpleado, partnerNumber]);
 
-    // Alerta si NO existe Inicio hoy (etapas 2 y 3)
+    // Alerta de secuencia (ej: falta el 1 antes del 2, o el 2 antes del 3)
     useEffect(() => {
         if (partnerNumber === 1 || !idEmpleado) return;
 
-        const checkInicio = async () => {
+        const checkSecuencia = async () => {
             try {
-                const res = await axios.get(`${BUDDY_API_URL}/pending/${idEmpleado}`);
-                const tieneInicioHoy = res.data.some(r =>
-                    r.Tipo === 1 && r.fecha === moment().format('YYYY-MM-DD')
-                );
+                const prevStage = partnerNumber - 1;
+                const today = moment().format('YYYY-MM-DD');
 
-                if (!tieneInicioHoy) {
+                const res = await axios.get(`${BUDDY_API_URL}/check-duplicate`, {
+                    params: {
+                        id_empleado: idEmpleado,
+                        fecha: today,
+                        tipo: prevStage
+                    }
+                });
+
+                if (!res.data?.exists) {
                     Swal.fire({
                         icon: 'warning',
-                        title: 'No se encontró Inicio de jornada hoy',
+                        title: `Falta etapa anterior`,
                         html: `
-                            No existe registro de <b>Buddy Partner 1 (Inicio)</b> 
-                            para este empleado hoy.<br><br>
-                            ¿Quieres continuar con esta etapa?
+                            No se encontró el registro de <b>Buddy Partner ${prevStage}</b> 
+                            para el día de hoy.<br><br>
+                            Se recomienda seguir el orden secuencial.<br><br>
+                            ¿Quieres continuar de todos modos?
                         `,
                         showCancelButton: true,
                         confirmButtonColor: '#3085d6',
                         cancelButtonColor: '#d33',
                         confirmButtonText: 'Sí, continuar',
-                        cancelButtonText: 'Regresar',
+                        cancelButtonText: 'Ir al Inicio',
                         allowOutsideClick: false
                     }).then((result) => {
                         if (!result.isConfirmed) {
@@ -102,11 +109,11 @@ export default function BuddyFormulario({ partnerNumber = 1 }) {
                     });
                 }
             } catch (err) {
-                console.error("Error verificando Inicio:", err);
+                console.error("Error verificando secuencia:", err);
             }
         };
 
-        checkInicio();
+        checkSecuencia();
     }, [idEmpleado, partnerNumber]);
 
     // Alerta de pendientes de días anteriores

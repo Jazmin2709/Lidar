@@ -1,24 +1,23 @@
-const db = require('../config/db');
+const { db, promisePool } = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const secret = 'mi-secreto';
+
+const secret = process.env.JWT_SECRET || 'mi-secreto';
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: {
-        user: 'lidarnotifier@gmail.com',
-        pass: 'biyd nddo uqdy zubm'
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 });
 
 exports.registrar = async (req, res) => {
     try {
         const { Correo, Nombres, Apellidos, Cedula, Celular, Contrasena, Tipo_Doc, agreeTerms } = req.body;
-
-        console.log(req.body);
 
         if (!Correo || !Nombres || !Apellidos || !Cedula || !Celular || !Contrasena || !Tipo_Doc || !agreeTerms) {
             return res.status(400).json({ message: 'Todos los campos son obligatorios' });
@@ -27,103 +26,81 @@ exports.registrar = async (req, res) => {
         const hashedPassword = await bcrypt.hash(Contrasena, 10);
 
         const qUsuario = 'SELECT * FROM persona WHERE Correo = ? OR Cedula = ?';
-        db.query(qUsuario, [Correo, Cedula], (error, results) => {
-            if (error) {
-                console.error(error);
-                return res.status(500).json({ message: 'Error al registrar el usuario' });
-            }
-            if (results.length > 0) {
-                return res.status(400).json({ message: 'El correo o cédula ya está registrado' });
-            }
+        const [results] = await promisePool.query(qUsuario, [Correo, Cedula]);
 
-            const query = 'INSERT INTO persona (Correo, Nombres, Apellidos, Cedula, Celular, Contrasena, Tipo_Doc, agreeTerms, id_rol, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 2, 1)';
-            const values = [Correo, Nombres, Apellidos, Cedula, Celular, hashedPassword, Tipo_Doc, agreeTerms];
+        if (results.length > 0) {
+            return res.status(400).json({ message: 'El correo o cédula ya está registrado' });
+        }
 
-            db.query(query, values, (error) => {
-                if (error) {
-                    console.error(error);
-                    return res.status(500).json({ message: 'Error al registrar el usuario' });
-                }
-                return res.status(200).json({ message: 'Usuario registrado exitosamente' });
-            });
-        });
+        const query = 'INSERT INTO persona (Correo, Nombres, Apellidos, Cedula, Celular, Contrasena, Tipo_Doc, agreeTerms, id_rol, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 2, 1)';
+        const values = [Correo, Nombres, Apellidos, Cedula, Celular, hashedPassword, Tipo_Doc, agreeTerms];
+
+        await promisePool.query(query, values);
+        return res.status(200).json({ message: 'Usuario registrado exitosamente' });
+
     } catch (error) {
-        console.error(error);
+        console.error("Error en registrar:", error);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
 
-// FUNCIÓN INGRESAR MEJORADA - ACEPTA EMAIL O CÉDULA
 exports.ingresar = async (req, res) => {
     try {
         const { Documento, Contrasena } = req.body;
-        console.log('Login attempt:', req.body);
         
-        if (!Documento) {
-            return res.status(400).json({ message: 'El correo o cédula es obligatorio' });
+        if (!Documento || !Contrasena) {
+            return res.status(400).json({ message: 'El documento (correo/cédula) y contraseña son obligatorios' });
         }
 
-        if (!Contrasena) {
-            return res.status(400).json({ message: 'La contraseña es obligatoria' });
-        }
-
-        // BUSCAR POR EMAIL O CÉDULA
         const query = 'SELECT * FROM persona WHERE Correo = ? OR Cedula = ?';
-        db.query(query, [Documento, Documento], async (error, results) => {
-            if (error) {
-                console.error(error);
-                return res.status(500).json({ message: 'Error al ingresar' });
-            }
+        const [results] = await promisePool.query(query, [Documento, Documento]);
 
-            if (results.length === 0) {
-                return res.status(401).json({ message: 'Credenciales incorrectas' });
-            }
+        if (results.length === 0) {
+            return res.status(401).json({ message: 'Credenciales incorrectas' });
+        }
 
-            const user = results[0];
+        const user = results[0];
 
-            // VALIDAR USUARIO INACTIVO
-            if (user.activo === 0) {
-                return res.status(403).json({ 
-                    message: 'Cuenta deshabilitada. Contacta al administrador.' 
-                });
-            }
+        if (user.activo === 0) {
+            return res.status(403).json({ message: 'Cuenta deshabilitada. Contacta al administrador.' });
+        }
 
-            // VERIFICAR CONTRASEÑA
-            const isPasswordValid = await bcrypt.compare(Contrasena, user.Contrasena);
-            if (isPasswordValid) {
-                const token = jwt.sign({ id: user.id_per, rol: user.id_rol }, secret, { expiresIn: '30d' });
-                return res.status(200).json({ 
-                    rol: user.id_rol, 
-                    message: 'Ingreso exitoso', 
-                    token: token,
-                    usuario: {
-                        id: user.id_per,
-                        nombre: user.Nombres,
-                        email: user.Correo
-                    }
-                });
-            } else {
-                return res.status(401).json({ message: 'Contraseña incorrecta' });
-            }
-        });
+        const isPasswordValid = await bcrypt.compare(Contrasena, user.Contrasena);
+        if (isPasswordValid) {
+            const token = jwt.sign({ id: user.id_per, rol: user.id_rol }, secret, { expiresIn: '30d' });
+            return res.status(200).json({ 
+                rol: user.id_rol, 
+                message: 'Ingreso exitoso', 
+                token: token,
+                usuario: {
+                    id: user.id_per,
+                    nombre: user.Nombres,
+                    email: user.Correo
+                }
+            });
+        } else {
+            return res.status(401).json({ message: 'Contraseña incorrecta' });
+        }
     } catch (error) {
-        console.error(error);
+        console.error("Error en ingresar:", error);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
 
 exports.validarToken = async (req, res) => {
     try {
+        if (!req.headers.authorization) {
+            return res.status(401).json({ message: 'No hay token' });
+        }
         const token = req.headers.authorization.split(' ')[1];
         jwt.verify(token, secret, (error, decoded) => {
             if (error) {
                 return res.status(401).json({ message: 'Token inválido' });
             }
-            req.userId = decoded.id;
             return res.send({ id: decoded.id, rol: decoded.rol });
         });
     } catch (error) {
-        console.error(error);
+        console.error("Error en validarToken:", error);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
@@ -136,75 +113,57 @@ exports.enviarCorreo = async (req, res) => {
         }
 
         const query = 'SELECT * FROM persona WHERE Correo = ?';
-        db.query(query, [Correo], async (error, results) => {
-            if (error) {
-                console.error(error);
-                return res.status(500).json({ message: 'Error al ingresar' });
-            }
+        const [results] = await promisePool.query(query, [Correo]);
 
-            if (results.length === 0) {
-                return res.status(401).json({ message: 'El correo no está registrado' });
-            }
+        if (results.length === 0) {
+            return res.status(401).json({ message: 'El correo no está registrado' });
+        }
 
-            const usuario = results[0];
-            
-            // Validar usuario inactivo también para recuperación
-            if (usuario.activo === 0) {
-                return res.status(403).json({ 
-                    message: 'Cuenta deshabilitada. Contacta al administrador.' 
+        const usuario = results[0];
+        if (usuario.activo === 0) {
+            return res.status(403).json({ message: 'Cuenta deshabilitada. Contacta al administrador.' });
+        }
+
+        const ahora = new Date();
+        if (usuario.UltimoEnvio) {
+            const ultimaFecha = new Date(usuario.UltimoEnvio);
+            const diferenciaMinutos = (ahora - ultimaFecha) / 60000;
+            if (diferenciaMinutos < 2) {
+                return res.status(429).json({
+                    message: `Ya se envió un código recientemente. Espera ${Math.ceil(2 - diferenciaMinutos)} minuto(s).`
                 });
             }
+        }
 
-            const ahora = new Date();
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-            if (usuario.UltimoEnvio) {
-                const ultimaFecha = new Date(usuario.UltimoEnvio);
-                const diferenciaMinutos = (ahora - ultimaFecha) / 60000;
-
-                if (diferenciaMinutos < 2) {
-                    return res.status(429).json({
-                        message: `Ya se envió un código recientemente. Espera ${Math.ceil(2 - diferenciaMinutos)} minuto(s).`
-                    });
-                }
-            }
-
-            const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-            const mailOptions = {
-                from: 'lidarnotifier@gmail.com',
-                to: Correo,
-                subject: 'Código de verificación para restablecer contraseña || Lidar',
-                html: `
-                <div class="container" style="background-color: #3483CD; color: #fff; padding: 80px;">
-                    <h1>Recuperación de Contraseña</h1>
-                    <p style="font-size: 25px;">Tu código de verificación es:</p>
-                    <h2 style="font-size: 40px; font-weight: bold; color:rgb(255, 255, 255);">${verificationCode}</h2>
-                    <p>Por favor, ingrésalo en el formulario de recuperación de contraseña.</p>
-                    <p>Si no solicitaste este cambio, ignora este mensaje.</p>
-                    <p>Gracias,</p>
-                    <p>El equipo de soporte</p>
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: Correo,
+            subject: 'Código de verificación para restablecer contraseña || Lidar',
+            html: `
+            <div style="background-color: #3483CD; color: #fff; padding: 40px; font-family: sans-serif; border-radius: 10px;">
+                <h1 style="text-align: center;">Recuperación de Contraseña</h1>
+                <p style="font-size: 18px; text-align: center;">Tu código de verificación es:</p>
+                <div style="background-color: #fff; color: #3483CD; padding: 20px; font-size: 40px; font-weight: bold; text-align: center; border-radius: 5px; margin: 20px 0;">
+                    ${verificationCode}
                 </div>
-                `,
-            };
+                <p style="text-align: center;">Ingrésalo en el formulario de recuperación de contraseña para continuar.</p>
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.3); margin: 20px 0;">
+                <p style="font-size: 14px; text-align: center; opacity: 0.8;">Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+            </div>
+            `,
+        };
 
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.error(error);
-                    return res.status(500).json({ message: 'Error al enviar el correo' });
-                }
+        await transporter.sendMail(mailOptions);
 
-                const updateQuery = 'UPDATE persona SET Codigo = ?, UltimoEnvio = ? WHERE Correo = ?';
-                db.query(updateQuery, [verificationCode, ahora, Correo], (error) => {
-                    if (error) {
-                        console.error(error);
-                        return res.status(500).json({ message: 'Error al actualizar el código' });
-                    }
-                    return res.status(200).json({ correo: Correo, message: 'Correo enviado exitosamente' });
-                });
-            });
-        });
+        const updateQuery = 'UPDATE persona SET Codigo = ?, UltimoEnvio = ? WHERE Correo = ?';
+        await promisePool.query(updateQuery, [verificationCode, ahora, Correo]);
+
+        return res.status(200).json({ correo: Correo, message: 'Correo enviado exitosamente' });
+
     } catch (error) {
-        console.error(error);
+        console.error("Error en enviarCorreo:", error);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 }
@@ -212,42 +171,24 @@ exports.enviarCorreo = async (req, res) => {
 exports.recuperarContrasena = async (req, res) => {
     try {
         const { Correo, Codigo, NuevaContrasena } = req.body;
-        console.log(req.body);
-        if (!Correo) {
-            return res.status(400).json({ message: 'El correo es obligatorio' });
-        }
-
-        if (!Codigo) {
-            return res.status(400).json({ message: 'El código es obligatorio' });
-        }
-
-        if (!NuevaContrasena) {
-            return res.status(400).json({ message: 'La nueva contraseña es obligatoria' });
+        if (!Correo || !Codigo || !NuevaContrasena) {
+            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
         }
 
         const query = 'SELECT * FROM persona WHERE Correo = ? AND Codigo = ?';
-        db.query(query, [Correo, Codigo], async (error, results) => {
-            if (error) {
-                console.error(error);
-                return res.status(500).json({ message: 'Error al ingresar' });
-            }
+        const [results] = await promisePool.query(query, [Correo, Codigo]);
 
-            if (results.length === 0) {
-                return res.status(401).json({ message: 'Código incorrecto o correo no registrado' });
-            }
+        if (results.length === 0) {
+            return res.status(401).json({ message: 'Código incorrecto o correo no registrado' });
+        }
 
-            const hashedPassword = await bcrypt.hash(NuevaContrasena, 10);
+        const hashedPassword = await bcrypt.hash(NuevaContrasena, 10);
+        await promisePool.query('UPDATE persona SET Contrasena = ?, Codigo = NULL WHERE Correo = ?', [hashedPassword, Correo]);
 
-            db.query('UPDATE persona SET Contrasena = ? WHERE Correo = ?', [hashedPassword, Correo], (error) => {
-                if (error) {
-                    console.error(error);
-                    return res.status(500).json({ message: 'Error al actualizar la contraseña' });
-                }
-                return res.status(200).json({ message: 'Contraseña actualizada exitosamente' });
-            });
-        });
+        return res.status(200).json({ message: 'Contraseña actualizada exitosamente' });
+
     } catch (error) {
-        console.error(error);
+        console.error("Error en recuperarContrasena:", error);
         return res.status(500).json({ message: 'Error interno del servidor' });
     }
 }

@@ -9,13 +9,17 @@ const db = mysql.createPool({
     connectTimeout: 10000,
     ssl: process.env.DB_SSL ? true : false
 });
+
+/* Exportar pool con promesas */
+const promisePool = db.promise();
+
 /* Verificar la conexión */
 db.getConnection((err) => {
     if (err) {
-        console.log(err);
+        console.log("Error de conexión a la base de datos:", err);
     } else {
-        console.log('Conectado a la base de datos');
+        console.log('Conectado a la base de datos (Pool)');
     }
 });
 
-module.exports = db
+module.exports = { db, promisePool };
