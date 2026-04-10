@@ -1,10 +1,9 @@
 const { db, promisePool } = require('../config/db');
-const PDFDocument = require("pdfkit-table");
+const PDFDocument = require("pdfkit"); // o "pdfkit-table" si planeas hacer tablas
 const ExcelJS = require('exceljs');
 const moment = require('moment');
 const path = require('path');
-const PDFDocument = require('pdfkit');
-const moment = require('moment');
+const fs = require('fs');
 // ========================
 // 📦 Obtener todos los registros (GET /buddypartner)
 // ========================
@@ -209,10 +208,10 @@ exports.ExportPDF = (req, res) => {
         }
 
         // ====================== CREACIÓN DEL PDF ======================
-        const doc = new PDFDocument({ 
-            margin: 60, 
-            size: 'A4', 
-            layout: 'portrait' 
+        const doc = new PDFDocument({
+            margin: 60,
+            size: 'A4',
+            layout: 'portrait'
         });
 
         res.setHeader("Content-Type", "application/pdf");
@@ -221,34 +220,49 @@ exports.ExportPDF = (req, res) => {
         doc.pipe(res);
 
         // ====================== AGREGAR LOGO EN ESQUINA SUPERIOR DERECHA ======================
-        const logoPath = path.join(__dirname, '../../frontend/src/assets/img/Logo.jpeg');
-        // Si la ruta no es correcta, ajusta según la estructura de tu proyecto
+        const logoPath = path.resolve(__dirname, '../../frontend/src/assets/img/Logo.jpeg');
+        let logoBuffer = null;
+        try {
+            if (fs.existsSync(logoPath)) {
+                logoBuffer = fs.readFileSync(logoPath);
+            } else {
+                console.error("❌ No se encontró el logo en la ruta:", logoPath);
+            }
+        } catch (error) {
+            console.error("❌ Error al leer el archivo del logo:", error.message);
+        }
 
         const logoWidth = 130;   // Ancho del logo
         const logoHeight = 65;   // Alto del logo (mantén proporción aproximada)
 
         // Insertar logo en la esquina superior derecha
-        doc.image(logoPath, doc.page.width - logoWidth - 45, 35, {
-            width: logoWidth,
-            height: logoHeight,
-            align: 'right'
-        });
+        if (logoBuffer) {
+            try {
+                doc.image(logoBuffer, doc.page.width - logoWidth - 45, 35, {
+                    width: logoWidth,
+                    height: logoHeight,
+                    align: 'right'
+                });
+            } catch (err) {
+                console.error("❌ Error insertando logo en la primera página:", err.message);
+            }
+        }
 
         // ====================== TÍTULO ======================
         doc.fontSize(26)
-           .fillColor('#1a3c6d')
-           .font('Helvetica-Bold')
-           .text('Reporte de Buddy Partners', { 
-               align: 'center',
-               y: 45   // Ajustado para que no se superponga con el logo
-           });
+            .fillColor('#1a3c6d')
+            .font('Helvetica-Bold')
+            .text('Reporte de Buddy Partners', {
+                align: 'center',
+                y: 45   // Ajustado para que no se superponga con el logo
+            });
 
         // Subtítulo con fecha y cantidad de jornadas
         doc.moveDown(0.8);
         doc.fontSize(12)
-           .fillColor('#555')
-           .text(`Generado el ${moment().format('DD/MM/YYYY')} a las ${moment().format('HH:mm')} • ${jornadas.length} jornadas`, 
-                 { align: 'center' });
+            .fillColor('#555')
+            .text(`Generado el ${moment().format('DD/MM/YYYY')} a las ${moment().format('HH:mm')} • ${jornadas.length} jornadas`,
+                { align: 'center' });
 
         doc.moveDown(2);
 
@@ -256,47 +270,53 @@ exports.ExportPDF = (req, res) => {
         jornadas.forEach((jornada, index) => {
             if (index > 0) {
                 doc.addPage();
-                
+
                 // Volver a poner el logo en las páginas siguientes
-                doc.image(logoPath, doc.page.width - logoWidth - 45, 35, {
-                    width: logoWidth,
-                    height: logoHeight,
-                    align: 'right'
-                });
+                if (logoBuffer) {
+                    try {
+                        doc.image(logoBuffer, doc.page.width - logoWidth - 45, 35, {
+                            width: logoWidth,
+                            height: logoHeight,
+                            align: 'right'
+                        });
+                    } catch (err) {
+                        console.error("❌ Error insertando logo en página extra:", err.message);
+                    }
+                }
 
                 // Título en páginas siguientes
                 doc.fontSize(26)
-                   .fillColor('#1a3c6d')
-                   .font('Helvetica-Bold')
-                   .text('Reporte de Buddy Partners', { 
-                       align: 'center',
-                       y: 45
-                   });
+                    .fillColor('#1a3c6d')
+                    .font('Helvetica-Bold')
+                    .text('Reporte de Buddy Partners', {
+                        align: 'center',
+                        y: 45
+                    });
 
                 doc.moveDown(0.8);
                 doc.fontSize(12)
-                   .fillColor('#555')
-                   .text(`Generado el ${moment().format('DD/MM/YYYY')} a las ${moment().format('HH:mm')} • ${jornadas.length} jornadas`, 
-                         { align: 'center' });
+                    .fillColor('#555')
+                    .text(`Generado el ${moment().format('DD/MM/YYYY')} a las ${moment().format('HH:mm')} • ${jornadas.length} jornadas`,
+                        { align: 'center' });
 
                 doc.moveDown(2);
             }
 
             // Información de la jornada
             doc.fontSize(18)
-               .fillColor('#004080')
-               .font('Helvetica-Bold')
-               .text(`Jornada: Cuadrilla ${jornada.num_cuadrilla} - ${jornada.Fecha} - Empleado ${jornada.id_empleado}`);
+                .fillColor('#004080')
+                .font('Helvetica-Bold')
+                .text(`Jornada: Cuadrilla ${jornada.num_cuadrilla} - ${jornada.Fecha} - Empleado ${jornada.id_empleado}`);
 
             doc.moveDown(0.5);
             doc.fontSize(12)
-               .fillColor('#444')
-               .text(`Hora: ${jornada.Hora_buddy || '—'}`);
+                .fillColor('#444')
+                .text(`Hora: ${jornada.Hora_buddy || '—'}`);
 
             doc.moveDown(0.8);
             doc.fontSize(14)
-               .fillColor(jornada.estadoGeneral === 'Completado' ? '#2e7d32' : '#c62828')
-               .text(`Estado General: ${jornada.estadoGeneral}`);
+                .fillColor(jornada.estadoGeneral === 'Completado' ? '#2e7d32' : '#c62828')
+                .text(`Estado General: ${jornada.estadoGeneral}`);
 
             doc.moveDown(1.2);
 
@@ -306,9 +326,9 @@ exports.ExportPDF = (req, res) => {
 
             // Detalles de las fases
             doc.fontSize(15)
-               .fillColor('#004080')
-               .font('Helvetica-Bold')
-               .text('Detalles de las fases registradas');
+                .fillColor('#004080')
+                .font('Helvetica-Bold')
+                .text('Detalles de las fases registradas');
 
             doc.moveDown(1);
 
@@ -323,17 +343,17 @@ exports.ExportPDF = (req, res) => {
                 if (!etapa) return;
 
                 doc.fontSize(13)
-                   .fillColor(fase.color)
-                   .font('Helvetica-Bold')
-                   .text(fase.nombre);
+                    .fillColor(fase.color)
+                    .font('Helvetica-Bold')
+                    .text(fase.nombre);
 
                 doc.moveDown(0.4);
                 doc.fontSize(11)
-                   .fillColor('#333')
-                   .font('Helvetica')
-                   .text(` Empleado: ${etapa.Est_empl || '—'}`)
-                   .text(` Vehículo: ${etapa.Est_vehi || '—'}`)
-                   .text(` Herramienta: ${etapa.Est_her || '—'}`);
+                    .fillColor('#333')
+                    .font('Helvetica')
+                    .text(` Empleado: ${etapa.Est_empl || '—'}`)
+                    .text(` Vehículo: ${etapa.Est_vehi || '—'}`)
+                    .text(` Herramienta: ${etapa.Est_her || '—'}`);
 
                 doc.moveDown(0.3);
                 doc.text(' Motivos:');
@@ -373,9 +393,9 @@ exports.ExportPDF = (req, res) => {
 
         // Pie de página
         doc.fontSize(10)
-           .fillColor('#777777')
-           .text(`Página ${doc.bufferedPageRange().count} • Generado por Buddy Partners`, 
-                 60, doc.page.height - 50, { align: 'center' });
+            .fillColor('#777777')
+            .text(`Página ${doc.bufferedPageRange().count} • Generado por Buddy Partners`,
+                60, doc.page.height - 50, { align: 'center' });
 
         doc.end();
     });
