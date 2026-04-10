@@ -227,7 +227,7 @@ exports.ExportPDF = (req, res) => {
 
         // Agregar logo a la primera página
         addHeaderLogo();
-        doc.y = 60;
+        doc.y = 120; // Empujar inicio hacia abajo para evitar solapamiento
 
         // Título
         doc.fontSize(26).fillColor('#1a3c6d').font('Helvetica-Bold').text('Reporte de Buddy Partners', { align: 'center' });
@@ -239,7 +239,7 @@ exports.ExportPDF = (req, res) => {
             if (index > 0) {
                 doc.addPage();
                 addHeaderLogo();
-                doc.y = 60;
+                doc.y = 120; // Empujar inicio hacia abajo en cada nueva página
             }
 
             doc.fontSize(18).fillColor('#004080').font('Helvetica-Bold')
