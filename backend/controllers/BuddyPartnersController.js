@@ -2,7 +2,9 @@ const { db, promisePool } = require('../config/db');
 const PDFDocument = require("pdfkit-table");
 const ExcelJS = require('exceljs');
 const moment = require('moment');
-
+const path = require('path');
+const PDFDocument = require('pdfkit');
+const moment = require('moment');
 // ========================
 // 📦 Obtener todos los registros (GET /buddypartner)
 // ========================
@@ -145,7 +147,6 @@ exports.DeleteBuddyPartner = async (req, res) => {
 // ========================
 exports.ExportPDF = (req, res) => {
     const filters = req.query;
-
     console.log("🔍 Filtros recibidos para PDF:", filters);
 
     let sql = "SELECT * FROM buddy WHERE 1=1";
@@ -201,44 +202,114 @@ exports.ExportPDF = (req, res) => {
             jornadas = jornadas.filter(j => j.estadoGeneral === filters.Est_etapa);
         }
 
-        console.log(`   → PDF final con ${jornadas.length} jornadas`);
+        console.log(` → PDF final con ${jornadas.length} jornadas`);
 
         if (jornadas.length === 0) {
             return res.status(404).json({ message: "No hay jornadas que coincidan con el filtro" });
         }
 
-        const doc = new PDFDocument({ margin: 60, size: 'A4', layout: 'portrait' });
+        // ====================== CREACIÓN DEL PDF ======================
+        const doc = new PDFDocument({ 
+            margin: 60, 
+            size: 'A4', 
+            layout: 'portrait' 
+        });
+
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `attachment; filename=Reporte_BuddyPartners_${moment().format("YYYYMMDD_HHmm")}.pdf`);
 
         doc.pipe(res);
 
-        // Título
-        doc.fontSize(26).fillColor('#1a3c6d').font('Helvetica-Bold').text('Reporte de Buddy Partners', { align: 'center' });
-        doc.moveDown(0.5);
-        doc.fontSize(12).fillColor('#555').text(`Generado el ${moment().format('DD/MM/YYYY')} a las ${moment().format('HH:mm')} • ${jornadas.length} jornadas`, { align: 'center' });
+        // ====================== AGREGAR LOGO EN ESQUINA SUPERIOR DERECHA ======================
+        const logoPath = path.join(__dirname, '../../frontend/src/assets/img/Logo.jpeg');
+        // Si la ruta no es correcta, ajusta según la estructura de tu proyecto
+
+        const logoWidth = 130;   // Ancho del logo
+        const logoHeight = 65;   // Alto del logo (mantén proporción aproximada)
+
+        // Insertar logo en la esquina superior derecha
+        doc.image(logoPath, doc.page.width - logoWidth - 45, 35, {
+            width: logoWidth,
+            height: logoHeight,
+            align: 'right'
+        });
+
+        // ====================== TÍTULO ======================
+        doc.fontSize(26)
+           .fillColor('#1a3c6d')
+           .font('Helvetica-Bold')
+           .text('Reporte de Buddy Partners', { 
+               align: 'center',
+               y: 45   // Ajustado para que no se superponga con el logo
+           });
+
+        // Subtítulo con fecha y cantidad de jornadas
+        doc.moveDown(0.8);
+        doc.fontSize(12)
+           .fillColor('#555')
+           .text(`Generado el ${moment().format('DD/MM/YYYY')} a las ${moment().format('HH:mm')} • ${jornadas.length} jornadas`, 
+                 { align: 'center' });
+
         doc.moveDown(2);
 
+        // ====================== CONTENIDO DE LAS JORNADAS ======================
         jornadas.forEach((jornada, index) => {
-            if (index > 0) doc.addPage();
+            if (index > 0) {
+                doc.addPage();
+                
+                // Volver a poner el logo en las páginas siguientes
+                doc.image(logoPath, doc.page.width - logoWidth - 45, 35, {
+                    width: logoWidth,
+                    height: logoHeight,
+                    align: 'right'
+                });
 
-            doc.fontSize(18).fillColor('#004080').font('Helvetica-Bold')
-                .text(`Jornada: Cuadrilla ${jornada.num_cuadrilla} - ${jornada.Fecha} - Empleado ${jornada.id_empleado}`);
+                // Título en páginas siguientes
+                doc.fontSize(26)
+                   .fillColor('#1a3c6d')
+                   .font('Helvetica-Bold')
+                   .text('Reporte de Buddy Partners', { 
+                       align: 'center',
+                       y: 45
+                   });
+
+                doc.moveDown(0.8);
+                doc.fontSize(12)
+                   .fillColor('#555')
+                   .text(`Generado el ${moment().format('DD/MM/YYYY')} a las ${moment().format('HH:mm')} • ${jornadas.length} jornadas`, 
+                         { align: 'center' });
+
+                doc.moveDown(2);
+            }
+
+            // Información de la jornada
+            doc.fontSize(18)
+               .fillColor('#004080')
+               .font('Helvetica-Bold')
+               .text(`Jornada: Cuadrilla ${jornada.num_cuadrilla} - ${jornada.Fecha} - Empleado ${jornada.id_empleado}`);
 
             doc.moveDown(0.5);
-            doc.fontSize(12).fillColor('#444').text(`Hora: ${jornada.Hora_buddy || '—'}`);
-            doc.moveDown(0.8);
+            doc.fontSize(12)
+               .fillColor('#444')
+               .text(`Hora: ${jornada.Hora_buddy || '—'}`);
 
+            doc.moveDown(0.8);
             doc.fontSize(14)
-                .fillColor(jornada.estadoGeneral === 'Completado' ? '#2e7d32' : '#c62828')
-                .text(`Estado General: ${jornada.estadoGeneral}`);
+               .fillColor(jornada.estadoGeneral === 'Completado' ? '#2e7d32' : '#c62828')
+               .text(`Estado General: ${jornada.estadoGeneral}`);
 
             doc.moveDown(1.2);
+
+            // Línea separadora
             doc.moveTo(60, doc.y).lineTo(540, doc.y).lineWidth(1).stroke('#cccccc');
             doc.moveDown(1);
 
-            // Siempre mostrar detalles de fases presentes
-            doc.fontSize(15).fillColor('#004080').font('Helvetica-Bold').text('Detalles de las fases registradas');
+            // Detalles de las fases
+            doc.fontSize(15)
+               .fillColor('#004080')
+               .font('Helvetica-Bold')
+               .text('Detalles de las fases registradas');
+
             doc.moveDown(1);
 
             const fases = [
@@ -249,42 +320,50 @@ exports.ExportPDF = (req, res) => {
 
             fases.forEach(fase => {
                 const etapa = jornada.etapas.find(e => e.Tipo === fase.tipo);
-                if (!etapa) return; // Saltar si la fase no existe
+                if (!etapa) return;
 
-                doc.fontSize(13).fillColor(fase.color).font('Helvetica-Bold').text(fase.nombre);
+                doc.fontSize(13)
+                   .fillColor(fase.color)
+                   .font('Helvetica-Bold')
+                   .text(fase.nombre);
+
                 doc.moveDown(0.4);
-
-                doc.fontSize(11).fillColor('#333').font('Helvetica')
-                    .text(`   Empleado:     ${etapa.Est_empl || '—'}`);
-                doc.text(`   Vehículo:     ${etapa.Est_vehi || '—'}`);
-                doc.text(`   Herramienta:  ${etapa.Est_her || '—'}`);
+                doc.fontSize(11)
+                   .fillColor('#333')
+                   .font('Helvetica')
+                   .text(` Empleado: ${etapa.Est_empl || '—'}`)
+                   .text(` Vehículo: ${etapa.Est_vehi || '—'}`)
+                   .text(` Herramienta: ${etapa.Est_her || '—'}`);
 
                 doc.moveDown(0.3);
-                doc.text('   Motivos:');
+                doc.text(' Motivos:');
+
                 const motivos = [];
                 if (etapa.MotivoEmp) motivos.push(`Empleado: ${etapa.MotivoEmp}`);
                 if (etapa.MotivoVeh) motivos.push(`Vehículo: ${etapa.MotivoVeh}`);
                 if (etapa.MotivoHer) motivos.push(`Herramienta: ${etapa.MotivoHer}`);
 
                 if (motivos.length > 0) {
-                    motivos.forEach(m => doc.text(`      • ${m}`));
+                    motivos.forEach(m => doc.text(` • ${m}`));
                 } else {
-                    doc.text('      —');
+                    doc.text(' —');
                 }
 
                 doc.moveDown(0.5);
                 doc.fontSize(11).fillColor('#0066cc');
+
                 if (fase.tipo === 1) {
-                    if (etapa.Carnet) doc.text('   Carnet: ', { continued: true }).text('ver imagen', { link: etapa.Carnet, underline: true });
-                    if (etapa.TarjetaVida) doc.text('   Tarjeta Vida: ', { continued: true }).text('ver imagen', { link: etapa.TarjetaVida, underline: true });
+                    if (etapa.Carnet) doc.text(' Carnet: ', { continued: true }).text('ver imagen', { link: etapa.Carnet, underline: true });
+                    if (etapa.TarjetaVida) doc.text(' Tarjeta Vida: ', { continued: true }).text('ver imagen', { link: etapa.TarjetaVida, underline: true });
                 } else if (fase.tipo === 2) {
-                    if (etapa.Tablero) doc.text('   Tablero: ', { continued: true }).text('ver imagen', { link: etapa.Tablero, underline: true });
-                    if (etapa.Calentamiento) doc.text('   Calentamiento: ', { continued: true }).text('ver imagen', { link: etapa.Calentamiento, underline: true });
+                    if (etapa.Tablero) doc.text(' Tablero: ', { continued: true }).text('ver imagen', { link: etapa.Tablero, underline: true });
+                    if (etapa.Calentamiento) doc.text(' Calentamiento: ', { continued: true }).text('ver imagen', { link: etapa.Calentamiento, underline: true });
                 }
 
                 doc.moveDown(1.5);
             });
 
+            // Línea separadora entre jornadas (excepto la última)
             if (index < jornadas.length - 1) {
                 doc.moveDown(0.5);
                 doc.moveTo(60, doc.y).lineTo(540, doc.y).lineWidth(1).stroke('#dddddd');
@@ -292,9 +371,11 @@ exports.ExportPDF = (req, res) => {
             }
         });
 
-        // Pie de página final
-        doc.fontSize(10).fillColor('#777777')
-            .text(`Página ${doc.bufferedPageRange().count} • Generado por Buddy Partners`, 60, doc.page.height - 50, { align: 'center' });
+        // Pie de página
+        doc.fontSize(10)
+           .fillColor('#777777')
+           .text(`Página ${doc.bufferedPageRange().count} • Generado por Buddy Partners`, 
+                 60, doc.page.height - 50, { align: 'center' });
 
         doc.end();
     });
