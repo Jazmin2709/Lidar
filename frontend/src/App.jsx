@@ -11,6 +11,9 @@ import IndexEmpleado from './paginas/IndexEmpleado';
 import EnviarCorreo from './paginas/EnviarCorreo';
 import RecuperarContraseña from './paginas/RecuperarContraseña';
 import BuddyFormulario from './paginas/BuddyFormulario.jsx';
+import Asistencia from './paginas/Asistencia';
+import GestionCuadrillas from './paginas/GestionCuadrillas';
+import MiCuadrilla from './paginas/MiCuadrilla';
 
 // Componentes de rutas y layouts
 import RoutePrivate from './componentes/RoutePrivate';
@@ -80,6 +83,7 @@ function App() {
           <Route element={<SupervisorLayout />}>
             <Route path="/supervisor/dashboard" element={<Dashboard />} />
             <Route path="/supervisor/Reportes" element={<Reportes />} />
+            <Route path="/supervisor/cuadrillas" element={<GestionCuadrillas />} />
           </Route>
         </Route>
 
@@ -90,6 +94,10 @@ function App() {
 
             {/* Ruta dinámica para TODOS los Buddys */}
             <Route path="/buddy/:number" element={<BuddyPageWrapper />} />
+            
+            {/* Nuevas rutas de asistencia y cuadrilla */}
+            <Route path="/asistencia" element={<Asistencia />} />
+            <Route path="/mi-cuadrilla" element={<MiCuadrilla />} />
           </Route>
         </Route>
       </Routes>

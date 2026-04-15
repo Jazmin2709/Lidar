@@ -410,12 +410,12 @@ exports.GetPendingByUser = async (req, res) => {
         const hoy = moment().format("YYYY-MM-DD");
 
         const sql = `
-            SELECT Tipo AS tipo, Est_etapa AS estado, DATE(Fecha) AS fecha
+            SELECT num_cuadrilla AS num_cuadrilla, Tipo AS Tipo, Est_etapa AS Est_etapa, Fecha AS Fecha
             FROM buddy
             WHERE id_empleado = ?
             AND (Est_etapa = 'Inicio' OR Est_etapa = 'En proceso')
             AND DATE(Fecha) < ?
-            ORDER BY Tipo ASC
+            ORDER BY Fecha DESC, Tipo ASC
         `;
 
         const [results] = await promisePool.query(sql, [id, hoy]);

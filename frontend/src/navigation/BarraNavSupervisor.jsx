@@ -5,7 +5,7 @@ export default function BarraNavSupervisor() {
     const enlacesSupervisor = [
         { href: '/supervisor/dashboard/', label: 'Dashboard' },
         { href: '/supervisor/reportes/', label: 'Mis Reportes' },
-        // agrega los que necesites
+        { href: '/supervisor/cuadrillas/', label: 'Gestión Cuadrillas' },
     ];
 
     return <BarraBase titulo="Supervisor" enlaces={enlacesSupervisor} />;

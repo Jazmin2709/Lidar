@@ -36,6 +36,8 @@ app.use('/api/buddy', buddyRoutes);
 app.use('/api/empleados', empleadosRoutes);
 app.use('/api/imagenes', imagenesRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/asistencia', require('./routes/asistencia'));
+app.use('/api/cuadrillas', require('./routes/cuadrillas'));
 
 // Ruta de prueba
 app.get('/', (req, res) => {

@@ -46,27 +46,48 @@ export default function BuddyFormulario({ partnerNumber = 1 }) {
         }
     }, [idEmpleado]);
 
-    // Precargar cuadrilla desde etapa 1 (para etapas 2 y 3)
+    // Precargar cuadrilla desde el nuevo sistema de asignaciones o desde etapa 1
     useEffect(() => {
-        if (!idEmpleado || partnerNumber === 1) return;
+        if (!idEmpleado) return;
 
-        const today = moment().format('YYYY-MM-DD');
-        const key = getStorageKey(today, idEmpleado);
-
-        if (!key) return;
-
-        const stored = localStorage.getItem(key);
-        if (stored) {
+        const fetchAsignacionActual = async () => {
             try {
-                const data = JSON.parse(stored);
-                if (data.id_empleado === idEmpleado && data.fecha === today) {
-                    setForm(prev => ({ ...prev, num_cuadrilla: data.num_cuadrilla }));
-                    setOriginalCuadrilla(data.num_cuadrilla);
+                const res = await axios.get(`${API_URL}/cuadrillas/mi-asignacion/${idEmpleado}`);
+                if (res.data.asignado) {
+                    setForm(prev => ({ ...prev, num_cuadrilla: res.data.cuadrilla.nombre }));
+                    setOriginalCuadrilla(res.data.cuadrilla.nombre);
+                    return true;
                 }
-            } catch (e) {
-                console.warn("Error al leer cuadrilla guardada", e);
+                return false;
+            } catch (err) {
+                console.warn("No se pudo obtener la asignación del día", err);
+                return false;
             }
-        }
+        };
+
+        const loadFromStorage = () => {
+            const today = moment().format('YYYY-MM-DD');
+            const key = getStorageKey(today, idEmpleado);
+            if (!key) return;
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    if (data.id_empleado === idEmpleado && data.fecha === today) {
+                        setForm(prev => ({ ...prev, num_cuadrilla: data.num_cuadrilla }));
+                        setOriginalCuadrilla(data.num_cuadrilla);
+                    }
+                } catch (e) {
+                    console.warn("Error al leer cuadrilla guardada", e);
+                }
+            }
+        };
+
+        fetchAsignacionActual().then(found => {
+            if (!found && partnerNumber !== 1) {
+                loadFromStorage();
+            }
+        });
     }, [idEmpleado, partnerNumber]);
 
     // Alerta de secuencia (ej: falta el 1 antes del 2, o el 2 antes del 3)
